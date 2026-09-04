@@ -249,3 +249,24 @@ terug naar het frame waarin je op play had gedrukt: de animatie eindigde op een
 stand die meteen weer verdween. En een lus die zonder pauze herbegint laat je
 precies het moment missen waar het diagram om draait. De pauze is een
 kijkinstelling zoals de snelheidsvermenigvuldiger en wordt niet opgeslagen.
+
+## 2026-09-04 — Favorieten zijn gedeeld, verwijderen is echt
+
+**Gekozen.** Eén kolom `favoriet` op `diagrams`, dezelfde ster voor de hele club.
+Verwijderen wist het diagram en zijn frames, met een bevestiging die de kaart
+zelf overneemt en de naam toont.
+
+**Alternatief.** Favorieten per trainer in een aparte tabel, en een prullenbak
+met een archiefvlag.
+
+**Waarom niet.** Op vraag van Daan, en het past bij de projectinstructie: geen
+extra tabel waar een kolom volstaat, en geen extra scherm voor een prullenbak
+die niemand nakijkt. De prijs staat er wel tegenover: haalt iemand een ster weg,
+dan is die bij iedereen weg, en verwijderen is niet terug te draaien. Daarom
+dekt de bevestiging de kaart af in plaats van ernaast te staan, zodat je ziet
+waar je ja op zegt.
+
+**Zoeken.** In het geheugen, over naam, tags, categorie en type samen. Elk woord
+moet ergens landen, dus een tweede woord versmalt. Accenten en hoofdletters doen
+niet mee. Bij honderden diagrammen is dat direct; pas bij tienduizenden zou dit
+naar de database moeten, en zoveel worden het er niet.

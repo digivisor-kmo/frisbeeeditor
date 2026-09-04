@@ -42,6 +42,15 @@ export function TrashIcon({ size = 20 }: IconProps) {
   )
 }
 
+/** The star of a favourite. Filled when it is on, outline when it is off. */
+export function SterIcon({ size = 20, gevuld = false }: IconProps & { gevuld?: boolean }) {
+  return (
+    <svg {...base(size)} fill={gevuld ? 'currentColor' : 'none'}>
+      <path d="M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.85z" />
+    </svg>
+  )
+}
+
 export function PaletteIcon({ size = 20 }: IconProps) {
   return (
     <svg {...base(size)}>

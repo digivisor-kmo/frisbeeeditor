@@ -25,6 +25,7 @@ export interface DiagramRow {
   weergave: string
   tokenstijl: string
   draft: boolean
+  favoriet: boolean
   status: string | null
   status_bijgewerkt_op: string | null
   aangemaakt_op: string

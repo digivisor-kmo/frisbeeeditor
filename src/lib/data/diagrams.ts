@@ -13,6 +13,7 @@ export interface DiagramSamenvatting {
   categorie: string | null
   weergave: string
   draft: boolean
+  favoriet: boolean
   gewijzigd_op: string
 }
 
@@ -20,7 +21,7 @@ export async function lijstDiagrammen(): Promise<DiagramSamenvatting[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('diagrams')
-    .select('id, naam, type, categorie, weergave, draft, gewijzigd_op')
+    .select('id, naam, type, categorie, weergave, draft, favoriet, gewijzigd_op')
     .order('gewijzigd_op', { ascending: false })
 
   if (error) throw new Error(error.message)
@@ -156,6 +157,15 @@ export async function bewaarDiagram(doc: EditorDoc): Promise<void> {
 
 export async function verwijderDiagram(id: string): Promise<void> {
   const supabase = createClient()
+  // Frames, playbook items and share links hang off the diagram with a cascade,
+  // so this one statement takes the whole thing.
   const { error } = await supabase.from('diagrams').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+/** The star is shared: one flag on the diagram, the same for the whole club. */
+export async function zetFavoriet(id: string, favoriet: boolean): Promise<void> {
+  const supabase = createClient()
+  const { error } = await supabase.from('diagrams').update({ favoriet }).eq('id', id)
   if (error) throw new Error(error.message)
 }

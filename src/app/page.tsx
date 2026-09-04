@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { DiagramThumbnail } from '@/components/field/DiagramThumbnail'
-import { frameContentSchema, type FrameContent, type Weergave } from '@/lib/diagram/schema'
+import { Bibliotheek, type BibliotheekItem } from './Bibliotheek'
+import { frameContentSchema, type FrameContent } from '@/lib/diagram/schema'
 import { createClient } from '@/lib/supabase/server'
 import type { Json, Profile } from '@/lib/supabase/database.types'
 import { nl } from '@/lib/strings'
@@ -11,14 +11,12 @@ interface Rij {
   naam: string
   type: string | null
   categorie: string | null
+  tags: string[] | null
   weergave: string
   draft: boolean
+  favoriet: boolean
   gewijzigd_op: string
   frames: { volgorde: number; content: Json }[]
-}
-
-function datum(waarde: string): string {
-  return new Date(waarde).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 /** A frame straight from the database still has to pass the schema. */
@@ -44,12 +42,25 @@ export default async function Home() {
 
   const { data: diagrammen } = await supabase
     .from('diagrams')
-    .select('id, naam, type, categorie, weergave, draft, gewijzigd_op, frames(volgorde, content)')
+    .select(
+      'id, naam, type, categorie, tags, weergave, draft, favoriet, gewijzigd_op, frames(volgorde, content)',
+    )
     .order('gewijzigd_op', { ascending: false })
     .returns<Rij[]>()
 
   const magBewerken = profile?.can_edit ?? false
-  const lijst = diagrammen ?? []
+  const lijst: BibliotheekItem[] = (diagrammen ?? []).map((rij) => ({
+    id: rij.id,
+    naam: rij.naam,
+    type: rij.type,
+    categorie: rij.categorie,
+    tags: rij.tags ?? [],
+    weergave: rij.weergave,
+    draft: rij.draft,
+    favoriet: rij.favoriet,
+    gewijzigd_op: rij.gewijzigd_op,
+    voorbeeld: eersteFrame(rij),
+  }))
 
   return (
     <main
@@ -123,64 +134,9 @@ export default async function Home() {
           )}
         </div>
       ) : (
-        <ul
-          style={{
-            listStyle: 'none',
-            margin: 0,
-            padding: 0,
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: 'var(--ruimte-3)',
-          }}
-        >
-          {lijst.map((diagram) => {
-            const content = eersteFrame(diagram)
-            return (
-              <li key={diagram.id}>
-                <Link href={`/editor/${diagram.id}`} className="kaart kaart--klikbaar">
-                  <div
-                    style={{
-                      padding: 'var(--ruimte-2)',
-                      background: 'var(--surface-sunken)',
-                      borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
-                      borderBottom: '1px solid var(--border)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        maxWidth: diagram.weergave === 'half' ? '7.5rem' : undefined,
-                        margin: '0 auto',
-                      }}
-                    >
-                      {content ? (
-                        <DiagramThumbnail
-                          content={content}
-                          weergave={diagram.weergave as Weergave}
-                        />
-                      ) : (
-                        <div style={{ aspectRatio: '2.5', display: 'grid', placeItems: 'center' }}>
-                          <span className="stil">{nl.bibliotheek.geenVoorbeeld}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div style={{ padding: 'var(--ruimte-3)', display: 'grid', gap: 2 }}>
-                    <span style={{ fontWeight: 600, fontSize: 'var(--tekst-md)' }}>
-                      {diagram.naam.trim() === '' ? nl.bibliotheek.geenNaam : diagram.naam}
-                    </span>
-                    <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
-                      {[diagram.type, diagram.categorie].filter(Boolean).join(' · ') || '—'} ·{' '}
-                      {datum(diagram.gewijzigd_op)}
-                      {diagram.draft ? ` · ${nl.bibliotheek.concept}` : ''}
-                    </span>
-                  </div>
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
+        <Bibliotheek items={lijst} magBewerken={magBewerken} />
       )}
+
     </main>
   )
 }

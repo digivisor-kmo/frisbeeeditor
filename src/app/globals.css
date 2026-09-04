@@ -36,6 +36,10 @@
 
   --goed: #3f7a52;
 
+  /* The star of a favourite. Warm enough to spot in a grid, not so loud that it
+     competes with the accent. */
+  --ster: #d09a12;
+
   /* Field */
   --field: #4f7d5c;
   --field-line: #ffffff;
@@ -776,4 +780,146 @@ body:has(.frame-strip) .editor-hoofd {
   accent-color: var(--accent);
   height: 24px;
   cursor: pointer;
+}
+
+/* ------------------------------------------------------------- library */
+
+/* Search first, then the filters, then the count. On a phone they wrap into
+   rows in that same order, so the search field is always the top one. */
+.bib-balk {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ruimte-2);
+  margin-bottom: var(--ruimte-3);
+}
+
+.bib-balk .invoer {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+.bib-raster {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--ruimte-3);
+}
+
+.bib-kaart {
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color var(--overgang),
+    box-shadow var(--overgang);
+}
+
+.bib-kaart:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--schaduw-2);
+}
+
+.bib-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.bib-voorbeeld {
+  padding: var(--ruimte-2);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.bib-tekst {
+  padding: var(--ruimte-3);
+  display: grid;
+  gap: 2px;
+  /* Room for the two buttons in the corner, so a long name never slides under
+     them. */
+  padding-right: 5.5rem;
+}
+
+.bib-naam {
+  font-weight: 600;
+  font-size: var(--tekst-md);
+}
+
+.bib-acties {
+  position: absolute;
+  right: var(--ruimte-2);
+  bottom: var(--ruimte-2);
+  display: flex;
+  gap: 4px;
+}
+
+/* Big enough for a finger, quiet enough not to fight the thumbnail. */
+.bib-ster {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    color var(--overgang),
+    border-color var(--overgang);
+}
+
+.bib-ster:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.bib-ster--aan,
+.bib-ster--aan:hover {
+  color: var(--ster);
+  border-color: var(--ster);
+}
+
+.bib-ster--gevaar:hover {
+  color: var(--waarschuwing);
+  border-color: var(--waarschuwing);
+}
+
+/* Confirming a delete covers the card it is about, so there is no doubt which
+   diagram you are answering for. */
+.bib-bevestig {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-raised);
+  padding: var(--ruimte-4);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: var(--ruimte-2);
+  font-size: var(--tekst-sm);
+}
+
+.leeg-kaart {
+  padding: var(--ruimte-6);
+  text-align: center;
+  display: grid;
+  gap: var(--ruimte-3);
+  justify-items: center;
+}
+
+.melding {
+  margin: 0 0 var(--ruimte-3);
+  padding: var(--ruimte-3);
+  border-radius: var(--radius);
+  font-size: var(--tekst-sm);
+}
+
+.melding--fout {
+  background: var(--waarschuwing-zacht);
+  color: var(--waarschuwing);
+  border: 1px solid var(--waarschuwing-rand);
 }
