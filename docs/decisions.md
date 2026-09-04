@@ -438,3 +438,24 @@ endzone-set je spelers staan. Wie het veld daar nodig heeft, deselecteert.
 gepubliceerd. Die dock is een afspeelbalk plus een framestrip op desktop, krijgt
 een toolbar op een telefoon, en groeit een rij zodra er binnenin iets afbreekt.
 Een vast getal klopt niet meer zodra iemand er een knop bij zet.
+
+## 2026-09-04 — Het slot repareert zichzelf bij het opslaan
+
+**Getest.** Met een verlopen slot weigert de database de schrijfactie werkelijk:
+`new row violates row-level security policy for table "frames"`. Het slot is dus
+een echte grendel en geen afspraak in de frontend. Dat is goed nieuws, maar de
+trainer kreeg die Engelse zin te zien.
+
+**Gekozen.** Niet het slot claimen vóór elke save — dat is een extra rondje naar
+de server om de twee seconden tekenen. In plaats daarvan repareren bij het
+mislukken: gaat de schrijfactie onderuit op de policy, neem dan het slot terug en
+probeer één keer opnieuw. Alleen als iemand anders hem werkelijk vasthoudt wordt
+het een fout, en dan staat er een zin over mensen in plaats van een policynaam.
+
+Dit dekt meteen het gewone geval: een tabblad dat twee minuten in een broekzak
+zat, verliest zijn slot omdat de hartslag stopt zodra het scherm verborgen is.
+Kom je terug, dan gebeurt er nu niets zichtbaars in plaats van een rode melding.
+
+**Nog niet getest.** De melding "iemand anders is hier bezig" zelf. Er bestaat
+maar één account, en een tweede aanmaken om mijn eigen code te testen zou een
+spookgebruiker in de echte database zetten. Dat moet met een tweede persoon.

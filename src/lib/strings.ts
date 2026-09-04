@@ -73,6 +73,9 @@ export const nl = {
     verlorenAlleen:
       'Dit diagram is intussen vrijgekomen. Om te vermijden dat je iets overschrijft, ga je terug naar het overzicht.',
     naarOverzicht: 'Naar de diagrammen',
+    kwijt: 'Iemand anders werkt nu aan dit diagram, dus je wijzigingen worden niet bewaard.',
+    kwijtDoor: (naam: string) =>
+      `${naam} werkt nu aan dit diagram, dus je wijzigingen worden niet bewaard.`,
     controle: 'Even kijken of je erin kan…',
     fout: 'Kon niet nagaan of dit diagram vrij is:',
   },

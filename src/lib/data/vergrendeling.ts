@@ -14,6 +14,14 @@ import { createClient } from '@/lib/supabase/client'
 export const SLOT_SECONDEN = 120
 export const SLOT_HERHAAL_MS = 30_000
 
+/** Thrown when a save is refused because somebody else holds the lock. */
+export class SlotKwijtError extends Error {
+  constructor(public readonly houder: string | null) {
+    super('Slot kwijt')
+    this.name = 'SlotKwijtError'
+  }
+}
+
 export interface Slot {
   gelukt: boolean
   gebruikerId: string | null

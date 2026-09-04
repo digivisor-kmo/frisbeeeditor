@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { bewaarDiagram } from '@/lib/data/diagrams'
+import { SlotKwijtError } from '@/lib/data/vergrendeling'
+import { nl } from '@/lib/strings'
 import { useDiagramStore } from './diagramStore'
 
 export type BewaarStatus = 'schoon' | 'wachtend' | 'bezig' | 'bewaard' | 'fout'
@@ -39,7 +41,12 @@ export function useAutosave(magBewerken = true) {
         setFout(null)
         setOoitBewaard(true)
       } catch (error) {
-        setFout(error instanceof Error ? error.message : 'Opslaan mislukt.')
+        // A trainer beside a field has no use for a Postgres policy name.
+        if (error instanceof SlotKwijtError) {
+          setFout(error.houder ? nl.slot.kwijtDoor(error.houder) : nl.slot.kwijt)
+        } else {
+          setFout(error instanceof Error ? error.message : nl.opslaan.fout)
+        }
       } finally {
         setBezig(false)
       }

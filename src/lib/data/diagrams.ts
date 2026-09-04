@@ -3,7 +3,7 @@
 import { occupancy } from '@/lib/diagram/entities'
 import { frameContentSchema, SCHEMA_VERSION } from '@/lib/diagram/schema'
 import type { EditorDoc } from '@/lib/editor/document'
-import { claimSlot } from '@/lib/data/vergrendeling'
+import { claimSlot, SlotKwijtError } from '@/lib/data/vergrendeling'
 import { createClient } from '@/lib/supabase/client'
 import type { DiagramRow, FrameRow } from '@/lib/supabase/database.types'
 
@@ -69,6 +69,11 @@ export async function maakDiagram(doc: EditorDoc): Promise<string> {
 
   return data.id
 }
+
+/** Postgres reports a missing lock as a row level security violation. */
+const isSlotFout = (bericht: string): boolean =>
+  bericht.toLowerCase().includes('row-level security') ||
+  bericht.toLowerCase().includes('row level security')
 
 export async function laadDiagram(id: string): Promise<EditorDoc> {
   const supabase = createClient()
@@ -148,7 +153,22 @@ export async function bewaarDiagram(doc: EditorDoc): Promise<void> {
   // One statement, so the deferred unique constraint on (diagram_id, volgorde)
   // is only checked once every row has moved. Reordering frames would trip it
   // halfway otherwise.
-  const { error: frameError } = await supabase.from('frames').upsert(rijen)
+  let { error: frameError } = await supabase.from('frames').upsert(rijen)
+
+  /*
+   * A frame write needs a valid lock, and a tab that sat in a pocket for two
+   * minutes no longer has one. Rather than claim the lock before every save —
+   * a round trip every two seconds of drawing — we repair on failure: take the
+   * lock back and try once more. Only when somebody else really holds it does
+   * this become an error, and then it is a sentence about people, not a policy
+   * violation in English.
+   */
+  if (frameError && isSlotFout(frameError.message)) {
+    const slot = await claimSlot(doc.id)
+    if (!slot.gelukt) throw new SlotKwijtError(slot.naam)
+    ;({ error: frameError } = await supabase.from('frames').upsert(rijen))
+  }
+
   if (frameError) throw new Error(frameError.message)
 
   const behouden = doc.frames.map((frame) => frame.id)
