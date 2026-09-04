@@ -98,6 +98,13 @@ export const nl = {
     dupliceren: 'Dupliceren',
     verwijderen: 'Verwijderen',
   },
+  afspelen: {
+    speel: 'Afspelen',
+    pauze: 'Pauzeren',
+    scrubber: 'Positie in de animatie',
+    lussen: 'Lussen',
+    beide: 'Beide',
+  },
   opslaan: {
     schoon: 'Nog niets gewijzigd',
     wachtend: 'Wijzigingen',

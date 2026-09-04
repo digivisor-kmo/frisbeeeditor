@@ -37,6 +37,15 @@ interface UiStore {
   zoom: number
   pan: { x: number; y: number }
 
+  /** Playback. The speed and the focus are viewing settings and are not stored. */
+  speelt: boolean
+  tijdMs: number
+  snelheid: number
+  lussen: boolean
+  /** True while the scrubber is being dragged, so the field shows the in-between. */
+  scrubt: boolean
+  focus: 'offense' | 'defense' | 'beide'
+
   setMode: (mode: EditorMode) => void
   setTool: (tool: Tool) => void
   setSnap: (snap: boolean) => void
@@ -44,6 +53,13 @@ interface UiStore {
   setActieveBocht: (index: number | null) => void
   setCamera: (zoom: number, pan: { x: number; y: number }) => void
   resetCamera: () => void
+
+  setSpeelt: (speelt: boolean) => void
+  setTijd: (tijdMs: number) => void
+  setSnelheid: (snelheid: number) => void
+  setLussen: (lussen: boolean) => void
+  setScrubt: (scrubt: boolean) => void
+  setFocus: (focus: 'offense' | 'defense' | 'beide') => void
   setActiveFrame: (index: number) => void
 
   select: (ids: string[]) => void
@@ -68,6 +84,12 @@ export const useUiStore = create<UiStore>((set, get) => ({
   actieveBocht: null,
   zoom: 1,
   pan: { x: 0, y: 0 },
+  speelt: false,
+  tijdMs: 0,
+  snelheid: 1,
+  lussen: false,
+  scrubt: false,
+  focus: 'beide',
 
   setMode: (mode) => set({ mode }),
   setTool: (tool) => set({ tool, mode: 'idle', menuOpen: false }),
@@ -76,6 +98,15 @@ export const useUiStore = create<UiStore>((set, get) => ({
   setActieveBocht: (actieveBocht) => set({ actieveBocht }),
   setCamera: (zoom, pan) => set({ zoom, pan }),
   resetCamera: () => set({ zoom: 1, pan: { x: 0, y: 0 } }),
+
+  // Playing is a way of looking, not of editing: the selection steps aside.
+  setSpeelt: (speelt) =>
+    set(speelt ? { speelt, selection: new Set<string>(), menuOpen: false } : { speelt }),
+  setTijd: (tijdMs) => set({ tijdMs }),
+  setSnelheid: (snelheid) => set({ snelheid }),
+  setLussen: (lussen) => set({ lussen }),
+  setScrubt: (scrubt) => set({ scrubt }),
+  setFocus: (focus) => set({ focus }),
   setActiveFrame: (activeFrame) =>
     set({ activeFrame, selection: new Set<string>(), menuOpen: false }),
 

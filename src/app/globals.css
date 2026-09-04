@@ -645,13 +645,20 @@ ol {
   bottom: 0;
   z-index: 4;
   display: flex;
-  gap: var(--ruimte-3);
-  align-items: center;
+  flex-direction: column;
+  gap: var(--ruimte-2);
+  align-items: stretch;
   padding: var(--ruimte-2) var(--ruimte-3);
   padding-bottom: calc(var(--ruimte-2) + env(safe-area-inset-bottom));
   background: var(--surface-raised);
   border-top: 1px solid var(--border);
   box-shadow: 0 -2px 12px rgb(16 24 32 / 0.06);
+}
+
+.frame-strip__onder {
+  display: flex;
+  gap: var(--ruimte-3);
+  align-items: center;
 }
 
 .frame-strip__rij {
@@ -721,7 +728,7 @@ ol {
 
 /* The strip is permanent context, so the page keeps room for it. */
 body:has(.frame-strip) .editor-hoofd {
-  padding-bottom: calc(var(--ruimte-7) + 96px);
+  padding-bottom: calc(var(--ruimte-7) + 150px);
 }
 
 @media (max-width: 720px) {
@@ -734,6 +741,27 @@ body:has(.frame-strip) .editor-hoofd {
   }
 
   body:has(.frame-strip) .veld-kaart .veld-svg {
-    height: calc(100dvh - 320px);
+    height: calc(100dvh - 380px);
   }
+
+  .frame-strip__onder {
+    flex-wrap: wrap;
+  }
+}
+
+/* ------------------------------------------------------------- playback bar */
+
+.afspeelbalk {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  flex-wrap: wrap;
+}
+
+.scrubber {
+  flex: 1;
+  min-width: 120px;
+  accent-color: var(--accent);
+  height: 24px;
+  cursor: pointer;
 }

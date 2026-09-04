@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { AnimatieLaag } from '@/components/field/AnimatieLaag'
 import { ArrowHandles } from '@/components/field/ArrowHandles'
 import { ArrowShape } from '@/components/field/ArrowShape'
 import { FieldSurface } from '@/components/field/FieldSurface'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
+import { frameOpTijd } from '@/lib/diagram/animation'
 import { snapThrowEnd, verplaatsArrow, verwijderBocht, voegBochtToe } from '@/lib/diagram/arrows'
 import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
 import { isArrow, isPlayer, type Point, type Side } from '@/lib/diagram/schema'
@@ -93,6 +95,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const pan = useUiStore((s) => s.pan)
   const setCamera = useUiStore((s) => s.setCamera)
 
+  const speelt = useUiStore((s) => s.speelt)
+  const scrubt = useUiStore((s) => s.scrubt)
+  const tijdMs = useUiStore((s) => s.tijdMs)
+  const focus = useUiStore((s) => s.focus)
+  const animeert = speelt || scrubt
+
   const staand = useStaandScherm()
   const view = useMemo(() => createView(doc.meta.weergave, staand), [doc.meta.weergave, staand])
   const camera = useMemo(() => maakCamera(view, zoom, pan), [view, zoom, pan])
@@ -104,6 +112,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     () => doc.frames[activeFrame]?.content.entities ?? [],
     [doc, activeFrame],
   )
+  const duren = useMemo(() => doc.frames.map((f) => f.duurMs), [doc])
 
   useEffect(() => {
     pruneSelection(new Set(entities.map((e) => e.id)))
@@ -144,6 +153,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   }
 
   function onPointerDown(event: React.PointerEvent<SVGSVGElement>) {
+    // While it plays, the field is something you watch, not something you edit.
+    if (animeert) return
     pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
 
     // Two fingers is always pan and zoom, never editing. Whatever drag the
@@ -447,7 +458,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
   const canvasBreedte = camera.width / UNITS_PER_METRE / metresPerPixel
   const canvasHoogte = camera.height / UNITS_PER_METRE / metresPerPixel
-  const toonScrim = menuOpen && geselecteerd !== undefined
+  const toonScrim = menuOpen && geselecteerd !== undefined && !animeert
 
   return (
     <div style={{ position: 'relative' }}>
@@ -466,7 +477,23 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       >
         <FieldSurface view={view} />
 
-        <g>
+        {animeert && (
+          <AnimatieLaag
+            vorig={doc.frames[frameOpTijd(duren, tijdMs).index]?.content ?? { entities: [] }}
+            volgend={
+              doc.frames[frameOpTijd(duren, tijdMs).index + 1]?.content ??
+              doc.frames[frameOpTijd(duren, tijdMs).index]?.content ?? { entities: [] }
+            }
+            t={frameOpTijd(duren, tijdMs).t}
+            duurMs={doc.frames[frameOpTijd(duren, tijdMs).index]?.duurMs ?? 1500}
+            view={view}
+            radiusM={radiusM}
+            stijl={doc.meta.tokenstijl}
+            focus={focus}
+          />
+        )}
+
+        <g style={{ display: animeert ? 'none' : undefined }}>
           {opZ(cones).map((cone) => (
             <ConeToken
               key={cone.id}
@@ -479,7 +506,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           ))}
         </g>
 
-        <g>
+        <g style={{ display: animeert ? 'none' : undefined }}>
           {opZ(arrows).map((arrow) => (
             <ArrowShape
               key={arrow.id}
@@ -493,7 +520,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           ))}
         </g>
 
-        <g>
+        <g style={{ display: animeert ? 'none' : undefined }}>
           {opZ(players).map((player) => (
             <PlayerToken
               key={player.id}
@@ -550,7 +577,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         </g>
       </svg>
 
-      {menuOpen && geselecteerd && anchor && (
+      {menuOpen && !animeert && geselecteerd && anchor && (
         <SelectedEntityMenu
           key={geselecteerd.id}
           entity={geselecteerd}

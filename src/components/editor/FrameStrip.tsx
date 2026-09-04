@@ -7,6 +7,7 @@ import { DEFAULT_FRAME_DURATION_MS } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
+import { Afspeelbalk } from './Afspeelbalk'
 import type { Weergave } from '@/lib/diagram/schema'
 
 const DUUR_STAPPEN = [750, 1000, 1500, 2000, 3000]
@@ -41,6 +42,8 @@ export function FrameStrip() {
 
   return (
     <div className="frame-strip">
+      <Afspeelbalk />
+      <div className="frame-strip__onder">
       <div
         className="frame-strip__rij"
         onPointerMove={(event) => {
@@ -123,6 +126,7 @@ export function FrameStrip() {
         >
           {nl.frames.verwijderen}
         </Knop>
+      </div>
       </div>
     </div>
   )
