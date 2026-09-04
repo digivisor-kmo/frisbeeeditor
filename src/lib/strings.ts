@@ -7,16 +7,43 @@ export const nl = {
     ondertitel: 'Spelvarianten en drills voor DUC Dendermonde',
   },
   login: {
-    uitleg: 'Log in met je e-mailadres. Je krijgt een link, geen wachtwoord.',
+    uitleg: 'Log in met je e-mailadres en wachtwoord. Heb je er nog geen, vraag dan een inloglink.',
     emailLabel: 'E-mailadres',
+    wachtwoordLabel: 'Wachtwoord',
+    inloggen: 'Inloggen',
     knop: 'Stuur me een link',
+    linkUitleg: 'Nog geen wachtwoord, of vergeten?',
     bezig: 'Bezig…',
     verstuurd: 'Er is een link onderweg naar',
     verstuurdUitleg:
       'Open hem op het toestel waar je wil werken. De link is één keer bruikbaar en vervalt na een uur.',
+    opnieuw: 'Toch met een wachtwoord',
     fout: 'Dat lukte niet:',
+    verkeerd:
+      'Dat e-mailadres en wachtwoord horen niet bij elkaar. Heb je nog geen wachtwoord ingesteld, vraag dan hieronder een inloglink.',
     linkVerlopen: 'Die link werkt niet meer. Vraag hieronder een nieuwe aan.',
     afmelden: 'Afmelden',
+  },
+  account: {
+    titel: 'Je account',
+    terug: 'Terug naar de diagrammen',
+    wachtwoordTitel: 'Wachtwoord',
+    wachtwoordUitleg:
+      'Met een wachtwoord log je op een nieuw toestel meteen in, zonder te wachten op een mail.',
+    nieuw: 'Nieuw wachtwoord',
+    herhaal: 'Nog eens',
+    minimum: 'Minstens acht tekens.',
+    teKort: 'Een wachtwoord van minstens acht tekens, graag.',
+    verschillend: 'De twee velden zijn niet hetzelfde.',
+    bewaren: 'Wachtwoord bewaren',
+    bezig: 'Bezig…',
+    bewaard: 'Je wachtwoord staat klaar. Vanaf nu log je in met je e-mailadres en dit wachtwoord.',
+    fout: 'Dat lukte niet:',
+    nudgeTitel: 'Stel een wachtwoord in',
+    nudgeUitleg:
+      'Dan hoef je op een nieuw toestel niet meer op een mailtje te wachten.',
+    nudgeKnop: 'Instellen',
+    nudgeLater: 'Later',
   },
   rechten: {
     trainer: 'Trainer, mag bewerken',
@@ -31,6 +58,22 @@ export const nl = {
     volledigUitleg: 'Liggend, beide endzones. Voor volledige spelvarianten.',
     halfUitleg: 'Staand, één endzone plus 32 meter. Voor endzone-sets en drills.',
     vrijUitleg: 'Geen lijnen. Voor drills zonder veldreferentie.',
+  },
+  slot: {
+    bezet: 'Iemand is hier al bezig',
+    bezetUitleg: (naam: string) =>
+      `${naam} heeft dit diagram open. Om te vermijden dat jullie elkaars werk overschrijven, kan er maar één tegelijk in.`,
+    bezetOnbekend: 'Iemand anders heeft dit diagram open.',
+    bezetTip: 'Zodra hij of zij weg is, komt het binnen twee minuten vrij.',
+    opnieuw: 'Opnieuw proberen',
+    verloren: 'Je was even weg',
+    verlorenUitleg:
+      'Dit diagram is intussen vrijgekomen en iemand anders werkt eraan. Wat je nog niet had opgeslagen is niet bewaard.',
+    verlorenAlleen:
+      'Dit diagram is intussen vrijgekomen. Om te vermijden dat je iets overschrijft, ga je terug naar het overzicht.',
+    naarOverzicht: 'Naar de diagrammen',
+    controle: 'Even kijken of je erin kan…',
+    fout: 'Kon niet nagaan of dit diagram vrij is:',
   },
   editor: {
     titel: 'Editor',

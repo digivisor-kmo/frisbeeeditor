@@ -270,3 +270,57 @@ waar je ja op zegt.
 moet ergens landen, dus een tweede woord versmalt. Accenten en hoofdletters doen
 niet mee. Bij honderden diagrammen is dat direct; pas bij tienduizenden zou dit
 naar de database moeten, en zoveel worden het er niet.
+
+## 2026-09-04 — Inloggen met een wachtwoord naast de magic link
+
+**Gekozen.** Het inlogscherm vraagt standaard e-mailadres en wachtwoord. De
+inloglink blijft eronder staan voor wie nog geen wachtwoord heeft of het vergeten
+is. Een wachtwoord instellen gebeurt op `/account`; een vlag
+`profiles.heeft_wachtwoord` bestaat alleen om te weten of de herinnering nog
+getoond moet worden, het wachtwoord zelf zit in Supabase Auth.
+
+**Waarom.** Op vraag van Daan. Een Supabase-sessie verloopt niet, dus op hetzelfde
+toestel hoort één keer inloggen te volstaan; op een nieuw toestel heeft elk
+systeem iets nodig, en met een wachtwoordbeheerder is dat één tik in plaats van
+wachten op een mail. Google-login zou nog vlotter zijn maar kost eenmalige setup
+in Google Cloud.
+
+**Meegenomen.** De middleware zet nu `Cache-Control: private, no-store` op zijn
+antwoord. Dat antwoord kan een vernieuwd sessiecookie dragen, en een CDN dat het
+bewaart geeft de volgende bezoeker een verkeerde of verlopen sessie. Dat is de
+waarschijnlijke oorzaak van het onverwachte uitloggen.
+
+**Rechten.** `profiles` mag je nu bijwerken, maar alleen je eigen rij en alleen de
+kolommen `naam` en `heeft_wachtwoord`. RLS bepaalt welke rij, een kolomrecht
+bepaalt welke velden; zonder dat tweede kon een trainer zichzelf `can_edit` geven.
+
+## 2026-09-04 — Eén tegelijk in een diagram
+
+**Gekozen.** Een aparte tabel `diagram_locks` met diagram, gebruiker en een
+vervaltijd. De editor claimt bij het openen en vernieuwt elke dertig seconden,
+maar alleen zolang het tabblad zichtbaar is. De claim staat op twee minuten.
+Weggaan geeft hem meteen vrij.
+
+Kom je terug en heeft iemand anders hem intussen, dan zegt het scherm dat, en ga
+je terug naar het overzicht. Kom je aan bij een diagram dat al bezet is, dan zie
+je wie ermee bezig is en een knop om het opnieuw te proberen. In beide gevallen
+geen half werkende editor: knoppen die niets doen zijn erger dan geen knoppen.
+
+**Alternatief.** Kolommen op `diagrams` in plaats van een eigen tabel.
+
+**Waarom niet.** Er staat een trigger op `diagrams` die `gewijzigd_op` bijwerkt.
+Een hartslag om de dertig seconden zou het diagram dus permanent bovenaan
+"recent gewijzigd" houden zonder dat er iets gewijzigd is. Een slot is bovendien
+vluchtige toestand met een eigen levensduur en hoort niet bij de inhoud.
+
+**Het is een echt slot.** De policy op `frames` eist een geldige claim, dus zonder
+slot weigert de database je schrijfactie. Een afspraak die alleen in de frontend
+staat is geen afspraak.
+
+**Twee minuten.** Kort genoeg dat wie wegloopt de club niet lang blokkeert, lang
+genoeg dat nadenken of een wankele verbinding je plek niet kost. Er is bewust
+geen knop om een slot af te pakken: dan kan je iemands werk wegtrekken terwijl
+hij aan het typen is.
+
+**Ook rechtgezet.** Een ster zetten dook het diagram naar boven in "recent
+gewijzigd". De trigger negeert nu een wijziging die alleen `favoriet` betreft.

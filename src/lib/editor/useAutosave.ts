@@ -16,7 +16,7 @@ export const DEBOUNCE_MS = 2000
  * work. The flip side is that there is no save moment left to report problems
  * at, so the status is shown permanently and a failure stays on screen.
  */
-export function useAutosave() {
+export function useAutosave(magBewerken = true) {
   const doc = useDiagramStore((s) => s.doc)
   const dirty = useDiagramStore((s) => s.dirty)
   const markSaved = useDiagramStore((s) => s.markSaved)
@@ -28,7 +28,8 @@ export function useAutosave() {
   // No ref needed: the effect depends on `doc`, so every change cancels the
   // pending timer and starts a new one with the current document.
   useEffect(() => {
-    if (!dirty || !doc.id) return
+    // A player changes nothing, so there is nothing to try to save and fail at.
+    if (!dirty || !doc.id || !magBewerken) return
 
     const timer = window.setTimeout(async () => {
       setBezig(true)
@@ -45,7 +46,7 @@ export function useAutosave() {
     }, DEBOUNCE_MS)
 
     return () => window.clearTimeout(timer)
-  }, [doc, dirty, markSaved])
+  }, [doc, dirty, markSaved, magBewerken])
 
   // Closing the tab with unsaved work is the one moment the browser can warn.
   useEffect(() => {

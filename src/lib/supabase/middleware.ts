@@ -48,5 +48,9 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // This response can carry a refreshed session cookie. A CDN that caches it
+  // would hand somebody else's session to the next visitor, or hand this
+  // visitor a stale one and log him out for no reason.
+  response.headers.set('Cache-Control', 'private, no-store')
   return response
 }

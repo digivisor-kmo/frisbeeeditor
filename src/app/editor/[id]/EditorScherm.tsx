@@ -19,7 +19,13 @@ import { useAutosave } from '@/lib/editor/useAutosave'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 
-export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
+export function EditorScherm({
+  doc: geladen,
+  magBewerken,
+}: {
+  doc: EditorDoc
+  magBewerken: boolean
+}) {
   const load = useDiagramStore((s) => s.load)
   const undo = useDiagramStore((s) => s.undo)
   const redo = useDiagramStore((s) => s.redo)
@@ -32,7 +38,7 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
   const selectieSleutel = useUiStore((s) => [...s.selection].sort().join(','))
 
   const [kant, setKant] = useState<Side>('offense')
-  const { status, fout } = useAutosave()
+  const { status, fout } = useAutosave(magBewerken)
 
   useEffect(() => {
     load(geladen)

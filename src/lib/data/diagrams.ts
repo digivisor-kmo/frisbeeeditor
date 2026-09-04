@@ -3,6 +3,7 @@
 import { occupancy } from '@/lib/diagram/entities'
 import { frameContentSchema, SCHEMA_VERSION } from '@/lib/diagram/schema'
 import type { EditorDoc } from '@/lib/editor/document'
+import { claimSlot } from '@/lib/data/vergrendeling'
 import { createClient } from '@/lib/supabase/client'
 import type { DiagramRow, FrameRow } from '@/lib/supabase/database.types'
 
@@ -49,6 +50,10 @@ export async function maakDiagram(doc: EditorDoc): Promise<string> {
     .single<{ id: string }>()
 
   if (error || !data) throw new Error(error?.message ?? 'Aanmaken mislukt.')
+
+  // Writing frames needs the lock, and the one who just made the diagram is
+  // the one who is about to open it.
+  await claimSlot(data.id)
 
   const frames = doc.frames.map((frame, index) => ({
     diagram_id: data.id,

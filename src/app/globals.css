@@ -923,3 +923,40 @@ body:has(.frame-strip) .editor-hoofd {
   color: var(--waarschuwing);
   border: 1px solid var(--waarschuwing-rand);
 }
+
+/* A link that behaves like a button but reads like text: for the quiet second
+   choice next to a primary action. */
+.tekstknop {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: var(--tekst-sm);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tekstknop:hover {
+  text-decoration: underline;
+}
+
+.melding--goed {
+  background: #eef5f0;
+  color: var(--goed);
+  border: 1px solid #cfe2d6;
+}
+
+/* One quiet reminder, not a banner that shouts. */
+.nudge {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ruimte-3);
+  margin-top: var(--ruimte-5);
+  padding: var(--ruimte-3) var(--ruimte-4);
+  background: var(--accent-zacht);
+  border: 1px solid var(--accent-rand);
+  border-radius: var(--radius);
+  font-size: var(--tekst-sm);
+}

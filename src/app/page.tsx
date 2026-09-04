@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Bibliotheek, type BibliotheekItem } from './Bibliotheek'
+import { WachtwoordNudge } from './WachtwoordNudge'
 import { frameContentSchema, type FrameContent } from '@/lib/diagram/schema'
 import { createClient } from '@/lib/supabase/server'
 import type { Json, Profile } from '@/lib/supabase/database.types'
@@ -36,9 +37,9 @@ export default async function Home() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('naam, email, can_edit')
+    .select('naam, email, can_edit, heeft_wachtwoord')
     .eq('id', user.id)
-    .single<Pick<Profile, 'naam' | 'email' | 'can_edit'>>()
+    .single<Pick<Profile, 'naam' | 'email' | 'can_edit' | 'heeft_wachtwoord'>>()
 
   const { data: diagrammen } = await supabase
     .from('diagrams')
@@ -92,12 +93,19 @@ export default async function Home() {
             </p>
           </div>
         </div>
-        <form action="/auth/signout" method="post">
-          <button type="submit" className="btn btn--klein">
-            {nl.login.afmelden}
-          </button>
-        </form>
+        <div style={{ display: 'flex', gap: 'var(--ruimte-2)' }}>
+          <Link href="/account" className="btn btn--klein">
+            {nl.account.titel}
+          </Link>
+          <form action="/auth/signout" method="post">
+            <button type="submit" className="btn btn--klein">
+              {nl.login.afmelden}
+            </button>
+          </form>
+        </div>
       </header>
+
+      {profile && !profile.heeft_wachtwoord && <WachtwoordNudge />}
 
       <div
         style={{

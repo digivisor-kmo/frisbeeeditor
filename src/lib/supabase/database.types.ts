@@ -9,6 +9,7 @@ export interface Profile {
   naam: string | null
   email: string | null
   can_edit: boolean
+  heeft_wachtwoord: boolean
   aangemaakt_op: string
 }
 
