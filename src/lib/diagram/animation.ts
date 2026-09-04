@@ -16,6 +16,18 @@ export const JUKE_CYCLI = 3
 export const WORP_START = 0.3
 export const WORP_AANKOMST = 0.9
 
+/**
+ * How the disc covers its flight.
+ *
+ * A player accelerates and slows down, so his movement is eased at both ends.
+ * A disc does not: it leaves the hand at full speed and floats in a little. Ease
+ * it in as well and the throw reads as being carried across rather than thrown.
+ */
+export function worpEase(t: number): number {
+  const g = Math.min(Math.max(t, 0), 1)
+  return 1 - (1 - g) ** 1.7
+}
+
 /** An entity that appears or disappears fades over this long. */
 export const FADE_MS = 200
 
@@ -135,7 +147,7 @@ export function schijfOpTijd(
   const table = buildLengthTable(worp.path.points)
   if (table.total === 0) return null
 
-  const eased = easeInOut(deel)
+  const eased = worpEase(deel)
   const punt = pointAtDistance(table, table.total * eased).point
 
   const start = worp.path.points[0]

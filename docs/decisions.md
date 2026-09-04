@@ -227,3 +227,25 @@ vertrek tot volledig bij de aankomst, dus de vorm van de worp blijft staan.
 **Ook aangescherpt.** De vliegende worp is nu die van de speler die de schijf
 werkelijk heeft. Voordien werd de eerste worp met een ontvanger genomen, wie hem
 ook getekend had.
+
+## 2026-09-04 — De schijf vliegt anders dan een speler loopt
+
+**Gekozen.** De vlucht van de schijf volgt `worpEase`, een curve die snel start
+en zacht aankomt. De beweging van spelers houdt `easeInOut`.
+
+**Waarom.** Een speler versnelt en vertraagt, een schijf niet: die verlaat de
+hand op volle snelheid en zweeft binnen. Met dezelfde ease aan beide kanten leek
+de worp eerder overgedragen dan gegooid. Nagemeten in de editor: met `easeInOut`
+legde de schijf in de eerste helft van de vlucht een kwart van de afstand af.
+
+## 2026-09-04 — Afspelen eindigt op wat je ziet, en lust met een adempauze
+
+**Gekozen.** Tijdens het afspelen loopt het actieve frame mee met de tijdlijn, en
+op het einde blijft het laatste frame het actieve. Bij lussen blijft de
+eindpositie 600 ms staan voor het opnieuw begint.
+
+**Waarom.** Het actieve frame liep niet mee, dus na het afspelen sprong het beeld
+terug naar het frame waarin je op play had gedrukt: de animatie eindigde op een
+stand die meteen weer verdween. En een lus die zonder pauze herbegint laat je
+precies het moment missen waar het diagram om draait. De pauze is een
+kijkinstelling zoals de snelheidsvermenigvuldiger en wordt niet opgeslagen.

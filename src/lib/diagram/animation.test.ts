@@ -11,6 +11,7 @@ import {
   schijfDragerOpTijd,
   schijfOpTijd,
   totaleDuur,
+  worpEase,
   WORP_AANKOMST,
   WORP_START,
 } from './animation'
@@ -237,6 +238,18 @@ describe('de schijf', () => {
     const ontvanger = positieOpTijd(vorig, volgend, 'p2', WORP_AANKOMST)!
     expect(bijAankomst.point.x).toBeCloseTo(ontvanger.x, 6)
     expect(bijAankomst.point.y).toBeCloseTo(ontvanger.y, 6)
+  })
+
+  it('vertrekt sneller dan hij aankomt', () => {
+    // A disc leaves the hand at speed; only a carried object eases in.
+    expect(worpEase(0)).toBe(0)
+    expect(worpEase(1)).toBe(1)
+    expect(worpEase(0.5)).toBeGreaterThan(0.6)
+
+    const halverwege = (WORP_START + WORP_AANKOMST) / 2
+    const punt = schijfOpTijd(metWorp(), naWorp(), halverwege)!
+    // Halfway through the flight it is already past the middle of the throw.
+    expect(punt.point.x).toBeGreaterThan(35 + 2)
   })
 
   it('vertrekt uit de hand van een werper die zelf beweegt', () => {

@@ -1,9 +1,17 @@
 'use client'
 
 import { useEffect, useMemo } from 'react'
-import { totaleDuur } from '@/lib/diagram/animation'
+import { frameOpTijd, totaleDuur } from '@/lib/diagram/animation'
 import { useDiagramStore } from './diagramStore'
 import { useUiStore } from './uiStore'
+
+/**
+ * How long the final position stays on screen before a loop starts over, in
+ * milliseconds. Without it the last pose is gone the instant it arrives, which
+ * is exactly the moment you want to look at. It is a viewing setting like the
+ * speed multiplier, so it is not stored with the diagram.
+ */
+const LUS_PAUZE_MS = 600
 
 /**
  * Drives the clock while the diagram plays.
@@ -27,23 +35,42 @@ export function useAfspelen(): { totaal: number } {
 
     let vorige = performance.now()
     let handle = 0
+    let pauze = 0
 
     const stap = (nu: number) => {
       const delta = (nu - vorige) * snelheid
       vorige = nu
 
-      const { tijdMs, setTijd, setSpeelt } = useUiStore.getState()
+      const { tijdMs, setTijd, setSpeelt, activeFrame, setActiveFrame } = useUiStore.getState()
+
+      // Holding the last pose before the loop starts over.
+      if (pauze > 0) {
+        pauze -= delta
+        if (pauze <= 0) {
+          pauze = 0
+          setTijd(0)
+        }
+        handle = requestAnimationFrame(stap)
+        return
+      }
+
       const nieuw = tijdMs + delta
 
       if (nieuw >= totaal) {
-        if (lussen) setTijd(nieuw % totaal)
-        else {
-          setTijd(totaal)
+        setTijd(totaal)
+        // Stopping leaves you editing the pose you are looking at, not the
+        // frame you happened to press play in.
+        if (activeFrame !== duren.length - 1) setActiveFrame(duren.length - 1)
+        if (lussen) {
+          pauze = LUS_PAUZE_MS
+        } else {
           setSpeelt(false)
           return
         }
       } else {
         setTijd(nieuw)
+        const { index } = frameOpTijd(duren, nieuw)
+        if (index !== activeFrame) setActiveFrame(index)
       }
 
       handle = requestAnimationFrame(stap)
@@ -51,7 +78,7 @@ export function useAfspelen(): { totaal: number } {
 
     handle = requestAnimationFrame(stap)
     return () => cancelAnimationFrame(handle)
-  }, [speelt, snelheid, lussen, totaal])
+  }, [speelt, snelheid, lussen, totaal, duren])
 
   return { totaal }
 }
