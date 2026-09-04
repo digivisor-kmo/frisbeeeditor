@@ -97,6 +97,10 @@ export const nl = {
     duur: 'Duur',
     dupliceren: 'Dupliceren',
     verwijderen: 'Verwijderen',
+    werktDoor: (n: number) =>
+      n === 1 ? 'werkt door naar 1 volgend frame' : `werkt door naar ${n} volgende frames`,
+    werktDoorUitleg:
+      'Wat je in dit frame wijzigt, schuift mee in de frames erna. Verplaatsingen die je daar zelf al deed blijven behouden.',
   },
   afspelen: {
     speel: 'Afspelen',

@@ -6,8 +6,14 @@ import { BulkPaneel } from '@/components/editor/BulkPaneel'
 import { EditorCanvas } from '@/components/editor/EditorCanvas'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
 import { FrameStrip } from '@/components/editor/FrameStrip'
+import {
+  arrowVerplaatsing,
+  herberekenSchijfVanaf,
+  verplaatsVanaf,
+  verwijderVanaf,
+} from '@/lib/diagram/propagatie'
 import type { Side } from '@/lib/diagram/schema'
-import type { EditorDoc } from '@/lib/editor/document'
+import { framesVan, type EditorDoc } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { useAutosave } from '@/lib/editor/useAutosave'
 import { useUiStore } from '@/lib/editor/uiStore'
@@ -63,11 +69,20 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
         event.preventDefault()
         const ids = new Set(selection)
         change(nl.menu.verwijderen, (draft) => {
-          const content = draft.frames[activeFrame]?.content
+          const frames = framesVan(draft)
+          const content = frames[activeFrame]
           if (!content) return
-          content.entities = content.entities.filter(
-            (e) => !ids.has(e.id) && !(e.type === 'arrow' && ids.has(e.ownerId)),
-          )
+          // Losing a movement arrow means its owner stays put from here on.
+          for (const entity of content.entities) {
+            if (entity.type !== 'arrow' || !ids.has(entity.id)) continue
+            if (ids.has(entity.ownerId)) continue
+            const delta = arrowVerplaatsing(content, entity)
+            if (delta) {
+              verplaatsVanaf(frames, activeFrame + 1, entity.ownerId, { x: -delta.x, y: -delta.y })
+            }
+          }
+          verwijderVanaf(frames, activeFrame, ids)
+          herberekenSchijfVanaf(frames, activeFrame)
         })
         clearSelection()
       }

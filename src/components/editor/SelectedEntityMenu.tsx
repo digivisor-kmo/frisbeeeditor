@@ -10,15 +10,24 @@ import {
 } from '@/lib/diagram/arrows'
 import { giveDisc } from '@/lib/diagram/entities'
 import {
+  arrowVerplaatsing,
+  herberekenSchijfVanaf,
+  verplaatsVanaf,
+  verwijderVanaf,
+  zetIdentiteit,
+} from '@/lib/diagram/propagatie'
+import {
   TOKEN_COLORS,
   type Arrow,
   type ArrowKind,
   type Entity,
+  type FrameContent,
   type Player,
   type ThrowType,
   type TokenColor,
 } from '@/lib/diagram/schema'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
+import { framesVan } from '@/lib/editor/document'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
@@ -49,6 +58,8 @@ const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
   sight: <CutIcon />,
 }
 
+const negatief = (p: { x: number; y: number }) => ({ x: -p.x, y: -p.y })
+
 export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Props) {
   const change = useDiagramStore((s) => s.change)
   const weergave = useDiagramStore((s) => s.doc.meta.weergave)
@@ -61,19 +72,47 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
   // entity remounts it and the settings panel starts closed again.
   const [paneelOpen, setPaneelOpen] = useState(false)
 
+  /** Changes that stay inside this one frame. */
   const wijzig = (label: string, recipe: (draft: Entity) => void) =>
     change(label, (draft) => {
       const target = draft.frames[activeFrame]?.content.entities.find((e) => e.id === entity.id)
       if (target) recipe(target)
     })
 
+  /** Changes that reach the frames after this one as well. */
+  const wijzigFrames = (label: string, recipe: (frames: FrameContent[]) => void) =>
+    change(label, (draft) => recipe(framesVan(draft)))
+
+  /**
+   * Who somebody is, as opposed to where he stands: the same in every frame.
+   * The recipe is applied to a copy so we can read off what it settled on.
+   */
+  const wijzigIdentiteit = (label: string, recipe: (draft: Player) => void) => {
+    if (entity.type !== 'player') return
+    const kopie = JSON.parse(JSON.stringify(entity)) as Player
+    recipe(kopie)
+    wijzigFrames(label, (frames) => {
+      zetIdentiteit(frames, entity.id, {
+        side: kopie.side,
+        role: kopie.role,
+        label: kopie.label,
+        color: kopie.color,
+      })
+    })
+  }
+
   const verwijder = () => {
-    change(nl.menu.verwijderen, (draft) => {
-      const content = draft.frames[activeFrame]?.content
+    wijzigFrames(nl.menu.verwijderen, (frames) => {
+      const content = frames[activeFrame]
       if (!content) return
-      content.entities = content.entities.filter(
-        (e) => e.id !== entity.id && !(e.type === 'arrow' && e.ownerId === entity.id),
-      )
+      // A movement arrow is what carries its owner to the next frame. Take it
+      // away and he has to stay where he was.
+      if (entity.type === 'arrow') {
+        const delta = arrowVerplaatsing(content, entity)
+        if (delta) verplaatsVanaf(frames, activeFrame + 1, entity.ownerId, negatief(delta))
+      }
+      verwijderVanaf(frames, activeFrame, new Set([entity.id]))
+      herberekenSchijfVanaf(frames, activeFrame)
     })
     clearSelection()
   }
@@ -92,10 +131,11 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
       icon: <DiscIcon />,
       actief: player.hasDisc,
       onClick: () =>
-        change(nl.menu.schijf, (draft) => {
-          const content = draft.frames[activeFrame]?.content
+        wijzigFrames(nl.menu.schijf, (frames) => {
+          const content = frames[activeFrame]
           if (!content) return
           giveDisc(content, player.hasDisc ? '' : player.id)
+          herberekenSchijfVanaf(frames, activeFrame)
         }),
     })
 
@@ -117,19 +157,21 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
         icon: ARROW_ICONS[kind],
         onClick: () => {
           const id = newId()
-          change(`${ARROW_LABELS[kind]} tekenen`, (draft) => {
-            const content = draft.frames[activeFrame]?.content
+          wijzigFrames(`${ARROW_LABELS[kind]} tekenen`, (frames) => {
+            const content = frames[activeFrame]
             if (!content) return
-            content.entities.push(
-              createArrow({
-                id,
-                ownerId: player.id,
-                van: player.pos,
-                kind,
-                weergave,
-                entities: content.entities,
-              }),
-            )
+            const arrow = createArrow({
+              id,
+              ownerId: player.id,
+              van: player.pos,
+              kind,
+              weergave,
+              entities: content.entities,
+            })
+            content.entities.push(arrow)
+            // His position in the next frame is the end of this arrow.
+            const delta = arrowVerplaatsing(content, arrow)
+            if (delta) verplaatsVanaf(frames, activeFrame + 1, player.id, delta)
           })
           select([id])
           setMenuOpen(false)
@@ -146,16 +188,7 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
     })
 
     if (paneelOpen) {
-      paneel = (
-        <PlayerSettings
-          player={player}
-          onChange={(recipe, label) =>
-            wijzig(label, (draft) => {
-              if (draft.type === 'player') recipe(draft as Player)
-            })
-          }
-        />
-      )
+      paneel = <PlayerSettings player={player} onChange={(recipe, label) => wijzigIdentiteit(label, recipe)} />
     }
   } else if (entity.type === 'arrow') {
     const arrow = entity
@@ -169,13 +202,26 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
         icon: ARROW_ICONS[kind],
         actief: arrow.kind === kind,
         onClick: () =>
-          wijzig(nl.menu.typeWisselen, (draft) => {
-            if (draft.type !== 'arrow') return
-            draft.kind = kind
+          wijzigFrames(nl.menu.typeWisselen, (frames) => {
+            const content = frames[activeFrame]
+            if (!content) return
+            const target = content.entities.find((e) => e.id === arrow.id)
+            if (!target || target.type !== 'arrow') return
+
+            // A cut carries its owner to the next frame, a throw does not, so
+            // switching between them moves him along or leaves him behind.
+            const voor = arrowVerplaatsing(content, target)
+            target.kind = kind
             if (kind !== 'throw') {
-              draft.throwType = undefined
-              draft.targetId = undefined
+              target.throwType = undefined
+              target.targetId = undefined
             }
+            const na = arrowVerplaatsing(content, target)
+            verplaatsVanaf(frames, activeFrame + 1, target.ownerId, {
+              x: (na?.x ?? 0) - (voor?.x ?? 0),
+              y: (na?.y ?? 0) - (voor?.y ?? 0),
+            })
+            herberekenSchijfVanaf(frames, activeFrame)
           }),
       })
     }
@@ -234,22 +280,16 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
             <button
               key={color}
               type="button"
+              className="kleurstaal"
               title={nl.kleuren[color]}
               aria-label={nl.kleuren[color]}
+              aria-pressed={entity.color === color}
               onClick={() =>
-                wijzig(nl.menu.kleur, (draft) => {
-                  if (draft.type === 'cone') draft.color = color
+                wijzigFrames(nl.menu.kleur, (frames) => {
+                  zetIdentiteit(frames, entity.id, { color })
                 })
               }
-              style={{
-                width: 34,
-                height: 34,
-                borderRadius: '50%',
-                cursor: 'pointer',
-                background: paintFor(color, 'offense').fill,
-                border:
-                  entity.color === color ? '2px solid var(--accent)' : '1px solid var(--border)',
-              }}
+              style={{ background: paintFor(color, 'offense').fill }}
             />
           ))}
         </div>

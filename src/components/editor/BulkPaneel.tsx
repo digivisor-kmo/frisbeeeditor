@@ -7,17 +7,27 @@ import { Keuze, VeldRij } from '@/components/ui/Veld'
 import { ARROW_LABELS } from '@/lib/diagram/arrows'
 import { ROLE_LABELS, rolesFor, rotationFor } from '@/lib/diagram/roles'
 import {
+  arrowVerplaatsing,
+  herberekenSchijfVanaf,
+  verplaatsVanaf,
+  verwijderVanaf,
+  voegToeVanaf,
+  zetIdentiteit,
+  type Identiteit,
+} from '@/lib/diagram/propagatie'
+import {
   isPlayer,
   TOKEN_COLORS,
   type ArrowKind,
   type Entity,
-  type Player,
+  type FrameContent,
   type PlayerRole,
   type Side,
   type TokenColor,
 } from '@/lib/diagram/schema'
 import { dupliceer } from '@/lib/editor/duplicate'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
+import { framesVan } from '@/lib/editor/document'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
@@ -74,6 +84,15 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
       for (const entity of content.entities) if (doelIds.has(entity.id)) recipe(entity)
     })
 
+  const wijzigFrames = (label: string, recipe: (frames: FrameContent[]) => void) =>
+    change(label, (draft) => recipe(framesVan(draft)))
+
+  /** Who they are, not where they stand: lands in every frame at once. */
+  const zetIdentiteitVanDoelen = (label: string, patch: Identiteit) =>
+    wijzigFrames(label, (frames) => {
+      for (const id of doelIds) zetIdentiteit(frames, id, patch)
+    })
+
   const gedeeldeKant = gedeeld(spelers.map((p) => p.side))
   const gedeeldeRol = gedeeld(spelers.map((p) => p.role))
   const gedeeldeKleur = gedeeld(
@@ -111,11 +130,11 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
             klein
             onClick={() => {
               const nieuw: string[] = []
-              change(nl.bulk.dupliceren, (draft) => {
-                const content = draft.frames[activeFrame]?.content
+              wijzigFrames(nl.bulk.dupliceren, (frames) => {
+                const content = frames[activeFrame]
                 if (!content) return
                 const { kopieen, nieuweIds } = dupliceer(content.entities, doelIds, newId)
-                content.entities.push(...kopieen)
+                for (const kopie of kopieen) voegToeVanaf(frames, activeFrame, kopie)
                 nieuw.push(...nieuweIds)
               })
               if (nieuw.length > 0) select(nieuw)
@@ -127,12 +146,23 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
             klein
             variant="gevaar"
             onClick={() => {
-              change(nl.bulk.verwijderen, (draft) => {
-                const content = draft.frames[activeFrame]?.content
+              wijzigFrames(nl.bulk.verwijderen, (frames) => {
+                const content = frames[activeFrame]
                 if (!content) return
-                content.entities = content.entities.filter(
-                  (e) => !doelIds.has(e.id) && !(e.type === 'arrow' && doelIds.has(e.ownerId)),
-                )
+                // An arrow that goes carries nobody: its owner stays put from here on.
+                for (const entity of content.entities) {
+                  if (entity.type !== 'arrow' || !doelIds.has(entity.id)) continue
+                  if (doelIds.has(entity.ownerId)) continue
+                  const delta = arrowVerplaatsing(content, entity)
+                  if (delta) {
+                    verplaatsVanaf(frames, activeFrame + 1, entity.ownerId, {
+                      x: -delta.x,
+                      y: -delta.y,
+                    })
+                  }
+                }
+                verwijderVanaf(frames, activeFrame, doelIds)
+                herberekenSchijfVanaf(frames, activeFrame)
               })
               clearSelection()
             }}
@@ -158,10 +188,10 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               onChange={(e) => {
                 const side = e.target.value as Side
                 if (side !== 'offense' && side !== 'defense') return
-                wijzigDoelen(nl.menu.kant, (entity) => {
-                  if (entity.type !== 'player') return
-                  entity.side = side
-                  entity.role = rotationFor(side)[0]!
+                zetIdentiteitVanDoelen(nl.menu.kant, {
+                  side,
+                  // Offence and defence have entirely separate position lists.
+                  role: rotationFor(side)[0]!,
                 })
               }}
             >
@@ -179,9 +209,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               onChange={(e) => {
                 const role = e.target.value as PlayerRole
                 if (e.target.value === GEMENGD) return
-                wijzigDoelen(nl.menu.positie, (entity) => {
-                  if (entity.type === 'player') (entity as Player).role = role
-                })
+                zetIdentiteitVanDoelen(nl.menu.positie, { role })
               }}
             >
               {gedeeldeRol === null && <option value={GEMENGD}>{nl.bulk.gemengd}</option>}
@@ -230,9 +258,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
                   aria-label={nl.kleuren[color]}
                   aria-pressed={gedeeldeKleur === color}
                   onClick={() =>
-                    wijzigDoelen(nl.menu.kleur, (entity) => {
-                      if (entity.type === 'player' || entity.type === 'cone') entity.color = color
-                    })
+                    zetIdentiteitVanDoelen(nl.menu.kleur, { color })
                   }
                   style={{ background: paintFor(color, 'offense').fill }}
                 />

@@ -375,6 +375,18 @@ ol {
   font-size: var(--tekst-sm);
 }
 
+/* Editing an earlier frame reaches the frames after it. Say it where the frame
+   number is, in a whisper: it is context, not a warning. */
+.werkt-door {
+  color: var(--text-muted);
+  font-size: var(--tekst-xs);
+  white-space: nowrap;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  cursor: help;
+}
+
 .titel {
   font-size: var(--tekst-xl);
   font-weight: 600;

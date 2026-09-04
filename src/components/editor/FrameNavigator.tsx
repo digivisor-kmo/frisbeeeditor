@@ -12,6 +12,7 @@ export function FrameNavigator() {
   const activeFrame = useUiStore((s) => s.activeFrame)
   const setActiveFrame = useUiStore((s) => s.setActiveFrame)
 
+  const volgende = Math.max(0, frames.length - 1 - activeFrame)
   const huidig = frames[activeFrame]
   const mag = huidig ? kanFrameToevoegen(huidig.content, frames.length) : false
 
@@ -58,6 +59,13 @@ export function FrameNavigator() {
       <Knop klein disabled={!mag} title={reden} onClick={() => setActiveFrame(voegFrameToe(activeFrame))}>
         + {nl.frames.frame}
       </Knop>
+
+      {/* Editing an earlier frame is not a local act: say so, quietly. */}
+      {volgende > 0 && (
+        <span className="werkt-door" title={nl.frames.werktDoorUitleg}>
+          {nl.frames.werktDoor(volgende)}
+        </span>
+      )}
     </div>
   )
 }

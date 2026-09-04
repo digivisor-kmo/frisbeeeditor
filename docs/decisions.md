@@ -167,3 +167,32 @@ dependency.
 
 Nog niet toegevoegd, bewust: shadcn/ui. Pas nodig bij de bibliotheek en de
 dialogen in stap 7.
+
+## 2026-09-04 — Wijzigingen werken door naar de volgende frames
+
+**Gekozen.** Een wijziging in frame N geldt vanaf frame N. Posities schuiven
+door als verplaatsing (een delta), niet als herberekening. Identiteit — kant,
+positie, eigen label, kleur — hoort bij de speler en landt in álle frames.
+Toevoegen voegt toe vanaf dit frame, verwijderen verwijdert vanaf dit frame, en
+de schijfdrager wordt vanaf dit frame vooruit herrekend.
+
+Daarbovenop één invariant, want zonder die klopt de animatie niet: heeft een
+speler in frame N een cut of juke, dan ís zijn positie in frame N+1 het eindpunt
+van die arrow. Dat zijn twee kanten van hetzelfde. Sleep je hem in frame N+1,
+dan sleept de punt van die arrow in frame N mee. Verdwijnt de arrow, dan blijft
+hij vanaf daar staan waar hij stond.
+
+**Alternatief.** Latere frames volledig herberekenen uit frame N, zoals
+`volgendFrame` doet bij het aanmaken. Dat is eenvoudiger te schrijven en
+eenvoudiger uit te leggen.
+
+**Waarom niet.** Het gooit handwerk weg. Een trainer die in frame 3 een
+verdediger een halve meter verzet en daarna in frame 1 iets rechtzet, verliest
+die halve meter. Met delta's blijft alles wat je later zelf deed relatief op zijn
+plaats. De prijs is dat een wijziging in een vroeg frame stilletjes vijf frames
+raakt, en daarom staat naast de framenavigator permanent hoeveel frames
+meebewegen.
+
+**Waar het inzit.** `src/lib/diagram/propagatie.ts`, met 22 tests. Aangesloten
+op alle plekken waar je iets kan wijzigen: plaatsen en slepen op het canvas, de
+punt van een arrow, het contextmenu, het bulkpaneel en de Delete-toets.

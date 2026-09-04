@@ -8,9 +8,16 @@ import { FieldSurface } from '@/components/field/FieldSurface'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
 import { frameOpTijd } from '@/lib/diagram/animation'
-import { snapThrowEnd, verplaatsArrow, verwijderBocht, voegBochtToe } from '@/lib/diagram/arrows'
+import { arrowEnd, snapThrowEnd, verwijderBocht, voegBochtToe } from '@/lib/diagram/arrows'
+import {
+  herberekenSchijfVanaf,
+  synchroniseerArrowMetVorigFrame,
+  verplaatsVanaf,
+  voegToeVanaf,
+} from '@/lib/diagram/propagatie'
 import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
 import { isArrow, isPlayer, type Point, type Side } from '@/lib/diagram/schema'
+import { framesVan } from '@/lib/editor/document'
 import {
   createView,
   klem,
@@ -127,8 +134,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const maybeSnap = (point: Point, altKey: boolean): Point =>
     snap && !altKey ? snapToGrid(point) : point
 
-  /** Applies a change to the entity with this id inside the active frame. */
-  const wijzigFrame = (label: string, recipe: (entities: import('@/lib/diagram/schema').Entity[]) => void, groupId?: string) =>
+  /** Applies a change to the entities of the active frame only. */
+  const wijzigFrame = (
+    label: string,
+    recipe: (entities: import('@/lib/diagram/schema').Entity[]) => void,
+    groupId?: string,
+  ) =>
     change(
       label,
       (draft) => {
@@ -137,6 +148,13 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       },
       groupId,
     )
+
+  /** Applies a change that reaches every frame, not only the one on screen. */
+  const wijzigFrames = (
+    label: string,
+    recipe: (frames: import('@/lib/diagram/schema').FrameContent[]) => void,
+    groupId?: string,
+  ) => change(label, (draft) => recipe(framesVan(draft)), groupId)
 
   /** Where a client point sits inside the element, as a fraction from 0 to 1. */
   function fractieIn(clientX: number, clientY: number): Point {
@@ -254,12 +272,15 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     if (tool === 'player' || tool === 'cone') {
       const pos = maybeSnap(point, event.altKey)
       const id = newId()
-      wijzigFrame(tool === 'player' ? 'Speler plaatsen' : 'Pion plaatsen', (list) => {
-        list.push(
+      wijzigFrames(tool === 'player' ? 'Speler plaatsen' : 'Pion plaatsen', (frames) => {
+        const huidig = frames[activeFrame]
+        if (!huidig) return
+        const nieuw =
           tool === 'player'
-            ? createPlayer({ id, pos, side: nieuweSpelerKant, entities: list })
-            : createCone({ id, pos, entities: list }),
-        )
+            ? createPlayer({ id, pos, side: nieuweSpelerKant, entities: huidig.entities })
+            : createCone({ id, pos, entities: huidig.entities })
+        // Somebody you put on the field does not vanish in the next frame.
+        voegToeVanaf(frames, activeFrame, nieuw)
       })
       select([id])
       setMenuOpen(true)
@@ -321,11 +342,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
     if (doel.soort === 'entiteit') {
       const pos = maybeSnap({ x: ruw.x + doel.offset.x, y: ruw.y + doel.offset.y }, event.altKey)
-      const groep = new Set(doel.groepIds)
-      wijzigFrame(
+      const groep = doel.groepIds
+      wijzigFrames(
         'Verplaatsen',
-        (list) => {
-          const primair = list.find((e) => e.id === doel.id)
+        (frames) => {
+          const huidig = frames[activeFrame]
+          const primair = huidig?.entities.find((e) => e.id === doel.id)
           if (!primair || !hasPosition(primair)) return
 
           // Only the entity under the finger snaps to the grid; everything else
@@ -334,23 +356,11 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           const delta = { x: pos.x - primair.pos.x, y: pos.y - primair.pos.y }
           if (delta.x === 0 && delta.y === 0) return
 
-          const verplaatsteArrows = new Set<string>()
-          for (const entity of list) {
-            if (!groep.has(entity.id)) continue
-            if (hasPosition(entity)) {
-              entity.pos = { x: entity.pos.x + delta.x, y: entity.pos.y + delta.y }
-            } else if (isArrow(entity)) {
-              verplaatsArrow(entity, delta)
-              verplaatsteArrows.add(entity.id)
-            }
-          }
-
-          // Arrows belong to their player: nudging him takes the shape he drew
-          // along instead of leaving it behind on the grass.
-          for (const entity of list) {
-            if (!isArrow(entity)) continue
-            if (verplaatsteArrows.has(entity.id)) continue
-            if (groep.has(entity.ownerId)) verplaatsArrow(entity, delta)
+          for (const id of groep) {
+            // His position in this frame is the end of the arrow that brought
+            // him here, so that arrow has to follow.
+            synchroniseerArrowMetVorigFrame(frames, activeFrame, id, delta)
+            verplaatsVanaf(frames, activeFrame, id, delta)
           }
         },
         state.groupId,
@@ -358,22 +368,33 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       return
     }
 
-    wijzigFrame(
+    wijzigFrames(
       doel.soort === 'tip' ? 'Arrow bijstellen' : 'Bocht bijstellen',
-      (list) => {
+      (frames) => {
+        const list = frames[activeFrame]?.entities
+        if (!list) return
         const arrow = list.find((e) => e.id === doel.id)
         if (!arrow || arrow.type !== 'arrow') return
 
         if (doel.soort === 'tip') {
           const gesnapt = maybeSnap(ruw, event.altKey)
+          const oudEinde = { ...arrowEnd(arrow) }
+
           if (arrow.kind === 'throw') {
             const { pos, targetId } = snapThrowEnd(gesnapt, list, arrow.ownerId)
             arrow.path.points[arrow.path.points.length - 1] = { ...pos }
             arrow.targetId = targetId
+            // A different receiver means the disc lands somewhere else.
+            herberekenSchijfVanaf(frames, activeFrame)
           } else {
             // A cut ends in open space, so it never locks onto a player.
             arrow.path.points[arrow.path.points.length - 1] = gesnapt
             arrow.targetId = undefined
+            const nieuwEinde = arrowEnd(arrow)
+            verplaatsVanaf(frames, activeFrame + 1, arrow.ownerId, {
+              x: nieuwEinde.x - oudEinde.x,
+              y: nieuwEinde.y - oudEinde.y,
+            })
           }
           return
         }

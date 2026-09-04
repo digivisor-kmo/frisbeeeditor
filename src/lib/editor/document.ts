@@ -33,6 +33,9 @@ export interface EditorDoc {
 
 export const DEFAULT_FRAME_DURATION_MS = 1500
 
+/** The frame contents of a document, in order, ready to be changed together. */
+export const framesVan = (doc: EditorDoc): FrameContent[] => doc.frames.map((f) => f.content)
+
 export function newFrame(id: string, content: FrameContent = emptyFrameContent()): EditorFrame {
   return { id, duurMs: DEFAULT_FRAME_DURATION_MS, toelichting: null, content }
 }
