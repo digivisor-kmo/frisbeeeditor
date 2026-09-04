@@ -17,7 +17,7 @@ import {
 } from '@/lib/data/bibliotheek'
 import type { FrameContent, Weergave } from '@/lib/diagram/schema'
 import { nl } from '@/lib/strings'
-import { SterIcon, TrashIcon } from '@/components/editor/icons'
+import { SterIcon, TrashIcon, ZoekIcon } from '@/components/editor/icons'
 
 export interface BibliotheekItem {
   id: string
@@ -99,13 +99,18 @@ export function Bibliotheek({
   return (
     <>
       <div className="bib-balk">
-        <Invoer
-          type="search"
-          aria-label={nl.bibliotheek.zoeken}
-          placeholder={nl.bibliotheek.zoekenPlaceholder}
-          value={filter.zoek}
-          onChange={(e) => setFilter((huidig) => ({ ...huidig, zoek: e.target.value }))}
-        />
+        <div className="zoekveld">
+          <span className="zoekveld__icoon" aria-hidden>
+            <ZoekIcon />
+          </span>
+          <Invoer
+            type="search"
+            aria-label={nl.bibliotheek.zoeken}
+            placeholder={nl.bibliotheek.zoekenPlaceholder}
+            value={filter.zoek}
+            onChange={(e) => setFilter((huidig) => ({ ...huidig, zoek: e.target.value }))}
+          />
+        </div>
 
         <div className="btn-groep">
           {SOORTEN.map((soort) => (
@@ -170,6 +175,7 @@ export function Bibliotheek({
             <li key={item.id} className="kaart bib-kaart">
               <Link href={`/editor/${item.id}`} className="bib-link">
                 <div className="bib-voorbeeld">
+                  {item.draft && <span className="chip chip--stil bib-vlag">{nl.bibliotheek.concept}</span>}
                   <div
                     style={{
                       maxWidth: item.weergave === 'half' ? '7.5rem' : undefined,
@@ -194,9 +200,9 @@ export function Bibliotheek({
                     {item.naam.trim() === '' ? nl.bibliotheek.geenNaam : item.naam}
                   </span>
                   <span className="bib-meta">
-                    {[item.type, item.categorie].filter(Boolean).join(' · ') || '—'} ·{' '}
-                    {datum(item.gewijzigd_op)}
-                    {item.draft ? ` · ${nl.bibliotheek.concept}` : ''}
+                    {[item.type, item.categorie, datum(item.gewijzigd_op)]
+                      .filter(Boolean)
+                      .join(' · ')}
                   </span>
                 </div>
               </Link>

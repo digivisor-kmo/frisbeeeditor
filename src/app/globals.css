@@ -1047,9 +1047,31 @@ body:has(.frame-strip) .editor-hoofd {
   margin-bottom: var(--ruimte-4);
 }
 
-.bib-balk .invoer {
+.zoekveld {
+  position: relative;
   flex: 1 1 14rem;
   max-width: 20rem;
+  display: flex;
+}
+
+.zoekveld__icoon {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-faint);
+  display: flex;
+  pointer-events: none;
+}
+
+.zoekveld .invoer {
+  padding-left: 34px;
+}
+
+/* Safari draws its own clear button on a search field; ours has filter chips
+   right beside it and does not need a second way to empty itself. */
+.zoekveld .invoer::-webkit-search-cancel-button {
+  -webkit-appearance: none;
 }
 
 .bib-raster {
@@ -1101,9 +1123,7 @@ body:has(.frame-strip) .editor-hoofd {
   padding: var(--ruimte-3) var(--ruimte-4) var(--ruimte-4);
   display: grid;
   gap: 3px;
-  /* Room for the two buttons in the corner, so a long name never slides under
-     them. */
-  padding-right: 5.5rem;
+  min-width: 0;
 }
 
 .bib-naam {
@@ -1124,12 +1144,40 @@ body:has(.frame-strip) .editor-hoofd {
   white-space: nowrap;
 }
 
+/* The actions float in the corner of the preview, not over the name. A title
+   that has to dodge two buttons is a title that gets truncated. */
 .bib-acties {
   position: absolute;
   right: var(--ruimte-2);
-  bottom: var(--ruimte-2);
+  top: var(--ruimte-2);
   display: flex;
   gap: 4px;
+}
+
+/* A quiet flag in the other corner, for what a diagram is rather than what you
+   can do to it. */
+.bib-vlag {
+  position: absolute;
+  left: var(--ruimte-2);
+  top: var(--ruimte-2);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-vol);
+  font-size: var(--tekst-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.chip--stil {
+  background: rgb(255 255 255 / 0.92);
+  color: var(--text-muted);
+  box-shadow: var(--schaduw-1);
 }
 
 /* Big enough for a finger, quiet enough not to fight the thumbnail. */
@@ -1166,7 +1214,8 @@ body:has(.frame-strip) .editor-hoofd {
 .bib-ster--aan,
 .bib-ster--aan:hover {
   color: var(--ster);
-  border-color: var(--ster);
+  border-color: var(--border);
+  background: var(--surface-raised);
 }
 
 .bib-ster--gevaar:hover {

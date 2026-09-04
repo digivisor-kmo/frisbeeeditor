@@ -51,6 +51,15 @@ export function SterIcon({ size = 20, gevuld = false }: IconProps & { gevuld?: b
   )
 }
 
+export function ZoekIcon({ size = 16 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <circle cx="10.6" cy="10.6" r="6.4" />
+      <path d="M15.4 15.4 20 20" />
+    </svg>
+  )
+}
+
 export function PaletteIcon({ size = 20 }: IconProps) {
   return (
     <svg {...base(size)}>
