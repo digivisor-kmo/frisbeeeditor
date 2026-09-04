@@ -143,3 +143,27 @@ describe('startopstellingen', () => {
     expect(buildPreset('leeg', 'volledig', makeId).entities).toHaveLength(0)
   })
 })
+
+describe('leesbaarheid van de startopstellingen', () => {
+  /** Twee tokens van ongeveer 1,55 m straal dekken elkaar af onder 3,1 m. */
+  const MIN_AFSTAND_M = 3
+
+  it('houdt elk paar spelers ver genoeg uit elkaar om beide labels te lezen', () => {
+    for (const opstelling of ['vertical-stack', 'horizontal-stack'] as const) {
+      for (const weergave of ['volledig', 'half'] as const) {
+        const spelers = buildPreset(opstelling, weergave, makeId).entities.filter(isPlayer)
+        for (let i = 0; i < spelers.length; i++) {
+          for (let j = i + 1; j < spelers.length; j++) {
+            const a = spelers[i]!
+            const b = spelers[j]!
+            const afstand = Math.hypot(a.pos.x - b.pos.x, a.pos.y - b.pos.y)
+            expect(
+              afstand,
+              `${opstelling}/${weergave}: ${a.role} en ${b.role} staan ${afstand.toFixed(1)} m uit elkaar`,
+            ).toBeGreaterThanOrEqual(MIN_AFSTAND_M)
+          }
+        }
+      }
+    }
+  })
+})

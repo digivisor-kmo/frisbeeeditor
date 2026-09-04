@@ -35,8 +35,7 @@ export const nl = {
   editor: {
     titel: 'Editor',
     terug: 'Terug',
-    nietsBewaard:
-      'Dit diagram wordt nog niet bewaard. Opslaan komt in de volgende stap; als je de pagina herlaadt is je werk weg.',
+    nietsBewaard: 'Nog niets wordt bewaard. Herlaad je de pagina, dan is je werk weg.',
     selecteren: 'Selecteren',
     speler: 'Speler',
     pion: 'Pion',

@@ -1,6 +1,5 @@
 import { FIELD_M } from '@/lib/field/geometry'
 import { nextZ } from './entities'
-import { ROLE_ABBREV } from './roles'
 import type { Cone, Entity, FrameContent, Player, PlayerRole, Weergave } from './schema'
 
 export type Opstelling = 'vertical-stack' | 'horizontal-stack' | 'leeg'
@@ -12,40 +11,66 @@ interface Spot {
   /** Across the field, in metres from the sideline at y = 0. */
   y: number
   disc?: boolean
+  /**
+   * Where this player's defender stands, relative to them.
+   * `langs` counts towards the endzone the offence is attacking, `opzij` across
+   * the field. In a vertical stack the defenders stand beside their man rather
+   * than in front of him: in front would put every defender on top of the next
+   * player in the stack, and then neither label is readable.
+   */
+  dLangs?: number
+  dOpzij?: number
 }
 
 const MIDDEN = FIELD_M.width / 2
 
-/**
- * A vertical stack: three handlers behind the disc, four cutters strung out on
- * the centre axis towards the endzone.
- */
-const VERTICAL_STACK: Spot[] = [
-  { role: 'handler', vanGoalLine: 52, y: MIDDEN, disc: true },
-  { role: 'handler', vanGoalLine: 55, y: MIDDEN - 5.5 },
-  { role: 'handler', vanGoalLine: 55, y: MIDDEN + 5.5 },
-  { role: 'cutter', vanGoalLine: 36, y: MIDDEN },
-  { role: 'cutter', vanGoalLine: 31, y: MIDDEN },
-  { role: 'deep', vanGoalLine: 26, y: MIDDEN },
-  { role: 'wing', vanGoalLine: 21, y: MIDDEN },
-]
+/** Default: the defender stands between his man and the endzone. */
+const DEFAULT_D_LANGS = 3.2
 
-/** A horizontal stack: three handlers, four cutters spread across the width. */
-const HORIZONTAL_STACK: Spot[] = [
-  { role: 'handler', vanGoalLine: 52, y: MIDDEN, disc: true },
-  { role: 'handler', vanGoalLine: 55, y: MIDDEN - 6 },
-  { role: 'handler', vanGoalLine: 55, y: MIDDEN + 6 },
-  { role: 'cutter', vanGoalLine: 34, y: MIDDEN - 13 },
-  { role: 'cutter', vanGoalLine: 34, y: MIDDEN - 4.5 },
-  { role: 'cutter', vanGoalLine: 34, y: MIDDEN + 4.5 },
-  { role: 'deep', vanGoalLine: 34, y: MIDDEN + 13 },
-]
+/** Stack defenders: just beside the stack, all on the same side. */
+const STACK_D = { dLangs: 0.8, dOpzij: -3.4 }
 
-/**
- * The half-field view only shows one endzone plus 32 metres, so the same shape
- * has to sit closer together. These are the same seven roles, compressed.
- */
-const HALF_SCALE = 0.58
+const VERTICAL_STACK: Record<'volledig' | 'half', Spot[]> = {
+  volledig: [
+    { role: 'handler', vanGoalLine: 52, y: MIDDEN, disc: true },
+    { role: 'handler', vanGoalLine: 55, y: MIDDEN - 5.5 },
+    { role: 'handler', vanGoalLine: 55, y: MIDDEN + 5.5 },
+    { role: 'cutter', vanGoalLine: 36, y: MIDDEN, ...STACK_D },
+    { role: 'cutter', vanGoalLine: 31, y: MIDDEN, ...STACK_D },
+    { role: 'deep', vanGoalLine: 26, y: MIDDEN, ...STACK_D },
+    { role: 'wing', vanGoalLine: 21, y: MIDDEN, ...STACK_D },
+  ],
+  half: [
+    { role: 'handler', vanGoalLine: 26, y: MIDDEN, disc: true },
+    { role: 'handler', vanGoalLine: 29, y: MIDDEN - 5.5 },
+    { role: 'handler', vanGoalLine: 29, y: MIDDEN + 5.5 },
+    { role: 'cutter', vanGoalLine: 16, y: MIDDEN, ...STACK_D },
+    { role: 'cutter', vanGoalLine: 11, y: MIDDEN, ...STACK_D },
+    { role: 'deep', vanGoalLine: 6, y: MIDDEN, ...STACK_D },
+    { role: 'wing', vanGoalLine: 2, y: MIDDEN, ...STACK_D },
+  ],
+}
+
+const HORIZONTAL_STACK: Record<'volledig' | 'half', Spot[]> = {
+  volledig: [
+    { role: 'handler', vanGoalLine: 52, y: MIDDEN, disc: true },
+    { role: 'handler', vanGoalLine: 55, y: MIDDEN - 6 },
+    { role: 'handler', vanGoalLine: 55, y: MIDDEN + 6 },
+    { role: 'cutter', vanGoalLine: 34, y: MIDDEN - 13 },
+    { role: 'cutter', vanGoalLine: 34, y: MIDDEN - 4.5 },
+    { role: 'cutter', vanGoalLine: 34, y: MIDDEN + 4.5 },
+    { role: 'deep', vanGoalLine: 34, y: MIDDEN + 13 },
+  ],
+  half: [
+    { role: 'handler', vanGoalLine: 26, y: MIDDEN, disc: true },
+    { role: 'handler', vanGoalLine: 29, y: MIDDEN - 6 },
+    { role: 'handler', vanGoalLine: 29, y: MIDDEN + 6 },
+    { role: 'cutter', vanGoalLine: 13, y: MIDDEN - 13 },
+    { role: 'cutter', vanGoalLine: 13, y: MIDDEN - 4.5 },
+    { role: 'cutter', vanGoalLine: 13, y: MIDDEN + 4.5 },
+    { role: 'deep', vanGoalLine: 13, y: MIDDEN + 13 },
+  ],
+}
 
 const DEFENSE_ROLES_BY_INDEX: PlayerRole[] = [
   'mark',
@@ -57,33 +82,25 @@ const DEFENSE_ROLES_BY_INDEX: PlayerRole[] = [
   'deep-deep',
 ]
 
-/**
- * How far the defender stands in front of their mark, towards the endzone.
- * Has to exceed a token diameter, otherwise the two tokens cover each other and
- * you cannot read either label.
- */
-const MARK_GAP_M = 3.2
-
 interface Layout {
   /** Position of the attacking goal line along the length axis. */
   goalLine: number
-  /** +1 or -1: the direction in which the offence is moving. */
+  /** The direction from the goal line back into the field: positions grow this way. */
   richting: 1 | -1
-  schaal: number
+  variant: 'volledig' | 'half'
 }
 
 function layoutFor(weergave: Weergave): Layout {
   if (weergave === 'half') {
     // Endzone at the top of the portrait view; the offence attacks towards x = 0.
-    return { goalLine: FIELD_M.endzoneDepth, richting: 1, schaal: HALF_SCALE }
+    return { goalLine: FIELD_M.endzoneDepth, richting: 1, variant: 'half' }
   }
   // Endzone on the right; the offence attacks towards x = 100.
-  return { goalLine: FIELD_M.length - FIELD_M.endzoneDepth, richting: -1, schaal: 1 }
+  return { goalLine: FIELD_M.length - FIELD_M.endzoneDepth, richting: -1, variant: 'volledig' }
 }
 
-function spotToX(spot: Spot, layout: Layout): number {
-  return layout.goalLine + layout.richting * spot.vanGoalLine * layout.schaal
-}
+const spotX = (spot: Spot, layout: Layout) =>
+  layout.goalLine + layout.richting * spot.vanGoalLine
 
 export function buildPreset(
   opstelling: Opstelling,
@@ -92,8 +109,9 @@ export function buildPreset(
 ): FrameContent {
   if (opstelling === 'leeg') return { entities: [] }
 
-  const spots = opstelling === 'vertical-stack' ? VERTICAL_STACK : HORIZONTAL_STACK
   const layout = layoutFor(weergave)
+  const table = opstelling === 'vertical-stack' ? VERTICAL_STACK : HORIZONTAL_STACK
+  const spots = table[layout.variant]
   const entities: Entity[] = []
 
   for (const spot of spots) {
@@ -101,7 +119,7 @@ export function buildPreset(
       id: makeId(),
       type: 'player',
       z: nextZ(entities),
-      pos: { x: spotToX(spot, layout), y: spot.y },
+      pos: { x: spotX(spot, layout), y: spot.y },
       side: 'offense',
       role: spot.role,
       color: 'standaard',
@@ -111,13 +129,14 @@ export function buildPreset(
   }
 
   spots.forEach((spot, index) => {
+    const langs = spot.dLangs ?? DEFAULT_D_LANGS
     const defender: Player = {
       id: makeId(),
       type: 'player',
       z: nextZ(entities),
       pos: {
-        x: spotToX(spot, layout) - layout.richting * MARK_GAP_M,
-        y: spot.y,
+        x: spotX(spot, layout) - layout.richting * langs,
+        y: spot.y + (spot.dOpzij ?? 0),
       },
       side: 'defense',
       role: DEFENSE_ROLES_BY_INDEX[index]!,
@@ -127,8 +146,8 @@ export function buildPreset(
     entities.push(defender)
   })
 
-  const coneX = spotToX(spots[0]!, layout)
-  for (const y of [0.5, FIELD_M.width - 0.5]) {
+  const coneX = spotX(spots[0]!, layout)
+  for (const y of [0.6, FIELD_M.width - 0.6]) {
     const cone: Cone = {
       id: makeId(),
       type: 'cone',
@@ -147,5 +166,3 @@ export const OPSTELLING_LABELS: Record<Opstelling, string> = {
   'horizontal-stack': 'Horizontal stack',
   leeg: 'Leeg veld',
 }
-
-export { ROLE_ABBREV }
