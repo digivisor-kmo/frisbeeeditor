@@ -457,17 +457,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         role="application"
         aria-label="Veld"
         className="veld-svg"
-        style={{
-          width: '100%',
-          height: 'auto',
-          display: 'block',
-          touchAction: 'none',
-          // Without this a drag across the field selects the letters in the
-          // tokens, and the whole diagram lights up blue halfway through.
-          userSelect: 'none',
-          WebkitUserSelect: 'none',
-          WebkitTapHighlightColor: 'transparent',
-        }}
+
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
