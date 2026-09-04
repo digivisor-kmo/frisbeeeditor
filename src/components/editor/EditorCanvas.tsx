@@ -425,16 +425,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         {/* While the menu is open the field steps back, so the arc reads as a
             layer above the diagram instead of as part of it. The token you
             tapped stays bright: it is what you are working on. */}
-        {toonScrim && (
-          <rect
-            x={view.origin.x}
-            y={view.origin.y}
-            width={view.width}
-            height={view.height}
-            fill="var(--scrim)"
-            pointerEvents="none"
-          />
-        )}
+        {toonScrim && <Scrim view={view} />}
 
         {toonScrim && geselecteerd?.type === 'player' && (
           <PlayerToken
@@ -515,6 +506,22 @@ function KaderVlak({
       fillOpacity={0.12}
       stroke="var(--accent)"
       strokeWidth={dikte}
+      pointerEvents="none"
+    />
+  )
+}
+
+/** Dims the pitch itself, not the white margin around it. */
+function Scrim({ view }: { view: import('@/lib/field/geometry').FieldView }) {
+  const a = toSvg({ x: view.area.minX, y: view.area.minY }, view)
+  const b = toSvg({ x: view.area.maxX, y: view.area.maxY }, view)
+  return (
+    <rect
+      x={Math.min(a.x, b.x)}
+      y={Math.min(a.y, b.y)}
+      width={Math.abs(b.x - a.x)}
+      height={Math.abs(b.y - a.y)}
+      fill="var(--scrim)"
       pointerEvents="none"
     />
   )
