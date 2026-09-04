@@ -816,7 +816,33 @@ h3,
  */
 @media (max-width: 720px) {
   .editor-hoofd {
-    padding-bottom: calc(var(--ruimte-7) + 56px);
+    padding: var(--ruimte-3) var(--ruimte-3);
+    padding-bottom: calc(var(--dock-hoogte, 120px) + var(--ruimte-4));
+  }
+
+  /*
+   * The name and the status do not fit on one line next to a back button, and
+   * squeezing them tried: the name field was pushed out of existence and the
+   * counters ran off the right edge. Two lines, and everything stays reachable.
+   */
+  .editor-kop {
+    flex-wrap: wrap;
+    row-gap: var(--ruimte-2);
+  }
+
+  .editor-kop__rechts {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .validatie-woord {
+    display: none;
+  }
+
+  /* The card is only a frame around the pitch here; every pixel of padding is a
+     pixel the field does not get. */
+  .veld-kaart {
+    padding: 4px;
   }
 
   .editor-chrome {
@@ -876,19 +902,24 @@ h3,
     display: none;
   }
 
-  .editor-hoofd {
-    min-height: 100dvh;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .veld-kaart {
-    margin-top: auto;
-    margin-bottom: auto;
-  }
-
   .editor-balk__rechts {
     gap: var(--ruimte-2);
+  }
+
+  /*
+   * A phone on its side has barely any height. The thumbnails are the first
+   * thing to go: you can still step through frames with the arrows, and what
+   * you need to see is the pitch.
+   */
+  @media (max-height: 520px) {
+    .frame-strip__rij,
+    .frame-strip__acties {
+      display: none;
+    }
+
+    .frame-strip__onder {
+      display: none;
+    }
   }
 }
 
@@ -910,15 +941,30 @@ h3,
 
 @media (max-width: 720px) {
   /*
-   * Portrait: fit the field to the height, not the width. The whole pitch has
-   * to be on screen at once; scrolling to find the endzone is not an option
-   * when you are standing beside it explaining a set.
+   * In the editor the field fits the room that is actually left, measured
+   * rather than subtracted from the viewport with a hard-coded number. The
+   * whole pitch has to be on screen at once: scrolling to find the endzone is
+   * not an option while you are standing beside it explaining a set, and the
+   * controls below are fixed anyway.
+   *
+   * Width auto so the box hugs the drawing. A full-width box around a tall
+   * narrow pitch is what left those two fields of white on either side.
    */
-  .veld-kaart .veld-svg {
-    height: calc(100dvh - 200px);
+  .editor-hoofd .veld-kaart .veld-svg {
+    height: var(--veld-ruimte, 60dvh);
     width: auto;
     max-width: 100%;
     margin: 0 auto;
+  }
+
+  /*
+   * On a reading screen the opposite: the field takes the full width and the
+   * page scrolls. Nobody draws here, and a letterboxed pitch in the middle of
+   * an empty card is the worst of both.
+   */
+  .lees-veld .veld-svg {
+    width: 100%;
+    height: auto;
   }
 }
 
@@ -1124,7 +1170,7 @@ h3,
 
 /* The strip is permanent context, so the page keeps room for it. */
 body:has(.frame-strip) .editor-hoofd {
-  padding-bottom: calc(var(--ruimte-7) + 150px);
+  padding-bottom: calc(var(--dock-hoogte, 150px) + var(--ruimte-5));
 }
 
 @media (max-width: 720px) {
@@ -1134,10 +1180,6 @@ body:has(.frame-strip) .editor-hoofd {
 
   .frame-thumb__veld {
     width: 74px;
-  }
-
-  body:has(.frame-strip) .veld-kaart .veld-svg {
-    height: calc(100dvh - 380px);
   }
 
   .frame-strip__onder {

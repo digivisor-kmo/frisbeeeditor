@@ -32,7 +32,9 @@ export function ValidatieIndicator({ ontbreekt }: { ontbreekt: Ontbreekt[] }) {
           ▲
         </span>
         {ontbreekt.length}
-        <span style={{ fontWeight: 400 }}>{nl.validatie.knop}</span>
+        <span className="validatie-woord" style={{ fontWeight: 400 }}>
+          {nl.validatie.knop}
+        </span>
       </button>
 
       {open && (
