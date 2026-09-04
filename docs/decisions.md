@@ -2,6 +2,48 @@
 
 Wat gekozen is, welk alternatief er was, en waarom. Nieuwste bovenaan.
 
+## 2026-09-04 — Kleuren zijn palletsleutels, geen hexwaarden
+
+**Gekozen.** Het `color`-veld op een entiteit is een sleutel uit een vaste lijst:
+`standaard`, `geel`, `paars`, `wit`, `grijs`. `standaard` betekent: volg de kant
+waartoe de entiteit hoort.
+
+**Alternatief.** Een hexwaarde opslaan, zoals in de projectinstructie staat.
+
+**Waarom.** Bij export naar PDF moet hetzelfde diagram opnieuw getekend worden in
+het printthema, met omlijnde tokens op wit. Met een hexwaarde in de data kan dat
+niet: die kleur is dan hard vastgelegd en blijft ook op papier staan. Met een
+sleutel verandert alleen de variabelenset. Rood en blauw ontbreken bewust in de
+lijst: rood tegenover groen is precies de combinatie die bij deuteranopie
+wegvalt, en blauw is de accentkleur van de interface.
+
+## 2026-09-04 — Frame-invarianten zitten in het schema, niet in de interface
+
+**Gekozen.** `frameContentSchema` controleert bij elke save ook de regels die
+over meerdere entiteiten gaan: unieke ids, hoogstens één speler met de schijf,
+elke arrow hoort bij een bestaande entiteit, en een worp kan alleen vanuit de
+schijfdrager.
+
+**Alternatief.** Die regels alleen in de editor afdwingen.
+
+**Waarom.** Dit zijn stille fouten. Een worp die vertrekt vanuit iemand zonder
+schijf ziet er op het scherm normaal uit en klopt pas niet als je het op training
+probeert uit te leggen. De interface voorkomt ze al, maar de interface verandert
+en het schema is de laatste controle voor het naar de database gaat.
+
+## 2026-09-04 — Magic link met een middleware die de sessie ververst
+
+**Gekozen.** `@supabase/ssr` met een middleware die bij elk verzoek
+`getUser()` aanroept, en routes onder `/login` en `/auth` als enige publiek.
+
+**Waarom.** Zonder die aanroep in de middleware verloopt het token en word je
+midden in een sessie stilzwijgend uitgelogd. Op een telefoon aan de zijlijn is
+dat precies het moment waarop je werk kwijt bent.
+
+Nieuwe accounts krijgen `can_edit = false`. Bewerkrechten zet je met de hand aan
+in het Supabase-dashboard. Voor tien trainers die je persoonlijk kent is een
+uitnodigingsscherm meer werk dan het oplevert.
+
 ## 2026-09-04 — Veldcoördinaten in meters, viewBox groter dan het veld
 
 **Gekozen.** Posities worden opgeslagen in meters met de oorsprong linksonder in
