@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { totaleDuur } from '@/lib/diagram/animation'
 import { useDiagramStore } from './diagramStore'
 import { useUiStore } from './uiStore'
@@ -12,7 +12,10 @@ import { useUiStore } from './uiStore'
  * each frame belongs to the diagram and is saved with it.
  */
 export function useAfspelen(): { totaal: number } {
-  const duren = useDiagramStore((s) => s.doc.frames.map((f) => f.duurMs))
+  // Deriving inside the selector would hand Zustand a fresh array on every
+  // read, which it sees as a change, which re-renders, which reads again.
+  const frames = useDiagramStore((s) => s.doc.frames)
+  const duren = useMemo(() => frames.map((f) => f.duurMs), [frames])
   const speelt = useUiStore((s) => s.speelt)
   const snelheid = useUiStore((s) => s.snelheid)
   const lussen = useUiStore((s) => s.lussen)

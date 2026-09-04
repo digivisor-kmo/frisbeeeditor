@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Knop } from '@/components/ui/Knop'
 import { frameOpTijd } from '@/lib/diagram/animation'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
@@ -10,7 +11,8 @@ import { nl } from '@/lib/strings'
 const SNELHEDEN = [0.5, 1, 1.5, 2]
 
 export function Afspeelbalk() {
-  const duren = useDiagramStore((s) => s.doc.frames.map((f) => f.duurMs))
+  const frames = useDiagramStore((s) => s.doc.frames)
+  const duren = useMemo(() => frames.map((f) => f.duurMs), [frames])
   const { totaal } = useAfspelen()
 
   const speelt = useUiStore((s) => s.speelt)
