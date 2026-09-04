@@ -932,6 +932,53 @@ body:has(.frame-strip) .editor-hoofd {
   cursor: pointer;
 }
 
+/* ----------------------------------------------------------------- login */
+
+.inlog {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--ruimte-6) var(--ruimte-4);
+  /* One very soft wash behind the card, so the page has a centre. Not a
+     gradient on a surface: a hint of light under everything. */
+  background:
+    radial-gradient(60rem 34rem at 50% -12rem, rgb(26 86 219 / 0.07), transparent 70%),
+    var(--surface);
+}
+
+.inlog__kolom {
+  width: 100%;
+  max-width: 25rem;
+}
+
+.inlog__merk {
+  justify-content: center;
+  margin-bottom: var(--ruimte-6);
+}
+
+.inlog__kop {
+  text-align: center;
+  font-size: var(--tekst-2xl);
+}
+
+.inlog__onder {
+  text-align: center;
+  margin: var(--ruimte-2) auto var(--ruimte-5);
+  max-width: 21rem;
+}
+
+.inlog__kaart {
+  padding: var(--ruimte-5);
+  box-shadow: var(--schaduw-2);
+}
+
+.inlog__voet {
+  text-align: center;
+  margin-top: var(--ruimte-5);
+  font-size: var(--tekst-xs);
+  color: var(--text-faint);
+}
+
 /* ------------------------------------------------------------ page shell */
 
 /*
@@ -1005,6 +1052,11 @@ body:has(.frame-strip) .editor-hoofd {
   max-width: 72rem;
   margin: 0 auto;
   padding: var(--ruimte-6) var(--ruimte-5) var(--ruimte-8);
+}
+
+/* Forms and reading want a measure, not the full grid. */
+.pagina--smal {
+  max-width: 44rem;
 }
 
 /* The heading and its one action, on the same baseline. */

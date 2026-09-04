@@ -7,6 +7,7 @@ export const nl = {
     ondertitel: 'Spelvarianten en drills voor DUC Dendermonde',
   },
   login: {
+    kop: 'Welkom terug',
     uitleg: 'Log in met je e-mailadres en wachtwoord. Heb je er nog geen, vraag dan een inloglink.',
     emailLabel: 'E-mailadres',
     wachtwoordLabel: 'Wachtwoord',
@@ -200,6 +201,7 @@ export const nl = {
   },
   nieuw: {
     titel: 'Nieuw diagram',
+    uitleg: 'Kies een veld en een startopstelling. De rest teken je in de editor.',
     veldtype: 'Welk veld?',
     opstelling: 'Waarmee begin je?',
     doorgaan: 'Doorgaan',

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { AppBalk } from '@/components/AppBalk'
 import { Bibliotheek, type BibliotheekItem } from './Bibliotheek'
 import { WachtwoordNudge } from './WachtwoordNudge'
 import { frameContentSchema, type FrameContent } from '@/lib/diagram/schema'
@@ -65,34 +66,7 @@ export default async function Home() {
 
   return (
     <>
-      {/* A slim, full-bleed bar with a hairline under it. It belongs to the
-          product, not to the page, so it runs edge to edge. */}
-      <header className="topbalk">
-        <div className="topbalk__binnen">
-          <div className="merk">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icoon.svg" alt="" width={30} height={30} className="merk__teken" />
-            <span className="merk__naam">{nl.app.naam}</span>
-          </div>
-
-          <div className="topbalk__rechts">
-            <span className="stil topbalk__wie">
-              {profile?.naam ?? profile?.email ?? user.email}
-              <span className="topbalk__rol">
-                {magBewerken ? nl.rechten.trainer : nl.rechten.speler}
-              </span>
-            </span>
-            <Link href="/account" className="btn btn--klein">
-              {nl.account.titel}
-            </Link>
-            <form action="/auth/signout" method="post">
-              <button type="submit" className="btn btn--klein">
-                {nl.login.afmelden}
-              </button>
-            </form>
-          </div>
-        </div>
-      </header>
+      <AppBalk />
 
       <main className="pagina">
         {profile && !profile.heeft_wachtwoord && <WachtwoordNudge />}
