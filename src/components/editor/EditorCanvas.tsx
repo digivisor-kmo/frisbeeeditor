@@ -21,8 +21,19 @@ interface DragState {
   groupId: string
   /** Distance between the pointer and the entity origin, so the token does not jump. */
   offset: Point
+  /** Where the pointer went down, in screen pixels. */
+  start: { x: number; y: number }
   moved: boolean
 }
+
+/**
+ * How far the pointer has to travel before a tap becomes a drag, in CSS pixels.
+ *
+ * Without this every tap is a drag: a mouse click emits a pointermove between
+ * down and up, and a finger never lands perfectly still. The menu would flash
+ * open and shut, and the entity would record a move of nothing.
+ */
+const SLEEP_DREMPEL_PX = 4
 
 export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -86,6 +97,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         pointerId: event.pointerId,
         groupId: newId(),
         offset: { x: entity.pos.x - point.x, y: entity.pos.y - point.y },
+        start: { x: event.clientX, y: event.clientY },
         moved: false,
       }
       svgRef.current?.setPointerCapture(event.pointerId)
@@ -118,16 +130,21 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     const state = drag.current
     if (!state || state.pointerId !== event.pointerId) return
 
+    if (!state.moved) {
+      const afstand = Math.hypot(
+        event.clientX - state.start.x,
+        event.clientY - state.start.y,
+      )
+      if (afstand < SLEEP_DREMPEL_PX) return
+      state.moved = true
+      setMenuOpen(false)
+    }
+
     const raw = pointOf(event.clientX, event.clientY)
     const pos = maybeSnap(
       { x: raw.x + state.offset.x, y: raw.y + state.offset.y },
       event.altKey,
     )
-
-    if (!state.moved) {
-      state.moved = true
-      setMenuOpen(false)
-    }
     change(
       'Verplaatsen',
       (draft) => {
