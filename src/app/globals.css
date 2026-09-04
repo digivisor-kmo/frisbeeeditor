@@ -687,15 +687,23 @@ h3,
   gap: var(--ruimte-2);
 }
 
-/* The frame number lives inside the segmented track, between its two arrows,
-   so stepping and reading are one control instead of two things side by side. */
+/*
+ * The frame number lives inside the segmented track, between its two arrows,
+ * so stepping and reading are one control instead of two things side by side.
+ *
+ * Fixed width and tabular figures: without them the counter shifts sideways
+ * between 1/2 and 1/10, and the two arrows shuffle along with it.
+ */
 .framenav__teller {
   display: inline-flex;
   align-items: baseline;
+  justify-content: center;
   gap: 1px;
-  padding: 0 var(--ruimte-2);
+  min-width: 3.25rem;
+  padding: 0 var(--ruimte-1);
   font-size: var(--tekst-sm);
   font-weight: 650;
+  font-variant-numeric: tabular-nums;
   color: var(--text);
   white-space: nowrap;
   user-select: none;
