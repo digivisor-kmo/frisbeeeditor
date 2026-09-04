@@ -39,8 +39,9 @@ export function FrameNavigator() {
         </Knop>
 
         <span className="framenav__teller cijfers" aria-live="polite">
-          {activeFrame + 1}
-          <span className="framenav__van">/{frames.length}</span>
+          <span className="framenav__nu">{activeFrame + 1}</span>
+          <span className="framenav__streep">/</span>
+          <span className="framenav__totaal">{frames.length}</span>
         </span>
 
         <Knop
