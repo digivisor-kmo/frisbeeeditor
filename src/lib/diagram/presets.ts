@@ -57,8 +57,12 @@ const DEFENSE_ROLES_BY_INDEX: PlayerRole[] = [
   'deep-deep',
 ]
 
-/** How far the defender stands in front of their mark, towards the endzone. */
-const MARK_GAP_M = 1.5
+/**
+ * How far the defender stands in front of their mark, towards the endzone.
+ * Has to exceed a token diameter, otherwise the two tokens cover each other and
+ * you cannot read either label.
+ */
+const MARK_GAP_M = 3.2
 
 interface Layout {
   /** Position of the attacking goal line along the length axis. */
