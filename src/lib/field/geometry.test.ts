@@ -1,0 +1,110 @@
+import { describe, expect, it } from 'vitest'
+import {
+  BRICK_MARKS_M,
+  CENTRAL_ZONE_M,
+  createView,
+  FIELD_M,
+  GOAL_LINES_M,
+  snapToGrid,
+  toField,
+  toSvg,
+  UNITS_PER_METRE,
+} from './geometry'
+
+describe('field constants', () => {
+  it('matches the WFDF outdoor field', () => {
+    expect(FIELD_M.length).toBe(100)
+    expect(FIELD_M.width).toBe(37)
+    expect(FIELD_M.endzoneDepth).toBe(18)
+    expect(CENTRAL_ZONE_M).toBe(64)
+  })
+
+  it('puts the goal lines 18 m from each end', () => {
+    expect(GOAL_LINES_M).toEqual([18, 82])
+  })
+
+  it('puts the brick marks 18 m from their own goal line on the centre axis', () => {
+    expect(BRICK_MARKS_M).toEqual([
+      { x: 36, y: 18.5 },
+      { x: 64, y: 18.5 },
+    ])
+  })
+})
+
+describe('volledig veld', () => {
+  const view = createView('volledig')
+
+  it('scales the field to exactly 1000 x 370 units', () => {
+    expect(toSvg({ x: 0, y: 0 }, view)).toEqual({ x: 0, y: 370 })
+    expect(toSvg({ x: 100, y: 37 }, view)).toEqual({ x: 1000, y: 0 })
+  })
+
+  it('flips the y axis so y grows upward on the field', () => {
+    const low = toSvg({ x: 50, y: 5 }, view)
+    const high = toSvg({ x: 50, y: 30 }, view)
+    expect(high.y).toBeLessThan(low.y)
+  })
+
+  it('adds a 3 m margin on every side', () => {
+    expect(view.viewBox).toBe('-30 -30 1060 430')
+  })
+
+  it('uses 10 units per metre', () => {
+    const a = toSvg({ x: 10, y: 0 }, view)
+    const b = toSvg({ x: 11, y: 0 }, view)
+    expect(b.x - a.x).toBe(UNITS_PER_METRE)
+  })
+})
+
+describe('half veld', () => {
+  const view = createView('half')
+
+  it('is portrait: 43 units wide per 10 m across, 56 m long', () => {
+    expect(view.viewBox).toBe('-30 -30 430 560')
+    expect(view.height).toBeGreaterThan(view.width)
+  })
+
+  it('rotates 90 degrees clockwise without mirroring', () => {
+    // Back of the endzone sits at the top.
+    expect(toSvg({ x: 0, y: 18.5 }, view).y).toBe(0)
+    // The sideline at y = 0 stays on the left, as it is in the landscape view.
+    expect(toSvg({ x: 25, y: 0 }, view).x).toBe(0)
+    expect(toSvg({ x: 25, y: 37 }, view).x).toBe(370)
+  })
+})
+
+describe('vrij vlak', () => {
+  it('uses the same geometry but draws no lines', () => {
+    const view = createView('vrij')
+    expect(view.showLines).toBe(false)
+    expect(view.viewBox).toBe(createView('volledig').viewBox)
+  })
+})
+
+describe('toField', () => {
+  it.each(['volledig', 'half', 'vrij'] as const)('is the exact inverse of toSvg for %s', (kind) => {
+    const view = createView(kind)
+    for (const p of [
+      { x: 0, y: 0 },
+      { x: 12.5, y: 3.25 },
+      { x: 50, y: 18.5 },
+      { x: 100, y: 37 },
+      { x: -2, y: 40 },
+    ]) {
+      const back = toField(toSvg(p, view), view)
+      expect(back.x).toBeCloseTo(p.x, 10)
+      expect(back.y).toBeCloseTo(p.y, 10)
+    }
+  })
+})
+
+describe('snapToGrid', () => {
+  it('snaps to half metres', () => {
+    expect(snapToGrid({ x: 12.24, y: 3.3 })).toEqual({ x: 12, y: 3.5 })
+    expect(snapToGrid({ x: 12.26, y: 3.74 })).toEqual({ x: 12.5, y: 3.5 })
+  })
+
+  it('accepts a different step', () => {
+    expect(snapToGrid({ x: 12.4, y: 3.3 }, 1)).toEqual({ x: 12, y: 3 })
+  })
+})
