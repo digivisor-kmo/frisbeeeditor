@@ -8,6 +8,7 @@ import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 import { Afspeelbalk } from './Afspeelbalk'
+import { KopieIcon, TrashIcon } from './icons'
 import type { Weergave } from '@/lib/diagram/schema'
 
 const DUUR_STAPPEN = [750, 1000, 1500, 2000, 3000]
@@ -104,7 +105,7 @@ export function FrameStrip() {
         )}
 
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
+          <span className="stil frame-strip__woord" style={{ fontSize: 'var(--tekst-xs)' }}>
             {nl.frames.duur}
           </span>
           <select
@@ -121,19 +122,28 @@ export function FrameStrip() {
           </select>
         </label>
 
-        <Knop klein onClick={() => setActiveFrame(dupliceerFrame(activeFrame))}>
-          {nl.frames.dupliceren}
+        <Knop
+          klein
+          title={nl.frames.dupliceren}
+          aria-label={nl.frames.dupliceren}
+          onClick={() => setActiveFrame(dupliceerFrame(activeFrame))}
+        >
+          <KopieIcon />
+          <span className="knop-woord">{nl.frames.dupliceren}</span>
         </Knop>
         <Knop
           klein
           variant="gevaar"
           disabled={frames.length <= 1}
+          title={nl.frames.verwijderen}
+          aria-label={nl.frames.verwijderen}
           onClick={() => {
             verwijderFrame(activeFrame)
             setActiveFrame(Math.max(0, activeFrame - 1))
           }}
         >
-          {nl.frames.verwijderen}
+          <TrashIcon size={17} />
+          <span className="knop-woord">{nl.frames.verwijderen}</span>
         </Knop>
       </div>
       </div>

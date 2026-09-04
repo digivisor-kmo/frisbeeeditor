@@ -9,8 +9,6 @@ import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 import { PauzeIcon, SpeelIcon } from './icons'
 
-const SNELHEDEN = [0.5, 1, 1.5, 2]
-
 export function Afspeelbalk() {
   const frames = useDiagramStore((s) => s.doc.frames)
   const duren = useMemo(() => frames.map((f) => f.duurMs), [frames])
@@ -20,12 +18,8 @@ export function Afspeelbalk() {
   const setSpeelt = useUiStore((s) => s.setSpeelt)
   const tijdMs = useUiStore((s) => s.tijdMs)
   const setTijd = useUiStore((s) => s.setTijd)
-  const snelheid = useUiStore((s) => s.snelheid)
-  const setSnelheid = useUiStore((s) => s.setSnelheid)
   const lussen = useUiStore((s) => s.lussen)
   const setLussen = useUiStore((s) => s.setLussen)
-  const focus = useUiStore((s) => s.focus)
-  const setFocus = useUiStore((s) => s.setFocus)
   const setActiveFrame = useUiStore((s) => s.setActiveFrame)
   const setScrubt = useUiStore((s) => s.setScrubt)
 
@@ -73,25 +67,9 @@ export function Afspeelbalk() {
         }}
       />
 
-      <div className="btn-groep">
-        {SNELHEDEN.map((s) => (
-          <Knop key={s} klein actief={snelheid === s} onClick={() => setSnelheid(s)}>
-            {s.toLocaleString('nl-BE')}×
-          </Knop>
-        ))}
-      </div>
-
       <Knop klein actief={lussen} onClick={() => setLussen(!lussen)}>
         {nl.afspelen.lussen}
       </Knop>
-
-      <div className="btn-groep">
-        {(['beide', 'offense', 'defense'] as const).map((f) => (
-          <Knop key={f} klein actief={focus === f} onClick={() => setFocus(f)}>
-            {f === 'beide' ? nl.afspelen.beide : f === 'offense' ? nl.editor.aanval : nl.editor.verdediging}
-          </Knop>
-        ))}
-      </div>
     </div>
   )
 }

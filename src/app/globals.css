@@ -835,7 +835,8 @@ h3,
     justify-content: flex-start;
   }
 
-  .validatie-woord {
+  .validatie-woord,
+  .frame-strip__woord {
     display: none;
   }
 

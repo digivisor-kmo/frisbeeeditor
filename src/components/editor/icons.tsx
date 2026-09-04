@@ -160,6 +160,15 @@ export function VerderIcon({ size = 18 }: IconProps) {
   )
 }
 
+export function KopieIcon({ size = 17 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <rect x="8.6" y="8.6" width="11" height="11" rx="2.4" />
+      <path d="M15.4 5.4H6.8a2.4 2.4 0 0 0-2.4 2.4v8.6" />
+    </svg>
+  )
+}
+
 export function PersoonIcon({ size = 18 }: IconProps) {
   return (
     <svg {...base(size)}>

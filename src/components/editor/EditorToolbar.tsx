@@ -7,6 +7,7 @@ import type { Side } from '@/lib/diagram/schema'
 import { canRedo, canUndo, useDiagramStore } from '@/lib/editor/diagramStore'
 import { useUiStore, type Tool } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
+import { Afspeelinstellingen } from './Afspeelinstellingen'
 import { DiagramInstellingen } from './DiagramInstellingen'
 import { FrameNavigator } from './FrameNavigator'
 import {
@@ -74,6 +75,8 @@ export function EditorToolbar({ kant, setKant }: Props) {
               </Knop>
             </div>
           </div>
+
+          <Afspeelinstellingen />
 
           <div style={{ alignSelf: 'end' }}>
             <Aanvink label={nl.editor.rasterUitleg} checked={snap} onChange={setSnap} />

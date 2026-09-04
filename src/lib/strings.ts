@@ -159,6 +159,8 @@ export const nl = {
     pauze: 'Pauzeren',
     scrubber: 'Positie in de animatie',
     lussen: 'Lussen',
+    snelheid: 'Snelheid',
+    focus: 'Focus tijdens het afspelen',
     beide: 'Beide',
   },
   opslaan: {
