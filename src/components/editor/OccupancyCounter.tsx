@@ -38,6 +38,8 @@ export function OccupancyCounter({ entities }: { entities: readonly Entity[] }) 
         border: '1px solid var(--border)',
         background: 'var(--surface-raised)',
         fontSize: 'var(--tekst-sm)',
+        whiteSpace: 'nowrap',
+        flexShrink: 0,
       }}
     >
       {chip(offense, 'A', 'var(--team-a)')}

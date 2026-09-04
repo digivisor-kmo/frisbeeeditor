@@ -39,6 +39,8 @@ export function EditorToolbar({ kant, setKant, status, fout }: Props) {
   const snap = useUiStore((s) => s.snap)
   const setSnap = useUiStore((s) => s.setSnap)
   const activeFrame = useUiStore((s) => s.activeFrame)
+  const zoom = useUiStore((s) => s.zoom)
+  const resetCamera = useUiStore((s) => s.resetCamera)
 
   const doc = useDiagramStore((s) => s.doc)
   const undo = useDiagramStore((s) => s.undo)
@@ -92,6 +94,11 @@ export function EditorToolbar({ kant, setKant, status, fout }: Props) {
         </div>
 
         <div className="editor-balk__rechts">
+          {zoom > 1.01 && (
+            <Knop klein onClick={resetCamera} title={nl.editor.zoomUit}>
+              {Math.round(zoom * 100)}%
+            </Knop>
+          )}
           <OccupancyCounter entities={entities} />
           <ValidatieIndicator ontbreekt={ontbreekt} />
           <BewaarStatusLabel status={status} fout={fout} />

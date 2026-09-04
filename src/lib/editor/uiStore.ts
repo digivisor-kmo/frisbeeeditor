@@ -33,11 +33,17 @@ interface UiStore {
    */
   actieveBocht: number | null
 
+  /** How far the field is zoomed in, and where the window sits. */
+  zoom: number
+  pan: { x: number; y: number }
+
   setMode: (mode: EditorMode) => void
   setTool: (tool: Tool) => void
   setSnap: (snap: boolean) => void
   setMenuOpen: (open: boolean) => void
   setActieveBocht: (index: number | null) => void
+  setCamera: (zoom: number, pan: { x: number; y: number }) => void
+  resetCamera: () => void
   setActiveFrame: (index: number) => void
 
   select: (ids: string[]) => void
@@ -60,12 +66,16 @@ export const useUiStore = create<UiStore>((set, get) => ({
   snap: true,
   menuOpen: false,
   actieveBocht: null,
+  zoom: 1,
+  pan: { x: 0, y: 0 },
 
   setMode: (mode) => set({ mode }),
   setTool: (tool) => set({ tool, mode: 'idle', menuOpen: false }),
   setSnap: (snap) => set({ snap }),
   setMenuOpen: (menuOpen) => set({ menuOpen }),
   setActieveBocht: (actieveBocht) => set({ actieveBocht }),
+  setCamera: (zoom, pan) => set({ zoom, pan }),
+  resetCamera: () => set({ zoom: 1, pan: { x: 0, y: 0 } }),
   setActiveFrame: (activeFrame) =>
     set({ activeFrame, selection: new Set<string>(), menuOpen: false }),
 

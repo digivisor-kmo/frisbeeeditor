@@ -11,11 +11,16 @@ import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
 import { isArrow, isPlayer, type Point, type Side } from '@/lib/diagram/schema'
 import {
   createView,
+  klem,
+  maakCamera,
+  MAX_ZOOM,
+  MIN_ZOOM,
   snapToGrid,
   toField,
   toScreenPx,
   toSvg,
   UNITS_PER_METRE,
+  zoomOmPunt,
 } from '@/lib/field/geometry'
 import { clientToSvg } from '@/lib/field/pointer'
 import { entiteitenInKader, maakKader, type Kader } from '@/lib/editor/marquee'
@@ -24,7 +29,15 @@ import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { SelectedEntityMenu } from './SelectedEntityMenu'
-import { useMetresPerPixel } from './useMetresPerPixel'
+import { useMetresPerPixel, useStaandScherm } from './useMetresPerPixel'
+
+interface KnijpState {
+  /** Distance between the two fingers when the gesture started. */
+  afstand: number
+  zoom: number
+  /** The point on the field that stays under the fingers, in SVG units. */
+  vast: Point
+}
 
 type DragDoel =
   | { soort: 'entiteit'; id: string; offset: Point; groepIds: string[] }
@@ -56,6 +69,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const drag = useRef<DragState | null>(null)
   const [tipInSleep, setTipInSleep] = useState<string | null>(null)
   const [kader, setKader] = useState<Kader | null>(null)
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const knijp = useRef<KnijpState | null>(null)
 
   const doc = useDiagramStore((s) => s.doc)
   const change = useDiagramStore((s) => s.change)
@@ -74,8 +89,14 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const actieveBocht = useUiStore((s) => s.actieveBocht)
   const setActieveBocht = useUiStore((s) => s.setActieveBocht)
 
-  const view = useMemo(() => createView(doc.meta.weergave), [doc.meta.weergave])
-  const metresPerPixel = useMetresPerPixel(svgRef, view)
+  const zoom = useUiStore((s) => s.zoom)
+  const pan = useUiStore((s) => s.pan)
+  const setCamera = useUiStore((s) => s.setCamera)
+
+  const staand = useStaandScherm()
+  const view = useMemo(() => createView(doc.meta.weergave, staand), [doc.meta.weergave, staand])
+  const camera = useMemo(() => maakCamera(view, zoom, pan), [view, zoom, pan])
+  const metresPerPixel = useMetresPerPixel(svgRef, camera)
   const radiusM = tokenRadiusM(metresPerPixel)
   const hitM = hitRadiusM(metresPerPixel)
 
@@ -108,7 +129,41 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       groupId,
     )
 
+  /** Where a client point sits inside the element, as a fraction from 0 to 1. */
+  function fractieIn(clientX: number, clientY: number): Point {
+    const rect = svgRef.current?.getBoundingClientRect()
+    if (!rect || rect.width === 0 || rect.height === 0) return { x: 0.5, y: 0.5 }
+    return { x: (clientX - rect.left) / rect.width, y: (clientY - rect.top) / rect.height }
+  }
+
+  function stopSleep() {
+    drag.current = null
+    setTipInSleep(null)
+    setKader(null)
+    setMode('idle')
+  }
+
   function onPointerDown(event: React.PointerEvent<SVGSVGElement>) {
+    pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+
+    // Two fingers is always pan and zoom, never editing. Whatever drag the
+    // first finger had started is abandoned rather than half-applied.
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()]
+      if (a && b) {
+        const midden = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+        const svg = svgRef.current
+        knijp.current = {
+          afstand: Math.max(Math.hypot(b.x - a.x, b.y - a.y), 1),
+          zoom,
+          vast: svg ? clientToSvg(svg, midden.x, midden.y) : { x: 0, y: 0 },
+        }
+        stopSleep()
+      }
+      return
+    }
+    if (pointers.current.size > 2) return
+
     const target = event.target as Element
     const groep = target.closest('[data-entity-id]')
     const entityId = groep?.getAttribute('data-entity-id') ?? null
@@ -213,6 +268,24 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   }
 
   function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
+    if (pointers.current.has(event.pointerId)) {
+      pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY })
+    }
+
+    const gebaar = knijp.current
+    if (gebaar && pointers.current.size >= 2) {
+      const [a, b] = [...pointers.current.values()]
+      if (!a || !b) return
+      const afstand = Math.max(Math.hypot(b.x - a.x, b.y - a.y), 1)
+      const midden = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+      const nieuweZoom = klem((gebaar.zoom * afstand) / gebaar.afstand, MIN_ZOOM, MAX_ZOOM)
+      setCamera(
+        nieuweZoom,
+        zoomOmPunt(view, nieuweZoom, gebaar.vast, fractieIn(midden.x, midden.y)),
+      )
+      return
+    }
+
     const state = drag.current
     if (!state || state.pointerId !== event.pointerId) return
 
@@ -322,13 +395,32 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   }
 
   function endDrag(event: React.PointerEvent<SVGSVGElement>) {
+    pointers.current.delete(event.pointerId)
+    if (pointers.current.size < 2) knijp.current = null
+
     const state = drag.current
     if (!state || state.pointerId !== event.pointerId) return
     svgRef.current?.releasePointerCapture(event.pointerId)
-    drag.current = null
-    setTipInSleep(null)
-    setKader(null)
-    setMode('idle')
+    stopSleep()
+  }
+
+  function onWheel(event: React.WheelEvent<SVGSVGElement>) {
+    const svg = svgRef.current
+    if (!svg) return
+    event.preventDefault()
+
+    // A pinch on a trackpad arrives as a wheel event with ctrl held.
+    if (event.ctrlKey || event.metaKey) {
+      const nieuweZoom = klem(zoom * Math.exp(-event.deltaY * 0.0035), MIN_ZOOM, MAX_ZOOM)
+      const vast = clientToSvg(svg, event.clientX, event.clientY)
+      setCamera(nieuweZoom, zoomOmPunt(view, nieuweZoom, vast, fractieIn(event.clientX, event.clientY)))
+      return
+    }
+
+    if (zoom === MIN_ZOOM) return
+    const rect = svg.getBoundingClientRect()
+    const perPixel = camera.width / Math.max(rect.width, 1)
+    setCamera(zoom, { x: pan.x + event.deltaX * perPixel, y: pan.y + event.deltaY * perPixel })
   }
 
   const cones = entities.filter((e) => e.type === 'cone')
@@ -344,23 +436,24 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           geselecteerd.path.points[geselecteerd.path.points.length - 1]!,
           view,
           metresPerPixel,
+          camera.origin,
         )
       : hasPosition(geselecteerd)
-        ? toScreenPx(geselecteerd.pos, view, metresPerPixel)
+        ? toScreenPx(geselecteerd.pos, view, metresPerPixel, camera.origin)
         : null
     : null
 
   const opZ = <T extends { z: number }>(list: T[]) => list.slice().sort((a, b) => a.z - b.z)
 
-  const canvasBreedte = view.width / UNITS_PER_METRE / metresPerPixel
-  const canvasHoogte = view.height / UNITS_PER_METRE / metresPerPixel
+  const canvasBreedte = camera.width / UNITS_PER_METRE / metresPerPixel
+  const canvasHoogte = camera.height / UNITS_PER_METRE / metresPerPixel
   const toonScrim = menuOpen && geselecteerd !== undefined
 
   return (
     <div style={{ position: 'relative' }}>
       <svg
         ref={svgRef}
-        viewBox={view.viewBox}
+        viewBox={camera.viewBox}
         role="application"
         aria-label="Veld"
         style={{
@@ -378,6 +471,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
+        onWheel={onWheel}
       >
         <FieldSurface view={view} />
 

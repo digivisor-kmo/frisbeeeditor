@@ -3,6 +3,9 @@ import {
   BRICK_MARKS_M,
   CENTRAL_ZONE_M,
   createView,
+  maakCamera,
+  MAX_ZOOM,
+  zoomOmPunt,
   FIELD_M,
   GOAL_LINES_M,
   snapToGrid,
@@ -125,5 +128,58 @@ describe('toScreenPx', () => {
     const smal = toScreenPx({ x: 50, y: 18.5 }, view, 106 / 400)
     const breed = toScreenPx({ x: 50, y: 18.5 }, view, 106 / 800)
     expect(breed.x).toBeCloseTo(smal.x * 2, 6)
+  })
+})
+
+describe('camera', () => {
+  const view = createView('volledig')
+
+  it('toont bij zoom 1 precies de hele viewBox', () => {
+    const camera = maakCamera(view, 1, { x: 0, y: 0 })
+    expect(camera.viewBox).toBe(view.viewBox)
+  })
+
+  it('toont bij zoom 2 een half zo breed venster', () => {
+    const camera = maakCamera(view, 2, { x: 0, y: 0 })
+    expect(camera.width).toBeCloseTo(view.width / 2, 6)
+    expect(camera.height).toBeCloseTo(view.height / 2, 6)
+  })
+
+  it('kijkt nooit voorbij de rand van het getekende vlak', () => {
+    const ver = maakCamera(view, 2, { x: 99999, y: 99999 })
+    expect(ver.origin.x + ver.width).toBeCloseTo(view.origin.x + view.width, 6)
+    expect(ver.origin.y + ver.height).toBeCloseTo(view.origin.y + view.height, 6)
+
+    const terug = maakCamera(view, 2, { x: -99999, y: -99999 })
+    expect(terug.origin.x).toBeCloseTo(view.origin.x, 6)
+    expect(terug.origin.y).toBeCloseTo(view.origin.y, 6)
+  })
+
+  it('klemt de zoom aan beide kanten', () => {
+    expect(maakCamera(view, 0.1, { x: 0, y: 0 }).width).toBeCloseTo(view.width, 6)
+    expect(maakCamera(view, 99, { x: 0, y: 0 }).width).toBeCloseTo(view.width / MAX_ZOOM, 6)
+  })
+
+  it('houdt het punt onder je vinger op zijn plek tijdens het zoomen', () => {
+    // Het midden van het veld, precies in het midden van het element.
+    const vast = toSvg({ x: 50, y: 18.5 }, view)
+    const fractie = { x: 0.5, y: 0.5 }
+    const pan = zoomOmPunt(view, 3, vast, fractie)
+    const camera = maakCamera(view, 3, pan)
+
+    const opnieuw = {
+      x: camera.origin.x + fractie.x * camera.width,
+      y: camera.origin.y + fractie.y * camera.height,
+    }
+    expect(opnieuw.x).toBeCloseTo(vast.x, 6)
+    expect(opnieuw.y).toBeCloseTo(vast.y, 6)
+  })
+
+  it('werkt ook als het vaste punt niet in het midden ligt', () => {
+    const vast = toSvg({ x: 20, y: 6 }, view)
+    const fractie = { x: 0.2, y: 0.8 }
+    const camera = maakCamera(view, 2.5, zoomOmPunt(view, 2.5, vast, fractie))
+    expect(camera.origin.x + fractie.x * camera.width).toBeCloseTo(vast.x, 6)
+    expect(camera.origin.y + fractie.y * camera.height).toBeCloseTo(vast.y, 6)
   })
 })

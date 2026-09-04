@@ -114,7 +114,7 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
       <EditorToolbar kant={kant} setKant={setKant} status={status} fout={fout} />
 
       <div
-        className="kaart"
+        className="kaart veld-kaart"
         style={{
           marginTop: 'var(--ruimte-3)',
           padding: 'var(--ruimte-2)',
@@ -129,7 +129,7 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
           exactly in the top metres of the pitch. */}
       <BulkPaneel key={selectieSleutel} entities={entities} />
 
-      <p className="stil" style={{ marginTop: 'var(--ruimte-3)', maxWidth: '46rem' }}>
+      <p className="stil hulp-tekst" style={{ marginTop: 'var(--ruimte-3)', maxWidth: '46rem' }}>
         {nl.editor.hulp}
       </p>
     </main>

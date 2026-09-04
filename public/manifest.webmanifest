@@ -1,0 +1,13 @@
+{
+  "name": "DUCs Playbook",
+  "short_name": "Playbook",
+  "description": "Spelvarianten en drills voor DUC Dendermonde",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f5f6",
+  "theme_color": "#f4f5f6",
+  "icons": [
+    { "src": "/icoon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

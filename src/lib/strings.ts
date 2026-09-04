@@ -36,6 +36,7 @@ export const nl = {
     titel: 'Editor',
     terug: 'Terug',
     laden: 'Diagram laden…',
+    zoomUit: 'Terug naar het hele veld',
     nietGeladen: 'Dit diagram kon niet geladen worden',
     nietsBewaard: 'Nog niets wordt bewaard. Herlaad je de pagina, dan is je werk weg.',
     selecteren: 'Selecteren',
@@ -51,7 +52,7 @@ export const nl = {
     verwijderen: 'Verwijderen',
     bezettingUitleg: 'Aanval en verdediging op het veld. Kleurt zodra het er geen zeven zijn.',
     hulp:
-      'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Tik een speler aan voor het menu; daar teken je ook een cut, juke of worp. Van een arrow open je met de punt het menu en met het lijfje de handvatten.',
+      'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Tik een speler aan voor het menu; daar teken je ook een cut, juke of worp. Van een arrow open je met de punt het menu en met het lijfje de handvatten. Twee vingers of ctrl met scrollen zoomt in.',
   },
   menu: {
     schijf: 'Schijf',

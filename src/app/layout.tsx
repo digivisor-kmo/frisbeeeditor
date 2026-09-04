@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   description: nl.app.ondertitel,
   applicationName: nl.app.naam,
   appleWebApp: { capable: true, title: nl.app.naam, statusBarStyle: 'default' },
+  manifest: '/manifest.webmanifest',
   icons: {
     icon: [{ url: '/icoon.svg', type: 'image/svg+xml' }],
     apple: [{ url: '/icoon.svg' }],

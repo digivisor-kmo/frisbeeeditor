@@ -583,3 +583,25 @@ ol {
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
+
+@media (max-width: 720px) {
+  /* The field is the content; a paragraph of instructions is not. */
+  .hulp-tekst {
+    display: none;
+  }
+
+  .editor-hoofd {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .veld-kaart {
+    margin-top: auto;
+    margin-bottom: auto;
+  }
+
+  .editor-balk__rechts {
+    gap: var(--ruimte-2);
+  }
+}

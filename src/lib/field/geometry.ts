@@ -65,13 +65,15 @@ export interface FieldView {
   height: number
 }
 
-export function createView(kind: ViewKind): FieldView {
+export function createView(kind: ViewKind, staand = false): FieldView {
   const area: Rect =
     kind === 'half'
       ? { minX: 0, minY: 0, maxX: HALF_VIEW_LENGTH_M, maxY: FIELD_M.width }
       : { minX: 0, minY: 0, maxX: FIELD_M.length, maxY: FIELD_M.width }
 
-  const rotated = kind === 'half'
+  // The half field is portrait by design. On a narrow upright screen the other
+  // views turn too, because a hundred metres across 390 pixels is unusable.
+  const rotated = kind === 'half' || staand
   const alongX = area.maxX - area.minX
   const alongY = area.maxY - area.minY
 
@@ -122,17 +124,74 @@ export function toField(p: Point, view: FieldView): Point {
   }
 }
 
+/* ------------------------------------------------------------------ camera */
+
+/**
+ * What part of the field is on screen.
+ *
+ * Zooming and panning only move this window; they never touch a stored
+ * position. On a phone the full field is 3,5 pixels per metre, so being able to
+ * zoom in is not a luxury.
+ */
+export interface Camera {
+  origin: Point
+  width: number
+  height: number
+  viewBox: string
+}
+
+export const MIN_ZOOM = 1
+export const MAX_ZOOM = 6
+
+export const klem = (waarde: number, min: number, max: number) =>
+  Math.min(Math.max(waarde, min), max)
+
+export function maakCamera(view: FieldView, zoom: number, pan: Point): Camera {
+  const z = klem(zoom, MIN_ZOOM, MAX_ZOOM)
+  const width = view.width / z
+  const height = view.height / z
+
+  // Never look past the edge of the drawn area: an empty grey void beside the
+  // field tells you nothing and feels broken.
+  const x = klem(view.origin.x + pan.x, view.origin.x, view.origin.x + view.width - width)
+  const y = klem(view.origin.y + pan.y, view.origin.y, view.origin.y + view.height - height)
+
+  return { origin: { x, y }, width, height, viewBox: `${x} ${y} ${width} ${height}` }
+}
+
+/**
+ * The pan that keeps `vast` (in SVG units) under the same spot on screen while
+ * the zoom changes. `fractie` is where that spot sits in the element, 0 to 1.
+ */
+export function zoomOmPunt(
+  view: FieldView,
+  nieuweZoom: number,
+  vast: Point,
+  fractie: Point,
+): Point {
+  const z = klem(nieuweZoom, MIN_ZOOM, MAX_ZOOM)
+  return {
+    x: vast.x - fractie.x * (view.width / z) - view.origin.x,
+    y: vast.y - fractie.y * (view.height / z) - view.origin.y,
+  }
+}
+
 /**
  * Where a field position lands inside the rendered element, in CSS pixels
  * relative to its top-left corner. Used to anchor HTML overlays -- the context
  * menu -- to an entity on the field.
  */
-export function toScreenPx(p: Point, view: FieldView, metresPerPixel: number): Point {
+export function toScreenPx(
+  p: Point,
+  view: FieldView,
+  metresPerPixel: number,
+  origin: Point = view.origin,
+): Point {
   const svg = toSvg(p, view)
   const pxPerUnit = 1 / (UNITS_PER_METRE * metresPerPixel)
   return {
-    x: (svg.x - view.origin.x) * pxPerUnit,
-    y: (svg.y - view.origin.y) * pxPerUnit,
+    x: (svg.x - origin.x) * pxPerUnit,
+    y: (svg.y - origin.y) * pxPerUnit,
   }
 }
 
