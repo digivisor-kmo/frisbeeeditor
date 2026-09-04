@@ -51,6 +51,88 @@ export function SterIcon({ size = 20, gevuld = false }: IconProps & { gevuld?: b
   )
 }
 
+/** The select tool: a pointer. */
+export function CursorIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M5.5 3.4 18 11.2l-5.4 1.2-2.4 5.1z" />
+    </svg>
+  )
+}
+
+/** The player tool: head and shoulders. */
+export function SpelerIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <circle cx="12" cy="8.4" r="3.4" />
+      <path d="M5.6 19.4c0-3.2 2.9-5.2 6.4-5.2s6.4 2 6.4 5.2" />
+    </svg>
+  )
+}
+
+/** The cone tool: a cone on its base. */
+export function PionIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M12 4.2 17.2 17H6.8z" />
+      <path d="M4 19.6h16" />
+    </svg>
+  )
+}
+
+export function OngedaanIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M4.5 8.2h9.1a5.4 5.4 0 0 1 0 10.8H7.6" />
+      <path d="M8 4.4 4.2 8.2 8 12" />
+    </svg>
+  )
+}
+
+export function OpnieuwIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M19.5 8.2h-9.1a5.4 5.4 0 0 0 0 10.8h6" />
+      <path d="M16 4.4l3.8 3.8L16 12" />
+    </svg>
+  )
+}
+
+export function PlusIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M12 5.2v13.6M5.2 12h13.6" />
+    </svg>
+  )
+}
+
+/** The settings panel: three sliders. */
+export function SchuivenIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M4 7.5h4.2M12.6 7.5H20M4 16.5h7.4M15.8 16.5H20" />
+      <circle cx="10.4" cy="7.5" r="2.2" />
+      <circle cx="13.6" cy="16.5" r="2.2" />
+    </svg>
+  )
+}
+
+export function TerugIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M14.5 5 8 12l6.5 7" />
+    </svg>
+  )
+}
+
+export function VerderIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M9.5 5 16 12l-6.5 7" />
+    </svg>
+  )
+}
+
 export function ZoekIcon({ size = 16 }: IconProps) {
   return (
     <svg {...base(size)}>

@@ -30,6 +30,7 @@ export function FrameStrip() {
   if (frames.length < 2) return null
 
   const huidig = frames[activeFrame]
+  const volgende = Math.max(0, frames.length - 1 - activeFrame)
 
   function indexOnder(clientX: number, container: HTMLElement): number {
     const kinderen = [...container.querySelectorAll('[data-frame-index]')] as HTMLElement[]
@@ -94,6 +95,14 @@ export function FrameStrip() {
       </div>
 
       <div className="frame-strip__acties">
+        {/* Editing an earlier frame is not a local act. Say it here, where the
+            frames themselves are, and quietly: it is context, not a warning. */}
+        {volgende > 0 && (
+          <span className="werkt-door" title={nl.frames.werktDoorUitleg}>
+            {nl.frames.werktDoor(volgende)}
+          </span>
+        )}
+
         <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
             {nl.frames.duur}

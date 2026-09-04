@@ -1,6 +1,7 @@
 'use client'
 
 import { Knop } from '@/components/ui/Knop'
+import { PlusIcon, TerugIcon, VerderIcon } from './icons'
 import { kanFrameToevoegen, MAX_FRAMES } from '@/lib/diagram/frames'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { useUiStore } from '@/lib/editor/uiStore'
@@ -12,7 +13,6 @@ export function FrameNavigator() {
   const activeFrame = useUiStore((s) => s.activeFrame)
   const setActiveFrame = useUiStore((s) => s.setActiveFrame)
 
-  const volgende = Math.max(0, frames.length - 1 - activeFrame)
   const huidig = frames[activeFrame]
   const mag = huidig ? kanFrameToevoegen(huidig.content, frames.length) : false
 
@@ -25,47 +25,46 @@ export function FrameNavigator() {
         : nl.frames.geenBeweging
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ruimte-2)' }}>
+    <div className="framenav">
       <div className="btn-groep">
         <Knop
           klein
+          className="btn--icoon"
           aria-label={nl.frames.vorige}
+          title={nl.frames.vorige}
           disabled={activeFrame === 0}
           onClick={() => setActiveFrame(activeFrame - 1)}
         >
-          ‹
+          <TerugIcon size={16} />
         </Knop>
+
+        <span className="framenav__teller cijfers" aria-live="polite">
+          {activeFrame + 1}
+          <span className="framenav__van">/{frames.length}</span>
+        </span>
+
         <Knop
           klein
+          className="btn--icoon"
           aria-label={nl.frames.volgende}
+          title={nl.frames.volgende}
           disabled={activeFrame >= frames.length - 1}
           onClick={() => setActiveFrame(activeFrame + 1)}
         >
-          ›
+          <VerderIcon size={16} />
         </Knop>
       </div>
 
-      <span
-        style={{
-          fontSize: 'var(--tekst-sm)',
-          fontVariantNumeric: 'tabular-nums',
-          color: 'var(--text-muted)',
-          whiteSpace: 'nowrap',
-        }}
+      <Knop
+        klein
+        className="btn--icoon"
+        disabled={!mag}
+        title={reden}
+        aria-label={nl.frames.toevoegenKort}
+        onClick={() => setActiveFrame(voegFrameToe(activeFrame))}
       >
-        {nl.frames.kort} {activeFrame + 1}/{frames.length}
-      </span>
-
-      <Knop klein disabled={!mag} title={reden} onClick={() => setActiveFrame(voegFrameToe(activeFrame))}>
-        + {nl.frames.frame}
+        <PlusIcon />
       </Knop>
-
-      {/* Editing an earlier frame is not a local act: say so, quietly. */}
-      {volgende > 0 && (
-        <span className="werkt-door" title={nl.frames.werktDoorUitleg}>
-          {nl.frames.werktDoor(volgende)}
-        </span>
-      )}
     </div>
   )
 }

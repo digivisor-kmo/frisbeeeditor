@@ -133,6 +133,7 @@ export const nl = {
     frame: 'Frame',
     kort: 'Frame',
     vorige: 'Vorig frame',
+    toevoegenKort: 'Frame toevoegen',
     volgende: 'Volgend frame',
     toevoegen:
       'Voegt het volgende frame toe: iedereen met een cut of juke staat daar al op zijn eindpunt, en een aangekomen worp is doorgegeven.',

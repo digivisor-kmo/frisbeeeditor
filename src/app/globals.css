@@ -634,11 +634,86 @@ h3,
 
 /* ------------------------------------------------------------ editor shell */
 
+.editor-hoofd {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: var(--ruimte-4) var(--ruimte-4) var(--ruimte-7);
+}
+
+.editor-kop {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  margin-bottom: var(--ruimte-3);
+  min-width: 0;
+}
+
+.editor-kop__rechts {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  flex-shrink: 0;
+}
+
+/* A square button holding a single glyph. */
+.btn--icoon {
+  width: 38px;
+  padding: 0;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.btn--icoon:hover:not(:disabled) {
+  color: var(--text);
+}
+
+@media (pointer: coarse) {
+  .btn--icoon {
+    width: var(--raakvlak);
+  }
+}
+
 .editor-balk {
   display: flex;
   flex-wrap: wrap;
   gap: var(--ruimte-2);
   align-items: center;
+}
+
+.framenav {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+}
+
+/* The frame number lives inside the segmented track, between its two arrows,
+   so stepping and reading are one control instead of two things side by side. */
+.framenav__teller {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 0 var(--ruimte-2);
+  font-size: var(--tekst-sm);
+  font-weight: 650;
+  color: var(--text);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.framenav__van {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+/* An icon button carrying a word next to it. */
+.knop-woord {
+  margin-left: -2px;
+}
+
+@media (max-width: 720px) {
+  .knop-woord {
+    display: none;
+  }
 }
 
 .editor-balk__rechts {
@@ -814,11 +889,12 @@ h3,
   flex-direction: column;
   gap: var(--ruimte-2);
   align-items: stretch;
-  padding: var(--ruimte-2) var(--ruimte-3);
+  padding: var(--ruimte-2) var(--ruimte-4);
   padding-bottom: calc(var(--ruimte-2) + env(safe-area-inset-bottom));
-  background: var(--surface-raised);
+  background: rgb(255 255 255 / 0.9);
+  backdrop-filter: saturate(1.6) blur(14px);
   border-top: 1px solid var(--border);
-  box-shadow: 0 -2px 12px rgb(16 24 32 / 0.06);
+  box-shadow: 0 -1px 2px rgb(16 24 40 / 0.04), 0 -12px 32px -18px rgb(16 24 40 / 0.24);
 }
 
 .frame-strip__onder {
@@ -890,6 +966,13 @@ h3,
   font-weight: 700;
   line-height: 16px;
   color: var(--text);
+}
+
+/* The two rows of the dock are one thing with a seam, not two bars stacked by
+   accident. */
+.frame-strip__onder {
+  border-top: 1px solid var(--border);
+  padding-top: var(--ruimte-2);
 }
 
 /* The strip is permanent context, so the page keeps room for it. */

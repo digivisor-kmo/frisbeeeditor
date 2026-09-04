@@ -6,51 +6,56 @@ import { Aanvink } from '@/components/ui/Veld'
 import type { Side } from '@/lib/diagram/schema'
 import { canRedo, canUndo, useDiagramStore } from '@/lib/editor/diagramStore'
 import { useUiStore, type Tool } from '@/lib/editor/uiStore'
-import type { BewaarStatus } from '@/lib/editor/useAutosave'
-import { watOntbreekt } from '@/lib/editor/validatie'
 import { nl } from '@/lib/strings'
-import { BewaarStatusLabel } from './BewaarStatus'
 import { DiagramInstellingen } from './DiagramInstellingen'
 import { FrameNavigator } from './FrameNavigator'
-import { OccupancyCounter } from './OccupancyCounter'
-import { ValidatieIndicator } from './ValidatieIndicator'
+import {
+  CursorIcon,
+  OngedaanIcon,
+  OpnieuwIcon,
+  PionIcon,
+  SchuivenIcon,
+  SpelerIcon,
+} from './icons'
 
 /**
  * Only the tools that actually work appear. Drawing and text boxes come later,
  * and a greyed-out button for something unbuilt reads as broken.
+ *
+ * Icon plus word: the icon is what you find back at a glance once you know it,
+ * the word is what tells you the first time. On a phone the word steps aside.
  */
-const TOOLS: { id: Tool; label: string }[] = [
-  { id: 'select', label: nl.editor.selecteren },
-  { id: 'player', label: nl.editor.speler },
-  { id: 'cone', label: nl.editor.pion },
+const TOOLS: { id: Tool; label: string; icoon: React.ReactNode }[] = [
+  { id: 'select', label: nl.editor.selecteren, icoon: <CursorIcon /> },
+  { id: 'player', label: nl.editor.speler, icoon: <SpelerIcon /> },
+  { id: 'cone', label: nl.editor.pion, icoon: <PionIcon /> },
 ]
 
 interface Props {
   kant: Side
   setKant: (side: Side) => void
-  status: BewaarStatus
-  fout: string | null
 }
 
-export function EditorToolbar({ kant, setKant, status, fout }: Props) {
+/**
+ * The controls, and only the controls. Who you are, what the diagram is called
+ * and how it is doing live in the header above: state on one line, actions on
+ * the next, so neither has to make room for the other.
+ */
+export function EditorToolbar({ kant, setKant }: Props) {
   const [paneelOpen, setPaneelOpen] = useState(false)
 
   const tool = useUiStore((s) => s.tool)
   const setTool = useUiStore((s) => s.setTool)
   const snap = useUiStore((s) => s.snap)
   const setSnap = useUiStore((s) => s.setSnap)
-  const activeFrame = useUiStore((s) => s.activeFrame)
   const zoom = useUiStore((s) => s.zoom)
   const resetCamera = useUiStore((s) => s.resetCamera)
 
-  const doc = useDiagramStore((s) => s.doc)
   const undo = useDiagramStore((s) => s.undo)
   const redo = useDiagramStore((s) => s.redo)
   const kanTerug = useDiagramStore(canUndo)
   const kanVooruit = useDiagramStore(canRedo)
 
-  const entities = doc.frames[activeFrame]?.content.entities ?? []
-  const ontbreekt = watOntbreekt(doc)
 
   return (
     <div className="editor-chrome" style={{ display: 'grid', gap: 'var(--ruimte-2)' }}>
@@ -81,18 +86,40 @@ export function EditorToolbar({ kant, setKant, status, fout }: Props) {
 
         <div className="btn-groep">
           {TOOLS.map((t) => (
-            <Knop key={t.id} klein actief={tool === t.id} onClick={() => setTool(t.id)}>
-              {t.label}
+            <Knop
+              key={t.id}
+              klein
+              actief={tool === t.id}
+              onClick={() => setTool(t.id)}
+              title={t.label}
+              aria-label={t.label}
+            >
+              {t.icoon}
+              <span className="knop-woord">{t.label}</span>
             </Knop>
           ))}
         </div>
 
         <div className="btn-groep">
-          <Knop klein onClick={undo} disabled={!kanTerug}>
-            {nl.editor.ongedaan}
+          <Knop
+            klein
+            className="btn--icoon"
+            onClick={undo}
+            disabled={!kanTerug}
+            title={nl.editor.ongedaan}
+            aria-label={nl.editor.ongedaan}
+          >
+            <OngedaanIcon />
           </Knop>
-          <Knop klein onClick={redo} disabled={!kanVooruit}>
-            {nl.editor.opnieuw}
+          <Knop
+            klein
+            className="btn--icoon"
+            onClick={redo}
+            disabled={!kanVooruit}
+            title={nl.editor.opnieuw}
+            aria-label={nl.editor.opnieuw}
+          >
+            <OpnieuwIcon />
           </Knop>
         </div>
 
@@ -102,11 +129,16 @@ export function EditorToolbar({ kant, setKant, status, fout }: Props) {
               {Math.round(zoom * 100)}%
             </Knop>
           )}
-          <OccupancyCounter entities={entities} />
-          <ValidatieIndicator ontbreekt={ontbreekt} />
-          <BewaarStatusLabel status={status} fout={fout} />
-          <Knop klein actief={paneelOpen} aria-expanded={paneelOpen} onClick={() => setPaneelOpen((o) => !o)}>
-            {paneelOpen ? nl.instellingen.minder : nl.instellingen.meer}
+          <Knop
+            klein
+            className="btn--icoon"
+            actief={paneelOpen}
+            aria-expanded={paneelOpen}
+            aria-label={nl.instellingen.meer}
+            title={nl.instellingen.meer}
+            onClick={() => setPaneelOpen((o) => !o)}
+          >
+            <SchuivenIcon />
           </Knop>
         </div>
       </div>

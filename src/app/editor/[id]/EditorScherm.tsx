@@ -12,6 +12,11 @@ import {
   verplaatsVanaf,
   verwijderVanaf,
 } from '@/lib/diagram/propagatie'
+import { BewaarStatusLabel } from '@/components/editor/BewaarStatus'
+import { TerugIcon } from '@/components/editor/icons'
+import { OccupancyCounter } from '@/components/editor/OccupancyCounter'
+import { ValidatieIndicator } from '@/components/editor/ValidatieIndicator'
+import { watOntbreekt } from '@/lib/editor/validatie'
 import type { Side } from '@/lib/diagram/schema'
 import { framesVan, type EditorDoc } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
@@ -41,6 +46,8 @@ export function EditorScherm({
     () => frames.some((f) => f.content.entities.some((e) => e.type === 'arrow')),
     [frames],
   )
+  const doc = useDiagramStore((s) => s.doc)
+  const ontbreekt = useMemo(() => watOntbreekt(doc), [doc])
 
   const [kant, setKant] = useState<Side>('offense')
   const { status, fout } = useAutosave(magBewerken)
@@ -105,23 +112,14 @@ export function EditorScherm({
   if (geladenId !== geladen.id) return null
 
   return (
-    <main
-      className="editor-hoofd"
-      style={{
-        maxWidth: '76rem',
-        margin: '0 auto',
-        padding: 'var(--ruimte-4) var(--ruimte-4) var(--ruimte-7)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 'var(--ruimte-3)',
-          marginBottom: 'var(--ruimte-3)',
-        }}
-      >
+    <main className="editor-hoofd">
+      {/* Identity and state on one line, controls on the next. The two used to
+          share a row and pushed each other onto a second one at random. */}
+      <div className="editor-kop">
+        <Link href="/" className="btn btn--klein btn--icoon" aria-label={nl.editor.terug} title={nl.editor.terug}>
+          <TerugIcon />
+        </Link>
+
         <input
           className="naam-invoer"
           aria-label={nl.editor.naamPlaceholder}
@@ -134,12 +132,15 @@ export function EditorScherm({
             })
           }}
         />
-        <Link href="/" className="btn btn--klein">
-          {nl.editor.terug}
-        </Link>
+
+        <div className="editor-kop__rechts">
+          <OccupancyCounter entities={entities} />
+          <ValidatieIndicator ontbreekt={ontbreekt} />
+          <BewaarStatusLabel status={status} fout={fout} />
+        </div>
       </div>
 
-      <EditorToolbar kant={kant} setKant={setKant} status={status} fout={fout} />
+      <EditorToolbar kant={kant} setKant={setKant} />
 
       <div
         className="kaart veld-kaart"
