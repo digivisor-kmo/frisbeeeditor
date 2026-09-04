@@ -24,7 +24,7 @@ const KNOP = 44
 /** Angle between two neighbouring buttons. */
 const STAP_GRADEN = 50
 /** Never wider than this, or the outer buttons end up beside the token. */
-const MAX_SPREIDING_GRADEN = 150
+const MAX_SPREIDING_GRADEN = 160
 
 /** Does this device have a real hover state? Touch screens do not. */
 function useHover(): boolean {
@@ -51,12 +51,19 @@ export function EntityMenu({ anchor, tokenRadiusPx, acties, paneel }: Props) {
   const hover = useHover()
   const [tip, setTip] = useState<string | null>(null)
 
-  const straal = Math.max(68, tokenRadiusPx + 48)
-  // Flip downwards when the arc would run off the top of the canvas.
-  const omlaag = anchor.y < straal + KNOP
   const n = acties.length
   const graden = Math.min(MAX_SPREIDING_GRADEN, STAP_GRADEN * (n - 1))
   const spreiding = n === 1 ? 0 : (graden * Math.PI) / 180
+
+  // The arc has to be wide enough that neighbouring buttons do not touch. With
+  // six buttons squeezed into 160 degrees a fixed radius puts them on top of
+  // each other, so the radius grows with the number of buttons.
+  const stap = n > 1 ? spreiding / (n - 1) : 0
+  const nodigVoorAfstand = n > 1 ? (KNOP + 8) / 2 / Math.sin(stap / 2) : 0
+  const straal = Math.max(68, tokenRadiusPx + 48, nodigVoorAfstand)
+
+  // Flip downwards when the arc would run off the top of the canvas.
+  const omlaag = anchor.y < straal + KNOP
 
   return (
     <div
