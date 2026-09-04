@@ -1,22 +1,27 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { createClient } from '@/lib/supabase/server'
-import type { Profile } from '@/lib/supabase/database.types'
+import type { DiagramRow, Profile } from '@/lib/supabase/database.types'
 import { nl } from '@/lib/strings'
 
-const views = [
-  { kind: 'volledig' as const, naam: nl.veld.volledig, uitleg: nl.veld.volledigUitleg },
-  { kind: 'half' as const, naam: nl.veld.half, uitleg: nl.veld.halfUitleg },
-  { kind: 'vrij' as const, naam: nl.veld.vrij, uitleg: nl.veld.vrijUitleg },
-]
+type Rij = Pick<
+  DiagramRow,
+  'id' | 'naam' | 'type' | 'categorie' | 'weergave' | 'draft' | 'gewijzigd_op'
+>
+
+function datum(waarde: string): string {
+  return new Date(waarde).toLocaleDateString('nl-BE', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
 
 export default async function Home() {
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
@@ -25,10 +30,17 @@ export default async function Home() {
     .eq('id', user.id)
     .single<Pick<Profile, 'naam' | 'email' | 'can_edit'>>()
 
+  const { data: diagrammen } = await supabase
+    .from('diagrams')
+    .select('id, naam, type, categorie, weergave, draft, gewijzigd_op')
+    .order('gewijzigd_op', { ascending: false })
+    .returns<Rij[]>()
+
   const magBewerken = profile?.can_edit ?? false
+  const lijst = diagrammen ?? []
 
   return (
-    <main style={{ maxWidth: '72rem', margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
+    <main style={{ maxWidth: '58rem', margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
       <header
         style={{
           display: 'flex',
@@ -51,7 +63,7 @@ export default async function Home() {
             style={{
               font: 'inherit',
               fontSize: '0.875rem',
-              minHeight: '44px',
+              minHeight: 44,
               padding: '0 1rem',
               borderRadius: 'var(--radius)',
               border: '1px solid var(--border)',
@@ -65,85 +77,88 @@ export default async function Home() {
         </form>
       </header>
 
-      {!magBewerken && (
-        <p
-          style={{
-            marginTop: '1.25rem',
-            padding: '0.75rem 1rem',
-            background: 'var(--surface-raised)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            color: 'var(--text-muted)',
-            fontSize: '0.875rem',
-          }}
-        >
-          {nl.rechten.spelerUitleg}
-        </p>
-      )}
-
-      <p
+      <div
         style={{
-          marginTop: '1.25rem',
-          padding: '0.75rem 1rem',
-          background: 'var(--surface-raised)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          color: 'var(--text-muted)',
-          fontSize: '0.875rem',
+          display: 'flex',
+          alignItems: 'baseline',
+          justifyContent: 'space-between',
+          marginTop: '2rem',
+          marginBottom: '0.75rem',
+          gap: '1rem',
         }}
       >
-        <strong style={{ color: 'var(--text)' }}>{nl.bouw.stap}</strong> {nl.bouw.toelichting}
-      </p>
-
-      <nav style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1.25rem' }}>
-        {[
-          { href: '/editor?weergave=volledig&opstelling=vertical-stack', label: 'Volledig veld, vertical stack' },
-          { href: '/editor?weergave=volledig&opstelling=horizontal-stack', label: 'Volledig veld, horizontal stack' },
-          { href: '/editor?weergave=half&opstelling=vertical-stack', label: 'Half veld, vertical stack' },
-          { href: '/editor?weergave=vrij&opstelling=leeg', label: 'Vrij vlak, leeg' },
-        ].map((link) => (
+        <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>{nl.bibliotheek.titel}</h2>
+        {magBewerken && (
           <Link
-            key={link.href}
-            href={link.href}
+            href="/nieuw"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              minHeight: '44px',
-              padding: '0 1rem',
+              minHeight: 44,
+              padding: '0 1.125rem',
               borderRadius: 'var(--radius)',
-              border: '1px solid var(--border)',
-              background: 'var(--surface-raised)',
-              color: 'var(--text)',
+              background: 'var(--accent)',
+              color: 'var(--accent-contrast)',
               textDecoration: 'none',
               fontSize: '0.875rem',
+              fontWeight: 600,
             }}
           >
-            {link.label}
+            {nl.bibliotheek.nieuw}
           </Link>
-        ))}
-      </nav>
-
-      <div style={{ display: 'grid', gap: '2rem', marginTop: '2rem' }}>
-        {views.map((v) => (
-          <section key={v.kind}>
-            <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.125rem' }}>{v.naam}</h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0 0 0.75rem' }}>
-              {v.uitleg}
-            </p>
-            <div
-              style={{
-                background: 'var(--surface-raised)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius)',
-                padding: '0.5rem',
-                maxWidth: v.kind === 'half' ? '22rem' : undefined,
-              }}
-            >
-              <FieldCanvas kind={v.kind} />
-            </div>
-          </section>
-        ))}
+        )}
       </div>
+
+      {lijst.length === 0 ? (
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{nl.bibliotheek.leeg}</p>
+      ) : (
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.5rem' }}>
+          {lijst.map((diagram) => (
+            <li key={diagram.id}>
+              <Link
+                href={`/editor/${diagram.id}`}
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '0.5rem 1rem',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  padding: '0.875rem 1rem',
+                  minHeight: 44,
+                  background: 'var(--surface-raised)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)',
+                  textDecoration: 'none',
+                  color: 'var(--text)',
+                }}
+              >
+                <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
+                  {diagram.naam.trim() === '' ? nl.bibliotheek.geenNaam : diagram.naam}
+                  {diagram.draft && (
+                    <span
+                      style={{
+                        marginLeft: '0.5rem',
+                        fontSize: '0.6875rem',
+                        fontWeight: 600,
+                        color: 'var(--text-muted)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 4,
+                        padding: '1px 5px',
+                      }}
+                    >
+                      {nl.bibliotheek.concept}
+                    </span>
+                  )}
+                </span>
+                <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                  {[diagram.type, diagram.categorie].filter(Boolean).join(' · ') || '—'} ·{' '}
+                  {datum(diagram.gewijzigd_op)}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </main>
   )
 }

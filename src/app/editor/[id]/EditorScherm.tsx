@@ -5,43 +5,45 @@ import Link from 'next/link'
 import { BulkPaneel } from '@/components/editor/BulkPaneel'
 import { EditorCanvas } from '@/components/editor/EditorCanvas'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
-import { buildPreset, OPSTELLING_LABELS, type Opstelling } from '@/lib/diagram/presets'
-import type { Side, Weergave } from '@/lib/diagram/schema'
-import { newDoc } from '@/lib/editor/document'
+import type { Side } from '@/lib/diagram/schema'
+import type { EditorDoc } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
-import { newId } from '@/lib/editor/ids'
+import { useAutosave } from '@/lib/editor/useAutosave'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 
-interface Props {
-  weergave: Weergave
-  opstelling: Opstelling
-}
-
-export function EditorScherm({ weergave, opstelling }: Props) {
+export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
   const load = useDiagramStore((s) => s.load)
   const undo = useDiagramStore((s) => s.undo)
   const redo = useDiagramStore((s) => s.redo)
   const change = useDiagramStore((s) => s.change)
-  const klaar = useDiagramStore((s) => s.doc.frames.length > 0 && s.doc.meta.naam !== '')
+  const naam = useDiagramStore((s) => s.doc.meta.naam)
+  const weergave = useDiagramStore((s) => s.doc.meta.weergave)
+  const geladenId = useDiagramStore((s) => s.doc.id)
   const entities = useDiagramStore((s) => s.doc.frames[0]?.content.entities ?? [])
   const selectieSleutel = useUiStore((s) => [...s.selection].sort().join(','))
+
   const [kant, setKant] = useState<Side>('offense')
+  const { status, fout } = useAutosave()
 
   useEffect(() => {
-    load({
-      ...newDoc({
-        frameId: newId(),
-        weergave,
-        naam: OPSTELLING_LABELS[opstelling],
-        content: buildPreset(opstelling, weergave, newId),
-      }),
+    load(geladen)
+    useUiStore.setState({
+      selection: new Set(),
+      tool: 'select',
+      mode: 'idle',
+      activeFrame: 0,
+      menuOpen: false,
+      actieveBocht: null,
     })
-    useUiStore.setState({ selection: new Set(), tool: 'select', mode: 'idle', activeFrame: 0 })
-  }, [load, weergave, opstelling])
+  }, [load, geladen])
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
+      const doel = event.target as HTMLElement | null
+      // Never steal a key from a field the user is typing in.
+      if (doel && ['INPUT', 'TEXTAREA', 'SELECT'].includes(doel.tagName)) return
+
       const meta = event.metaKey || event.ctrlKey
       if (meta && event.key.toLowerCase() === 'z') {
         event.preventDefault()
@@ -54,15 +56,16 @@ export function EditorScherm({ weergave, opstelling }: Props) {
         return
       }
       if (event.key === 'Delete' || event.key === 'Backspace') {
-        const { selection, clearSelection } = useUiStore.getState()
+        const { selection, clearSelection, activeFrame } = useUiStore.getState()
         if (selection.size === 0) return
         event.preventDefault()
         const ids = new Set(selection)
-        const frame = useUiStore.getState().activeFrame
-        change('Verwijderen', (draft) => {
-          const content = draft.frames[frame]?.content
+        change(nl.menu.verwijderen, (draft) => {
+          const content = draft.frames[activeFrame]?.content
           if (!content) return
-          content.entities = content.entities.filter((e) => !ids.has(e.id))
+          content.entities = content.entities.filter(
+            (e) => !ids.has(e.id) && !(e.type === 'arrow' && ids.has(e.ownerId)),
+          )
         })
         clearSelection()
       }
@@ -71,41 +74,49 @@ export function EditorScherm({ weergave, opstelling }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [undo, redo, change])
 
-  if (!klaar) return null
+  if (geladenId !== geladen.id) return null
 
   return (
     <main style={{ maxWidth: '76rem', margin: '0 auto', padding: '1rem 1rem 4rem' }}>
       <div
         style={{
           display: 'flex',
-          alignItems: 'baseline',
+          alignItems: 'center',
           justifyContent: 'space-between',
           gap: '1rem',
-          flexWrap: 'wrap',
+          marginBottom: '0.75rem',
         }}
       >
-        <h1 style={{ fontSize: '1.125rem', fontWeight: 600, margin: 0 }}>{nl.editor.titel}</h1>
-        <Link href="/" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <input
+          aria-label={nl.editor.naamPlaceholder}
+          value={naam}
+          placeholder={nl.editor.naamPlaceholder}
+          onChange={(e) => {
+            const nieuw = e.target.value
+            change('Naam', (draft) => {
+              draft.meta.naam = nieuw
+            })
+          }}
+          style={{
+            font: 'inherit',
+            fontSize: '1.125rem',
+            fontWeight: 600,
+            color: 'var(--text)',
+            background: 'transparent',
+            border: '1px solid transparent',
+            borderRadius: 6,
+            padding: '0.25rem 0.5rem',
+            marginLeft: '-0.5rem',
+            minWidth: 0,
+            flex: 1,
+          }}
+        />
+        <Link href="/" style={{ fontSize: '0.875rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
           {nl.editor.terug}
         </Link>
       </div>
 
-      <p
-        role="status"
-        style={{
-          margin: '0.75rem 0 1rem',
-          padding: '0.625rem 0.875rem',
-          borderRadius: 'var(--radius)',
-          border: '1px solid var(--waarschuwing-rand)',
-          background: 'var(--waarschuwing-zacht)',
-          color: 'var(--text)',
-          fontSize: '0.875rem',
-        }}
-      >
-        {nl.editor.nietsBewaard}
-      </p>
-
-      <EditorToolbar kant={kant} setKant={setKant} />
+      <EditorToolbar kant={kant} setKant={setKant} status={status} fout={fout} />
 
       <div
         style={{
