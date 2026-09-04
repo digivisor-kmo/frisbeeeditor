@@ -354,3 +354,23 @@ en dat kon dus niet: de knop bleef grijs en zei dat je eerst een cut moest zette
 alsof je worp niet meetelde. Een worp met een ontvanger is nu ook beweging. En een
 cut van de schijfdrager kan je nu in een worp veranderen; die knop stond wel in
 zijn spelersmenu maar niet in dat van de arrow zelf.
+
+## 2026-09-04 — Gebruiksvriendelijkheid: wat weg mocht
+
+**Eén framenummer, niet twee.** De navigator zei "Frame 2/2" terwijl de
+afspeelbalk "Frame 1" zei, omdat de tijdlijn niet meebewoog met het actieve
+frame. Nu verspringt de speelkop mee als je van frame wisselt, en is het tweede
+nummer uit de afspeelbalk verdwenen. Twee tellers die elkaar tegenspreken zijn
+erger dan één.
+
+**De uitlegtekst verdwijnt zodra je tekent.** Er stond een alinea van vijf zinnen
+permanent onder het veld, op desktop half afgesneden door de afspeelbalk. Nu één
+zin, en alleen zolang er in het hele diagram nog geen arrow staat. Uitleg die
+nooit weggaat wordt niet gelezen.
+
+**De toolbar op een telefoon schuift niet meer zijwaarts.** Hij scrolde
+horizontaal zonder scrollbalk, waardoor de instellingen, de teller "nog te doen"
+en de opslaanstatus buiten beeld vielen aan de rechterkant. Nu breekt hij af over
+meerdere rijen. Bediening die je niet ziet bestaat niet. Wat op een telefoon
+wegvalt is alleen wat context is en geen knop: het woord bij de opslaanbolletje
+en het chipje dat zegt hoeveel frames meebewegen.

@@ -95,7 +95,7 @@ export const nl = {
     verwijderen: 'Verwijderen',
     bezettingUitleg: 'Aanval en verdediging op het veld. Kleurt zodra het er geen zeven zijn.',
     hulp:
-      'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Tik een speler aan voor het menu; daar teken je ook een cut, juke of worp. Van een arrow open je met de punt het menu en met het lijfje de handvatten. Twee vingers of ctrl met scrollen zoomt in.',
+      'Tik een speler aan voor zijn menu; daar teken je zijn cut of zijn worp. Slepen verplaatst meteen.',
   },
   menu: {
     schijf: 'Schijf',

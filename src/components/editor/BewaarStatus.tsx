@@ -23,7 +23,8 @@ export function BewaarStatusLabel({ status, fout }: { status: Status; fout: stri
   return (
     <span
       role="status"
-      title={fout ?? undefined}
+      className="bewaarstatus"
+      title={fout ?? TEKST[status]}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -37,7 +38,7 @@ export function BewaarStatusLabel({ status, fout }: { status: Status; fout: stri
         aria-hidden
         style={{ width: 7, height: 7, borderRadius: '50%', background: KLEUR[status], flexShrink: 0 }}
       />
-      {TEKST[status]}
+      <span className="bewaarstatus__tekst">{TEKST[status]}</span>
     </span>
   )
 }

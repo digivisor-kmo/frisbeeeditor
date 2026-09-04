@@ -30,8 +30,6 @@ export function Afspeelbalk() {
 
   if (totaal <= 0) return null
 
-  const { index } = frameOpTijd(duren, tijdMs)
-
   return (
     <div className="afspeelbalk">
       <Knop
@@ -65,10 +63,6 @@ export function Afspeelbalk() {
           setActiveFrame(frameOpTijd(duren, waarde).index)
         }}
       />
-
-      <span className="stil" style={{ fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
-        {nl.frames.kort} {index + 1}
-      </span>
 
       <div className="btn-groep">
         {SNELHEDEN.map((s) => (

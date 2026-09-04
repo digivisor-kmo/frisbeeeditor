@@ -572,19 +572,29 @@ ol {
     padding-bottom: calc(var(--ruimte-2) + env(safe-area-inset-bottom));
   }
 
+  /*
+   * Wrap onto as many rows as it takes. It used to scroll sideways without a
+   * scrollbar, which hid the settings and the save status off the right edge of
+   * a phone: controls you cannot see are controls that do not exist.
+   */
   .editor-balk {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-  }
-
-  .editor-balk::-webkit-scrollbar {
-    display: none;
+    flex-wrap: wrap;
+    row-gap: var(--ruimte-2);
   }
 
   .editor-balk__rechts {
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
+    margin-left: 0;
+  }
+
+  /* The dot carries the state; the words are the first thing to go. */
+  .bewaarstatus__tekst {
+    display: none;
+  }
+
+  /* Which frames move along is context, not a control. */
+  .werkt-door {
+    display: none;
   }
 
   .editor-paneel {

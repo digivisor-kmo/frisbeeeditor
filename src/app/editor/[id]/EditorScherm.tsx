@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { BulkPaneel } from '@/components/editor/BulkPaneel'
 import { EditorCanvas } from '@/components/editor/EditorCanvas'
@@ -36,6 +36,11 @@ export function EditorScherm({
   const activeFrame = useUiStore((s) => s.activeFrame)
   const entities = useDiagramStore((s) => s.doc.frames[activeFrame]?.content.entities ?? [])
   const selectieSleutel = useUiStore((s) => [...s.selection].sort().join(','))
+  const frames = useDiagramStore((s) => s.doc.frames)
+  const heeftGetekend = useMemo(
+    () => frames.some((f) => f.content.entities.some((e) => e.type === 'arrow')),
+    [frames],
+  )
 
   const [kant, setKant] = useState<Side>('offense')
   const { status, fout } = useAutosave(magBewerken)
@@ -154,9 +159,13 @@ export function EditorScherm({
 
       <FrameStrip />
 
-      <p className="stil hulp-tekst" style={{ marginTop: 'var(--ruimte-3)', maxWidth: '46rem' }}>
-        {nl.editor.hulp}
-      </p>
+      {/* Help while you still need it, gone once you are working. A paragraph
+          that never leaves is a paragraph nobody reads. */}
+      {!heeftGetekend && (
+        <p className="stil hulp-tekst" style={{ marginTop: 'var(--ruimte-3)', maxWidth: '46rem' }}>
+          {nl.editor.hulp}
+        </p>
+      )}
     </main>
   )
 }

@@ -29,6 +29,20 @@ export function useAfspelen(): { totaal: number } {
   const lussen = useUiStore((s) => s.lussen)
 
   const totaal = totaleDuur(duren)
+  const activeFrame = useUiStore((s) => s.activeFrame)
+
+  // Stepping to another frame moves the playhead there. Without this the
+  // navigator says frame 2 while the play bar says frame 1, and two counters
+  // that contradict each other are worse than one.
+  useEffect(() => {
+    const { speelt: loopt, scrubt, tijdMs, setTijd } = useUiStore.getState()
+    if (loopt || scrubt) return
+    const start = Math.min(
+      duren.slice(0, activeFrame).reduce((som, ms) => som + ms, 0),
+      totaleDuur(duren),
+    )
+    if (Math.abs(tijdMs - start) > 1) setTijd(start)
+  }, [activeFrame, duren])
 
   useEffect(() => {
     if (!speelt || totaal <= 0) return
