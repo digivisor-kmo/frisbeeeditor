@@ -64,6 +64,18 @@ export const nl = {
     worptypeUitleg:
       'Bepaalt hoe de curve standaard buigt. Heb je de bocht zelf al versleept, dan blijft die staan.',
   },
+  bulk: {
+    titel: 'Selectie bewerken',
+    alles: 'Alles',
+    spelers: 'Spelers',
+    pionnen: 'Pionnen',
+    arrows: 'Arrows',
+    deselecteren: 'Deselecteren',
+    dupliceren: 'Dupliceren',
+    verwijderen: 'Verwijderen',
+    gemengd: 'Gemengd',
+    arrowtype: 'Arrowtype',
+  },
   kleuren: {
     standaard: 'Standaard',
     geel: 'Geel',

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { BulkPaneel } from '@/components/editor/BulkPaneel'
 import { EditorCanvas } from '@/components/editor/EditorCanvas'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
 import { buildPreset, OPSTELLING_LABELS, type Opstelling } from '@/lib/diagram/presets'
@@ -23,6 +24,8 @@ export function EditorScherm({ weergave, opstelling }: Props) {
   const redo = useDiagramStore((s) => s.redo)
   const change = useDiagramStore((s) => s.change)
   const klaar = useDiagramStore((s) => s.doc.frames.length > 0 && s.doc.meta.naam !== '')
+  const entities = useDiagramStore((s) => s.doc.frames[0]?.content.entities ?? [])
+  const selectieSleutel = useUiStore((s) => [...s.selection].sort().join(','))
   const [kant, setKant] = useState<Side>('offense')
 
   useEffect(() => {
@@ -117,6 +120,10 @@ export function EditorScherm({ weergave, opstelling }: Props) {
       >
         <EditorCanvas nieuweSpelerKant={kant} />
       </div>
+
+      {/* Under the field, never over it: at an endzone set your players stand
+          exactly in the top metres of the pitch. */}
+      <BulkPaneel key={selectieSleutel} entities={entities} />
 
       <p style={{ marginTop: '0.75rem', color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
         {nl.editor.hulp}

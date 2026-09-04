@@ -14,9 +14,11 @@ import {
   snapToGrid,
   toField,
   toScreenPx,
+  toSvg,
   UNITS_PER_METRE,
 } from '@/lib/field/geometry'
 import { clientToSvg } from '@/lib/field/pointer'
+import { entiteitenInKader, maakKader, type Kader } from '@/lib/editor/marquee'
 import { hitRadiusM, tokenRadiusM } from '@/lib/field/scale'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { newId } from '@/lib/editor/ids'
@@ -29,6 +31,7 @@ type DragDoel =
   | { soort: 'tip'; id: string }
   | { soort: 'bend'; id: string; puntIndex: number }
   | { soort: 'hint'; id: string; segmentIndex: number; puntIndex: number | null }
+  | { soort: 'kader'; startPunt: Point }
 
 interface DragState {
   doel: DragDoel
@@ -52,6 +55,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<DragState | null>(null)
   const [tipInSleep, setTipInSleep] = useState<string | null>(null)
+  const [kader, setKader] = useState<Kader | null>(null)
 
   const doc = useDiagramStore((s) => s.doc)
   const change = useDiagramStore((s) => s.change)
@@ -190,7 +194,16 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       return
     }
 
+    // Empty space with the select tool: drag a frame over the field.
     clearSelection()
+    drag.current = {
+      doel: { soort: 'kader', startPunt: point },
+      pointerId: event.pointerId,
+      groupId: newId(),
+      start: { x: event.clientX, y: event.clientY },
+      moved: false,
+    }
+    svgRef.current?.setPointerCapture(event.pointerId)
   }
 
   function onPointerMove(event: React.PointerEvent<SVGSVGElement>) {
@@ -203,10 +216,18 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       state.moved = true
       setMenuOpen(false)
       if (state.doel.soort === 'tip') setTipInSleep(state.doel.id)
+      if (state.doel.soort === 'kader') setMode('marquee')
     }
 
     const ruw = pointOf(event.clientX, event.clientY)
     const doel = state.doel
+
+    if (doel.soort === 'kader') {
+      const nieuw = maakKader(doel.startPunt, ruw)
+      setKader(nieuw)
+      select(entiteitenInKader(entities, nieuw, radiusM))
+      return
+    }
 
     if (doel.soort === 'entiteit') {
       const pos = maybeSnap({ x: ruw.x + doel.offset.x, y: ruw.y + doel.offset.y }, event.altKey)
@@ -283,6 +304,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     svgRef.current?.releasePointerCapture(event.pointerId)
     drag.current = null
     setTipInSleep(null)
+    setKader(null)
     setMode('idle')
   }
 
@@ -373,6 +395,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           ))}
         </g>
 
+        {kader && <KaderVlak kader={kader} view={view} metresPerPixel={metresPerPixel} />}
+
         <g>
           {arrows
             .filter((a) => selection.has(a.id))
@@ -398,5 +422,38 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         />
       )}
     </div>
+  )
+}
+
+function KaderVlak({
+  kader,
+  view,
+  metresPerPixel,
+}: {
+  kader: Kader
+  view: import('@/lib/field/geometry').FieldView
+  metresPerPixel: number
+}) {
+  const a = toSvg({ x: kader.minX, y: kader.minY }, view)
+  const b = toSvg({ x: kader.maxX, y: kader.maxY }, view)
+  const x = Math.min(a.x, b.x)
+  const y = Math.min(a.y, b.y)
+  const breedte = Math.abs(b.x - a.x)
+  const hoogte = Math.abs(b.y - a.y)
+  // Roughly one and a bit CSS pixels, whatever the zoom does to the field.
+  const dikte = UNITS_PER_METRE * metresPerPixel * 1.2
+
+  return (
+    <rect
+      x={x}
+      y={y}
+      width={breedte}
+      height={hoogte}
+      fill="var(--accent)"
+      fillOpacity={0.12}
+      stroke="var(--accent)"
+      strokeWidth={dikte}
+      pointerEvents="none"
+    />
   )
 }
