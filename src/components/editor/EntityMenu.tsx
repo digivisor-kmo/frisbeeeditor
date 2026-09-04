@@ -25,11 +25,11 @@ interface Props {
 
 const KNOP = 44
 const LABEL_AFSTAND = 31
-const LABEL_TEKENBREEDTE = 5.7
+const LABEL_TEKENBREEDTE = 5.9
 const STAP_GRADEN = 34
 const MAX_SPREIDING_GRADEN = 170
 
-const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 14
+const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 6
 
 /**
  * The one menu shape for every entity on the field: an arc of round buttons

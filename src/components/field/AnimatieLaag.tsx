@@ -1,5 +1,6 @@
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
+import { Schijf } from '@/components/field/tokens/Schijf'
 import { ArrowShape } from '@/components/field/ArrowShape'
 import {
   dekkingOpTijd,
@@ -122,17 +123,7 @@ function SchijfInDeLucht({
   radiusM: number
 }) {
   const { x, y } = toSvg(punt, view)
-  const r = metresToUnits(radiusM)
-  return (
-    <ellipse
-      cx={x}
-      cy={y}
-      rx={r * 0.62}
-      ry={r * 0.42}
-      fill="var(--token-wit)"
-      stroke="var(--token-donker)"
-      strokeWidth={r * 0.13}
-      pointerEvents="none"
-    />
-  )
+  // The same disc as the one in a hand, one size up because in the air it has
+  // nothing beside it to give it scale.
+  return <Schijf x={x} y={y} r={metresToUnits(radiusM) * 1.05} />
 }

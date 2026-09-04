@@ -38,7 +38,13 @@ export function hitRadiusM(metresPerPixel: number): number {
   return Math.max(tokenRadiusM(metresPerPixel), minimum)
 }
 
-/** Font size for the letter inside a token, in metres. */
-export function tokenFontSizeM(radiusM: number): number {
-  return radiusM * 1.15
+/**
+ * Font size for the letter inside a token, in metres.
+ *
+ * Two letters have to fit inside the same circle as one, so they step down.
+ * Setting them all at one size is what makes MI look cramped next to H.
+ */
+export function tokenFontSizeM(radiusM: number, tekens = 1): number {
+  const factor = tekens >= 3 ? 0.72 : tekens === 2 ? 0.92 : 1.15
+  return radiusM * factor
 }
