@@ -174,10 +174,11 @@ describe('arrow meeverplaatsen', () => {
       weergave: 'volledig',
       entities: [],
     })
+    const eindVoor = { ...arrowEnd(arrow) }
     verplaatsArrow(arrow, { x: 2, y: -1 })
     expect(arrowStart(arrow)).toEqual({ x: 42, y: 17.5 })
-    expect(arrowEnd(arrow).x).toBeCloseTo(49, 6)
-    expect(arrowEnd(arrow).y).toBeCloseTo(17.5, 6)
+    expect(arrowEnd(arrow).x).toBeCloseTo(eindVoor.x + 2, 6)
+    expect(arrowEnd(arrow).y).toBeCloseTo(eindVoor.y - 1, 6)
   })
 })
 
