@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { useOmklappen } from '@/components/ui/useOmklappen'
 
 export interface MenuActie {
@@ -24,23 +24,10 @@ interface Props {
 }
 
 const KNOP = 44
-const LABEL_AFSTAND = 30
+const LABEL_AFSTAND = 31
 const LABEL_TEKENBREEDTE = 5.7
 const STAP_GRADEN = 34
 const MAX_SPREIDING_GRADEN = 170
-
-/** Does this device have a real hover state? Touch screens do not. */
-function useHover(): boolean {
-  const [hover, setHover] = useState(true)
-  useEffect(() => {
-    const query = window.matchMedia('(hover: hover)')
-    const update = () => setHover(query.matches)
-    update()
-    query.addEventListener('change', update)
-    return () => query.removeEventListener('change', update)
-  }, [])
-  return hover
-}
 
 const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 14
 
@@ -54,8 +41,6 @@ const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 14
  * drawn next to their own button they slid underneath the neighbouring one.
  */
 export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Props) {
-  const hover = useHover()
-  const [tip, setTip] = useState<string | null>(null)
   const ankerRef = useRef<HTMLDivElement>(null)
   const paneelRef = useRef<HTMLDivElement>(null)
 
@@ -64,15 +49,16 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
   const spreiding = n === 1 ? 0 : (graden * Math.PI) / 180
   const stap = n > 1 ? spreiding / (n - 1) : 0
 
-  // The arc has to be wide enough that neither the buttons nor their labels
-  // touch. On touch every label is permanently visible, so the arc is wider
-  // there than on a desktop, where only the hovered one shows.
+  /*
+   * The arc has to be wide enough that neither the buttons nor their labels
+   * touch. Every label is always visible, on a mouse as well as on a finger:
+   * a cut, a juke and a throw are three arrows, and three arrows without words
+   * is a guessing game the first ten times you open this menu.
+   */
   let nodigeKoorde = KNOP + 10
-  if (!hover) {
-    for (let i = 0; i < n - 1; i++) {
-      const breedte = (labelBreedte(acties[i]!.label) + labelBreedte(acties[i + 1]!.label)) / 2 + 8
-      nodigeKoorde = Math.max(nodigeKoorde, breedte)
-    }
+  for (let i = 0; i < n - 1; i++) {
+    const breedte = (labelBreedte(acties[i]!.label) + labelBreedte(acties[i + 1]!.label)) / 2 + 8
+    nodigeKoorde = Math.max(nodigeKoorde, breedte)
   }
   const straalVoorAfstand = n > 1 ? nodigeKoorde / 2 / Math.sin(stap / 2) : 0
   const straal = Math.max(64, tokenRadiusPx + 46, straalVoorAfstand)
@@ -145,10 +131,6 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
             aria-label={actie.label}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={actie.onClick}
-            onMouseEnter={() => hover && setTip(actie.id)}
-            onMouseLeave={() => hover && setTip(null)}
-            onFocus={() => setTip(actie.id)}
-            onBlur={() => setTip(null)}
             className="menu-knop"
             data-actief={actie.actief ? 'ja' : undefined}
             data-gevaar={actie.gevaar ? 'ja' : undefined}
@@ -168,8 +150,6 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
       {/* One layer for every label, above every button. */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }}>
         {acties.map((actie, index) => {
-          const zichtbaar = hover ? tip === actie.id : true
-          if (!zichtbaar) return null
           const punt = posities[index]!
           return (
             <span

@@ -600,13 +600,14 @@ h3,
 }
 
 .menu-knop[data-actief='ja'] {
-  background: var(--accent);
+  background: var(--accent-zacht);
   border-color: var(--accent);
-  color: var(--accent-contrast);
+  color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--schaduw-2);
 }
 
 .menu-knop[data-actief='ja']:hover {
-  background: var(--accent-hover);
+  background: #e5eefb;
 }
 
 .menu-knop[data-gevaar='ja'] {
