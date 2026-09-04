@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { supabaseKey, supabaseUrl } from './env'
 
 /** Routes that stay reachable without a session. */
-const PUBLIC_PATHS = ['/login', '/auth']
+const PUBLIC_PATHS = ['/login', '/auth', '/gedeeld']
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request })

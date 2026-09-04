@@ -1331,6 +1331,63 @@ body:has(.frame-strip) .editor-hoofd {
   border-top: 1px solid var(--border);
 }
 
+/* ------------------------------------------------------------ player view */
+
+.lees-pagina {
+  max-width: 60rem;
+}
+
+.lees-naam {
+  margin-top: var(--ruimte-2);
+}
+
+.lees-veld {
+  padding: var(--ruimte-2);
+}
+
+/* The note belongs to the frame you are looking at, so it sits right under it
+   and reads as a caption rather than as a paragraph of its own. */
+.lees-toelichting {
+  margin-top: var(--ruimte-3);
+  padding: var(--ruimte-3) var(--ruimte-4);
+  background: var(--surface-mute);
+  border-radius: var(--radius-lg);
+  font-size: var(--tekst-sm);
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.lees-frames {
+  display: flex;
+  gap: var(--ruimte-2);
+  overflow-x: auto;
+  padding: var(--ruimte-3) 2px 2px;
+  scrollbar-width: thin;
+}
+
+/* The play bar sits in the page here, not fixed to the bottom: a player is
+   reading one diagram, not working inside a tool with permanent furniture. */
+.lees-balk {
+  margin-top: var(--ruimte-3);
+  padding: var(--ruimte-3) var(--ruimte-4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--schaduw-1);
+}
+
+.deelpaneel {
+  position: absolute;
+  right: 0;
+  z-index: 8;
+  width: min(22rem, calc(100vw - 2rem));
+  padding: var(--ruimte-3);
+}
+
+.deelpaneel__url {
+  font-size: var(--tekst-xs);
+}
+
 /* ----------------------------------------------------------------- login */
 
 .inlog {
@@ -1472,17 +1529,41 @@ body:has(.frame-strip) .editor-hoofd {
   margin-top: 6px;
 }
 
+/* One of the two is shown, never both. */
+.topbalk__account {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .topbalk__binnen {
     padding: var(--ruimte-2) var(--ruimte-4);
   }
 
-  .topbalk__wie {
+  .topbalk__wie,
+  .topbalk__breed {
     display: none;
+  }
+
+  .topbalk__account {
+    display: inline-flex;
+  }
+
+  .merk__naam {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .pagina {
     padding: var(--ruimte-5) var(--ruimte-4) var(--ruimte-7);
+  }
+
+  /* A primary action within thumb reach spans the column. */
+  .paginakop {
+    align-items: stretch;
+  }
+
+  .paginakop > .btn--primair {
+    width: 100%;
   }
 }
 

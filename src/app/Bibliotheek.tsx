@@ -50,9 +50,12 @@ function datum(waarde: string): string {
 export function Bibliotheek({
   items,
   magBewerken,
+  basisPad = '/editor',
 }: {
   items: BibliotheekItem[]
   magBewerken: boolean
+  /** Where a card leads. A trainer goes to the editor, a player to the reader. */
+  basisPad?: string
 }) {
   const router = useRouter()
   const [filter, setFilter] = useState<Filter>(LEEG_FILTER)
@@ -173,7 +176,7 @@ export function Bibliotheek({
         <ul className="bib-raster">
           {zichtbaar.map((item) => (
             <li key={item.id} className="kaart bib-kaart">
-              <Link href={`/editor/${item.id}`} className="bib-link">
+              <Link href={`${basisPad}/${item.id}`} className="bib-link">
                 <div className="bib-voorbeeld">
                   {item.draft && <span className="chip chip--stil bib-vlag">{nl.bibliotheek.concept}</span>}
                   <div

@@ -1,6 +1,6 @@
 'use client'
 
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, Ref } from 'react'
 
 type Variant = 'standaard' | 'primair' | 'gevaar'
 
@@ -8,6 +8,8 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
   klein?: boolean
   actief?: boolean
+  /** React 19 passes a ref straight through props; no forwardRef needed. */
+  ref?: Ref<HTMLButtonElement>
 }
 
 const VARIANT_CLASS: Record<Variant, string> = {

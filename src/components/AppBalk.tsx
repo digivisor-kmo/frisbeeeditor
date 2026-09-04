@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/supabase/database.types'
+import { PersoonIcon } from '@/components/editor/icons'
 import { nl } from '@/lib/strings'
 
 /**
@@ -39,10 +40,25 @@ export async function AppBalk() {
               {profile?.can_edit ? nl.rechten.trainer : nl.rechten.speler}
             </span>
           </span>
-          <Link href="/account" className="btn btn--klein">
+
+          {/*
+            On a phone two words plus two more words do not fit next to the
+            name of the app, and they were landing on top of it. One icon leads
+            to the account page, and signing out lives there.
+          */}
+          <Link
+            href="/account"
+            className="btn btn--klein btn--icoon topbalk__account"
+            aria-label={nl.account.titel}
+            title={nl.account.titel}
+          >
+            <PersoonIcon />
+          </Link>
+
+          <Link href="/account" className="btn btn--klein topbalk__breed">
             {nl.account.titel}
           </Link>
-          <form action="/auth/signout" method="post">
+          <form action="/auth/signout" method="post" className="topbalk__breed">
             <button type="submit" className="btn btn--klein">
               {nl.login.afmelden}
             </button>

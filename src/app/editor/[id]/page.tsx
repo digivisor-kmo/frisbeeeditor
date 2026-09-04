@@ -18,5 +18,9 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
     .eq('id', user.id)
     .single<Pick<Profile, 'can_edit'>>()
 
-  return <Laden id={id} magBewerken={profile?.can_edit ?? false} />
+  // A player has nothing to do here. Sending him to his own screen beats an
+  // editor full of buttons he is not allowed to press.
+  if (!profile?.can_edit) redirect(`/speler/${id}`)
+
+  return <Laden id={id} magBewerken />
 }

@@ -13,6 +13,7 @@ import {
   verwijderVanaf,
 } from '@/lib/diagram/propagatie'
 import { BewaarStatusLabel } from '@/components/editor/BewaarStatus'
+import { DeelKnop } from '@/components/editor/DeelKnop'
 import { TerugIcon } from '@/components/editor/icons'
 import { OccupancyCounter } from '@/components/editor/OccupancyCounter'
 import { ValidatieIndicator } from '@/components/editor/ValidatieIndicator'
@@ -136,6 +137,7 @@ export function EditorScherm({
         />
 
         <div className="editor-kop__rechts">
+          <DeelKnop diagramId={geladen.id} />
           <OccupancyCounter entities={entities} />
           <ValidatieIndicator ontbreekt={ontbreekt} />
           <BewaarStatusLabel status={status} fout={fout} />

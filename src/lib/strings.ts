@@ -45,6 +45,9 @@ export const nl = {
       'Dan hoef je op een nieuw toestel niet meer op een mailtje te wachten.',
     nudgeKnop: 'Instellen',
     nudgeLater: 'Later',
+    afmeldenTitel: 'Afmelden',
+    afmeldenUitleg:
+      'Je blijft ingelogd tot je hier afmeldt, ook als je de app een tijd niet opent.',
   },
   rechten: {
     trainer: 'Trainer, mag bewerken',
@@ -172,6 +175,22 @@ export const nl = {
       n === 1
         ? 'Eén worp komt bij niemand aan. Sleep de punt op een speler of op het eind van zijn cut.'
         : `${n} worpen komen bij niemand aan. Sleep de punt op een speler of op het eind van zijn cut.`,
+  },
+  speler: {
+    titel: 'Diagrammen',
+    uitleg: 'Tik een diagram aan om het te bekijken en af te spelen.',
+    terug: 'Alle diagrammen',
+    bewerken: 'Openen in de editor',
+    gedeeld: 'Gedeeld diagram',
+    gedeeldUitleg: 'Je bekijkt dit diagram via een deellink.',
+    verlopen: 'Deze link werkt niet meer',
+    verlopenUitleg:
+      'De link is verlopen of is nooit geldig geweest. Vraag je trainer om een nieuwe.',
+    delen: 'Delen',
+    delenBezig: 'Link maken…',
+    delenGekopieerd: 'Link gekopieerd',
+    delenFout: 'Link maken mislukt:',
+    delenUitleg: (datum: string) => `Werkt zonder login tot ${datum}.`,
   },
   bibliotheek: {
     titel: 'Diagrammen',

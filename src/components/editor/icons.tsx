@@ -160,6 +160,35 @@ export function VerderIcon({ size = 18 }: IconProps) {
   )
 }
 
+export function PersoonIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <circle cx="12" cy="8.2" r="3.6" />
+      <path d="M5.4 19.6c0-3.3 3-5.4 6.6-5.4s6.6 2.1 6.6 5.4" />
+    </svg>
+  )
+}
+
+export function UitIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M14.6 6.4V4.8H5.2v14.4h9.4v-1.6" />
+      <path d="M10.4 12h8.4M15.8 8.8 19 12l-3.2 3.2" />
+    </svg>
+  )
+}
+
+export function DeelIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <circle cx="17.4" cy="5.8" r="2.8" />
+      <circle cx="6.6" cy="12" r="2.8" />
+      <circle cx="17.4" cy="18.2" r="2.8" />
+      <path d="M9.05 10.6 15 7.2M9.05 13.4 15 16.8" />
+    </svg>
+  )
+}
+
 export function ZoekIcon({ size = 16 }: IconProps) {
   return (
     <svg {...base(size)}>

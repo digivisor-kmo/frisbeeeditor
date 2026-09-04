@@ -39,6 +39,18 @@ export default async function AccountPagina() {
           </p>
           <WachtwoordFormulier />
         </section>
+
+        <section className="kaart" style={{ padding: 'var(--ruimte-5)', marginTop: 'var(--ruimte-4)' }}>
+          <h2 className="kop">{nl.account.afmeldenTitel}</h2>
+          <p className="stil" style={{ margin: 'var(--ruimte-2) 0 var(--ruimte-4)' }}>
+            {nl.account.afmeldenUitleg}
+          </p>
+          <form action="/auth/signout" method="post">
+            <button type="submit" className="btn">
+              {nl.login.afmelden}
+            </button>
+          </form>
+        </section>
       </main>
     </>
   )
