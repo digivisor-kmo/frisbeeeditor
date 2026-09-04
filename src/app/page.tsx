@@ -64,87 +64,67 @@ export default async function Home() {
   }))
 
   return (
-    <main
-      style={{
-        maxWidth: '64rem',
-        margin: '0 auto',
-        padding: 'var(--ruimte-5) var(--ruimte-4) var(--ruimte-7)',
-      }}
-    >
-      <header
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: 'var(--ruimte-3)',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ruimte-3)' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icoon.svg" alt="" width={36} height={36} style={{ borderRadius: 9 }} />
-          <div>
-            <h1 className="titel" style={{ fontSize: 'var(--tekst-lg)' }}>
-              {nl.app.naam}
-            </h1>
-            <p className="stil">
-              {profile?.naam ?? profile?.email ?? user.email} ·{' '}
-              {magBewerken ? nl.rechten.trainer : nl.rechten.speler}
-            </p>
+    <>
+      {/* A slim, full-bleed bar with a hairline under it. It belongs to the
+          product, not to the page, so it runs edge to edge. */}
+      <header className="topbalk">
+        <div className="topbalk__binnen">
+          <div className="merk">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icoon.svg" alt="" width={30} height={30} className="merk__teken" />
+            <span className="merk__naam">{nl.app.naam}</span>
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: 'var(--ruimte-2)' }}>
-          <Link href="/account" className="btn btn--klein">
-            {nl.account.titel}
-          </Link>
-          <form action="/auth/signout" method="post">
-            <button type="submit" className="btn btn--klein">
-              {nl.login.afmelden}
-            </button>
-          </form>
+
+          <div className="topbalk__rechts">
+            <span className="stil topbalk__wie">
+              {profile?.naam ?? profile?.email ?? user.email}
+              <span className="topbalk__rol">
+                {magBewerken ? nl.rechten.trainer : nl.rechten.speler}
+              </span>
+            </span>
+            <Link href="/account" className="btn btn--klein">
+              {nl.account.titel}
+            </Link>
+            <form action="/auth/signout" method="post">
+              <button type="submit" className="btn btn--klein">
+                {nl.login.afmelden}
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
-      {profile && !profile.heeft_wachtwoord && <WachtwoordNudge />}
+      <main className="pagina">
+        {profile && !profile.heeft_wachtwoord && <WachtwoordNudge />}
 
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 'var(--ruimte-4)',
-          margin: 'var(--ruimte-6) 0 var(--ruimte-3)',
-        }}
-      >
-        <h2 className="kop">{nl.bibliotheek.titel}</h2>
-        {magBewerken && (
-          <Link href="/nieuw" className="btn btn--primair">
-            {nl.bibliotheek.nieuw}
-          </Link>
-        )}
-      </div>
-
-      {lijst.length === 0 ? (
-        <div
-          className="kaart"
-          style={{ padding: 'var(--ruimte-6)', textAlign: 'center', display: 'grid', gap: 'var(--ruimte-3)' }}
-        >
-          <p className="kop">{nl.bibliotheek.leegTitel}</p>
-          <p className="stil" style={{ maxWidth: '28rem', margin: '0 auto' }}>
-            {magBewerken ? nl.bibliotheek.leeg : nl.bibliotheek.leegSpeler}
-          </p>
+        <div className="paginakop">
+          <div>
+            <h1 className="display">{nl.bibliotheek.titel}</h1>
+            <p className="stil paginakop__onder">{nl.app.ondertitel}</p>
+          </div>
           {magBewerken && (
-            <div>
+            <Link href="/nieuw" className="btn btn--primair">
+              {nl.bibliotheek.nieuw}
+            </Link>
+          )}
+        </div>
+
+        {lijst.length === 0 ? (
+          <div className="kaart leeg-kaart">
+            <p className="kop">{nl.bibliotheek.leegTitel}</p>
+            <p className="stil" style={{ maxWidth: '30rem' }}>
+              {magBewerken ? nl.bibliotheek.leeg : nl.bibliotheek.leegSpeler}
+            </p>
+            {magBewerken && (
               <Link href="/nieuw" className="btn btn--primair">
                 {nl.bibliotheek.nieuw}
               </Link>
-            </div>
-          )}
-        </div>
-      ) : (
-        <Bibliotheek items={lijst} magBewerken={magBewerken} />
-      )}
-
-    </main>
+            )}
+          </div>
+        ) : (
+          <Bibliotheek items={lijst} magBewerken={magBewerken} />
+        )}
+      </main>
+    </>
   )
 }

@@ -138,7 +138,10 @@ export function Bibliotheek({
           </Keuze>
         )}
 
-        <span className="stil" style={{ marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+        <span
+          className="stil cijfers"
+          style={{ marginLeft: 'auto', whiteSpace: 'nowrap', fontSize: 'var(--tekst-xs)' }}
+        >
           {nl.bibliotheek.aantal(zichtbaar.length)}
         </span>
       </div>
@@ -190,7 +193,7 @@ export function Bibliotheek({
                   <span className="bib-naam">
                     {item.naam.trim() === '' ? nl.bibliotheek.geenNaam : item.naam}
                   </span>
-                  <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
+                  <span className="bib-meta">
                     {[item.type, item.categorie].filter(Boolean).join(' · ') || '—'} ·{' '}
                     {datum(item.gewijzigd_op)}
                     {item.draft ? ` · ${nl.bibliotheek.concept}` : ''}

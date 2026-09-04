@@ -1,17 +1,32 @@
 import type { Metadata, Viewport } from 'next'
-import { Source_Sans_3 } from 'next/font/google'
+import { Inter, Plus_Jakarta_Sans } from 'next/font/google'
 import { nl } from '@/lib/strings'
 import './globals.css'
 
 /**
- * A humanist sans with a large x-height: the position labels on a token are one
- * or two capitals at 26 px, read on a phone in the sun.
+ * Two faces, each doing one job.
+ *
+ * Inter carries everything you read while working: labels, buttons, and the one
+ * or two capitals on a token at 26 px on a phone in the sun. Its x-height is the
+ * reason it stays readable there.
+ *
+ * Plus Jakarta Sans carries the headings and the app's own name. It has the
+ * geometry and the slight warmth that make a screen feel made rather than
+ * assembled, which a pure UI face deliberately does not have.
+ *
+ * Both are variable and self-hosted by next/font, so this costs one request and
+ * no layout shift.
  */
-const sans = Source_Sans_3({
+const ui = Inter({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
   display: 'swap',
-  variable: '--font-sans',
+  variable: '--font-ui',
+})
+
+const display = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-display',
 })
 
 export const metadata: Metadata = {
@@ -31,12 +46,12 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#f4f5f6',
+  themeColor: '#f6f7f9',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl" className={sans.variable}>
+    <html lang="nl" className={`${ui.variable} ${display.variable}`}>
       <body>{children}</body>
     </html>
   )

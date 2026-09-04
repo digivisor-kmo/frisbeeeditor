@@ -8,37 +8,60 @@
  * that the diagram is what you look at.
  */
 :root {
-  /* Surfaces and text */
-  --surface: #f4f5f6;
+  /* ---------------------------------------------------------------- type */
+  --font-ui-stack: var(--font-ui), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display-stack: var(--font-display), var(--font-ui-stack);
+
+  /* A scale with a ratio, not a pile of sizes. Each step carries its own line
+     height and tracking, because a heading set at body tracking reads loose. */
+  --tekst-xs: 0.75rem;
+  --tekst-sm: 0.8125rem;
+  --tekst-md: 0.9375rem;
+  --tekst-lg: 1.0625rem;
+  --tekst-xl: 1.375rem;
+  --tekst-2xl: 1.875rem;
+  --tekst-3xl: 2.5rem;
+
+  --spoor-strak: -0.022em;
+  --spoor-krap: -0.014em;
+  --spoor-normaal: -0.006em;
+
+  /* ------------------------------------------------------------ surfaces */
+  --surface: #f6f7f9;
   --surface-raised: #ffffff;
-  --surface-sunken: #eceef0;
-  --border: #dfe3e7;
-  --border-strong: #c3cad1;
-  --text: #1f2429;
-  --text-muted: #667079;
-  --text-faint: #8b959d;
+  --surface-sunken: #eef0f4;
+  /* A soft fill instead of a border, for blocks that group rather than divide. */
+  --surface-mute: #f1f3f6;
+  --border: #e5e8ee;
+  --border-strong: #cbd2dc;
+  --text: #14171c;
+  --text-muted: #59636f;
+  --text-faint: #8b95a2;
 
   /* Interaction */
-  --hover: #f2f4f6;
-  --pressed: #e7eaee;
+  --hover: #f3f5f8;
+  --pressed: #e8ecf1;
 
   /* Placeholder blue. Replace with the DUC club blue from the brand file. */
-  --accent: #1d5fbf;
-  --accent-hover: #1a55ab;
-  --accent-pressed: #164a95;
+  --accent: #1a56db;
+  --accent-hover: #1749c0;
+  --accent-pressed: #1440a8;
   --accent-contrast: #ffffff;
-  --accent-zacht: #eaf1fc;
-  --accent-rand: #b9d0f0;
+  --accent-zacht: #eef3fd;
+  --accent-rand: #c2d5f7;
+  --ring: rgb(26 86 219 / 0.24);
 
-  --waarschuwing: #b04a17;
-  --waarschuwing-zacht: #fdf2e9;
-  --waarschuwing-rand: #f0d5bd;
+  --waarschuwing: #b0431a;
+  --waarschuwing-zacht: #fdf3ec;
+  --waarschuwing-rand: #f0d3bd;
 
-  --goed: #3f7a52;
+  --goed: #2f7350;
+  --goed-zacht: #edf5f0;
+  --goed-rand: #cfe3d7;
 
   /* The star of a favourite. Warm enough to spot in a grid, not so loud that it
      competes with the accent. */
-  --ster: #d09a12;
+  --ster: #cf9612;
 
   /* Field */
   --field: #4f7d5c;
@@ -60,13 +83,6 @@
   --arrow: #ffffff;
   --handle: #191c20;
 
-  /* Type scale */
-  --tekst-xs: 0.6875rem;
-  --tekst-sm: 0.8125rem;
-  --tekst-md: 0.9375rem;
-  --tekst-lg: 1.125rem;
-  --tekst-xl: 1.5rem;
-
   /* Spacing scale */
   --ruimte-1: 0.25rem;
   --ruimte-2: 0.5rem;
@@ -75,20 +91,23 @@
   --ruimte-5: 1.5rem;
   --ruimte-6: 2rem;
   --ruimte-7: 3rem;
+  --ruimte-8: 4.5rem;
 
   /* Radii */
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-vol: 999px;
 
-  /* Elevation. Low and soft, only for things that float above the field. */
-  --schaduw-1: 0 1px 2px rgb(16 24 32 / 0.06);
-  --schaduw-2: 0 1px 2px rgb(16 24 32 / 0.06), 0 4px 12px rgb(16 24 32 / 0.08);
-  --schaduw-3: 0 2px 4px rgb(16 24 32 / 0.08), 0 12px 28px rgb(16 24 32 / 0.14);
+  /* Elevation. Two layers each: a tight contact shadow and a wide soft one.
+     One flat blur is what makes a card look pasted on. */
+  --schaduw-1: 0 1px 1px rgb(16 24 40 / 0.03), 0 1px 2px rgb(16 24 40 / 0.05);
+  --schaduw-2: 0 1px 2px rgb(16 24 40 / 0.05), 0 6px 16px -6px rgb(16 24 40 / 0.1);
+  --schaduw-3: 0 2px 4px rgb(16 24 40 / 0.05), 0 20px 44px -16px rgb(16 24 40 / 0.22);
 
   /* The only movement allowed on the interface: state feedback, nothing else. */
-  --overgang: 120ms ease-out;
+  --overgang: 140ms cubic-bezier(0.2, 0, 0.1, 1);
 
   /* Minimum comfortable touch target. */
   --raakvlak: 44px;
@@ -119,11 +138,14 @@ body {
 body {
   background: var(--surface);
   color: var(--text);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-ui-stack);
   font-size: var(--tekst-md);
-  line-height: 1.5;
+  line-height: 1.55;
+  letter-spacing: var(--spoor-normaal);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  font-synthesis-weight: none;
 }
 
 h1,
@@ -133,6 +155,23 @@ p,
 ul,
 ol {
   margin: 0;
+}
+
+/* Headings carry the display face. Everything you operate stays in the UI face,
+   so the two never compete inside one control. */
+h1,
+h2,
+h3,
+.titel,
+.kop,
+.display {
+  font-family: var(--font-display-stack);
+  letter-spacing: var(--spoor-krap);
+}
+
+/* Numbers that sit above or below other numbers line up. */
+.cijfers {
+  font-variant-numeric: tabular-nums;
 }
 
 /* One visible focus ring everywhere, and only for keyboard users. */
@@ -149,7 +188,10 @@ ol {
   align-items: center;
   justify-content: center;
   gap: var(--ruimte-2);
-  min-height: var(--raakvlak);
+  /* A mouse wants a compact control, a finger wants forty-four pixels. The
+     pointer query below gives each what it needs instead of splitting the
+     difference and serving neither. */
+  min-height: 38px;
   padding: 0 var(--ruimte-4);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -157,14 +199,17 @@ ol {
   color: var(--text);
   font: inherit;
   font-size: var(--tekst-sm);
-  font-weight: 500;
+  font-weight: 550;
+  letter-spacing: var(--spoor-normaal);
   white-space: nowrap;
   cursor: pointer;
+  box-shadow: var(--schaduw-1);
   transition:
     background-color var(--overgang),
     border-color var(--overgang),
     color var(--overgang),
-    box-shadow var(--overgang);
+    box-shadow var(--overgang),
+    transform var(--overgang);
 }
 
 .btn:hover:not(:disabled) {
@@ -174,12 +219,15 @@ ol {
 
 .btn:active:not(:disabled) {
   background: var(--pressed);
+  box-shadow: none;
+  transform: translateY(0.5px);
 }
 
 .btn:disabled {
   color: var(--text-faint);
   background: var(--surface-sunken);
   border-color: var(--border);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -188,20 +236,26 @@ ol {
   background: var(--accent-zacht);
   border-color: var(--accent-rand);
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 650;
 }
 
 .btn[aria-pressed='true']:hover:not(:disabled),
 .btn.is-actief:hover:not(:disabled) {
-  background: #e0ebfa;
-  border-color: var(--accent);
+  background: #e5eefb;
+  border-color: var(--accent-rand);
 }
 
 .btn--primair {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-contrast);
-  font-weight: 600;
+  font-weight: 650;
+  /* A hairline of light along the top edge: the difference between a coloured
+     rectangle and a button you want to press. */
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.14),
+    0 1px 2px rgb(16 24 40 / 0.12),
+    0 6px 16px -8px rgb(26 86 219 / 0.5);
 }
 
 .btn--primair:hover:not(:disabled) {
@@ -211,6 +265,7 @@ ol {
 
 .btn--primair:active:not(:disabled) {
   background: var(--accent-pressed);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.14);
 }
 
 .btn--gevaar {
@@ -224,9 +279,21 @@ ol {
 }
 
 .btn--klein {
-  min-height: 36px;
+  min-height: 34px;
   padding: 0 var(--ruimte-3);
   font-size: var(--tekst-sm);
+}
+
+/* Anything driven by a finger grows to the touch minimum. */
+@media (pointer: coarse) {
+  .btn {
+    min-height: var(--raakvlak);
+  }
+
+  .btn--klein {
+    min-height: 40px;
+    padding: 0 var(--ruimte-3);
+  }
 }
 
 .btn--rond {
@@ -238,28 +305,66 @@ ol {
 }
 
 /* Groups of buttons that read as one control. */
+/*
+ * A segmented control: one sunken track with a raised pill on the chosen
+ * segment. Three adjacent bordered buttons read as three decisions; this reads
+ * as one decision with three answers, which is what it is.
+ */
 .btn-groep {
   display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 3px);
 }
 
 .btn-groep .btn {
-  border-radius: 0;
-  margin-left: -1px;
+  min-height: 32px;
+  margin: 0;
+  border-color: transparent;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  color: var(--text-muted);
+  font-weight: 550;
 }
 
-.btn-groep .btn:first-child {
-  border-radius: var(--radius) 0 0 var(--radius);
-  margin-left: 0;
+.btn-groep .btn:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.7);
+  border-color: transparent;
+  color: var(--text);
 }
 
-.btn-groep .btn:last-child {
-  border-radius: 0 var(--radius) var(--radius) 0;
+.btn-groep .btn:active:not(:disabled) {
+  background: rgb(255 255 255 / 0.9);
+  transform: none;
 }
 
-.btn-groep .btn:hover:not(:disabled),
-.btn-groep .btn.is-actief {
-  position: relative;
-  z-index: 1;
+.btn-groep .btn:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-faint);
+}
+
+.btn-groep .btn.is-actief,
+.btn-groep .btn[aria-pressed='true'] {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--accent);
+  box-shadow: var(--schaduw-1);
+}
+
+.btn-groep .btn.is-actief:hover:not(:disabled),
+.btn-groep .btn[aria-pressed='true']:hover:not(:disabled) {
+  background: var(--surface-raised);
+  border-color: var(--border-strong);
+}
+
+@media (pointer: coarse) {
+  .btn-groep .btn {
+    min-height: 38px;
+  }
 }
 
 /* -------------------------------------------------------------------- card */
@@ -269,6 +374,12 @@ ol {
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--schaduw-1);
+}
+
+/* A block that groups without dividing: a soft fill, no line. */
+.vlak {
+  background: var(--surface-mute);
+  border-radius: var(--radius-lg);
 }
 
 .kaart--klikbaar {
@@ -297,15 +408,16 @@ ol {
   display: block;
   font-size: var(--tekst-xs);
   font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
-  margin-bottom: var(--ruimte-1);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: var(--ruimte-2);
 }
 
 .invoer,
 .keuze {
   width: 100%;
-  min-height: var(--raakvlak);
+  min-height: 40px;
   padding: 0 var(--ruimte-3);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -313,9 +425,18 @@ ol {
   color: var(--text);
   font: inherit;
   font-size: var(--tekst-sm);
+  /* The inset hairline is what stops a field from reading as a flat box. */
+  box-shadow: inset 0 1px 1px rgb(16 24 40 / 0.03);
   transition:
     border-color var(--overgang),
     box-shadow var(--overgang);
+}
+
+@media (pointer: coarse) {
+  .invoer,
+  .keuze {
+    min-height: var(--raakvlak);
+  }
 }
 
 .invoer:hover:not(:disabled),
@@ -327,7 +448,7 @@ ol {
 .keuze:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-zacht);
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .invoer::placeholder {
@@ -361,14 +482,15 @@ ol {
 .paneel {
   background: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: var(--ruimte-3);
+  border-radius: var(--radius-lg);
+  padding: var(--ruimte-4);
+  box-shadow: var(--schaduw-1);
 }
 
 .zwevend {
   background: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   box-shadow: var(--schaduw-3);
 }
 
@@ -384,22 +506,40 @@ ol {
 .werkt-door {
   color: var(--text-muted);
   font-size: var(--tekst-xs);
+  font-weight: 550;
   white-space: nowrap;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 2px 8px;
+  background: var(--surface-mute);
+  border-radius: var(--radius-vol);
+  padding: 4px 10px;
   cursor: help;
 }
 
 .titel {
   font-size: var(--tekst-xl);
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-weight: 700;
+  letter-spacing: var(--spoor-krap);
+  line-height: 1.25;
+}
+
+/* The one big line on a page. Tight, heavy, and never repeated. */
+.display {
+  font-size: var(--tekst-2xl);
+  font-weight: 800;
+  letter-spacing: var(--spoor-strak);
+  line-height: 1.12;
+}
+
+@media (min-width: 721px) {
+  .display {
+    font-size: var(--tekst-3xl);
+  }
 }
 
 .kop {
-  font-size: var(--tekst-md);
-  font-weight: 600;
+  font-size: var(--tekst-lg);
+  font-weight: 700;
+  letter-spacing: var(--spoor-krap);
+  line-height: 1.3;
 }
 
 .kleurstaal {
@@ -792,6 +932,109 @@ body:has(.frame-strip) .editor-hoofd {
   cursor: pointer;
 }
 
+/* ------------------------------------------------------------ page shell */
+
+/*
+ * The bar belongs to the product and runs edge to edge; the page inside it is
+ * a measured column. That difference is most of what separates a product from
+ * a document.
+ */
+.topbalk {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgb(255 255 255 / 0.82);
+  backdrop-filter: saturate(1.6) blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbalk__binnen {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--ruimte-3) var(--ruimte-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ruimte-3);
+}
+
+.topbalk__rechts {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+}
+
+.topbalk__wie {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  margin-right: var(--ruimte-2);
+  text-align: right;
+  color: var(--text);
+  font-size: var(--tekst-sm);
+  font-weight: 550;
+}
+
+.topbalk__rol {
+  color: var(--text-faint);
+  font-size: var(--tekst-xs);
+  font-weight: 400;
+}
+
+.merk {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  min-width: 0;
+}
+
+.merk__teken {
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.merk__naam {
+  font-family: var(--font-display-stack);
+  font-size: var(--tekst-lg);
+  font-weight: 800;
+  letter-spacing: var(--spoor-strak);
+  white-space: nowrap;
+}
+
+.pagina {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--ruimte-6) var(--ruimte-5) var(--ruimte-8);
+}
+
+/* The heading and its one action, on the same baseline. */
+.paginakop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ruimte-4);
+  margin-bottom: var(--ruimte-5);
+}
+
+.paginakop__onder {
+  margin-top: 6px;
+}
+
+@media (max-width: 720px) {
+  .topbalk__binnen {
+    padding: var(--ruimte-2) var(--ruimte-4);
+  }
+
+  .topbalk__wie {
+    display: none;
+  }
+
+  .pagina {
+    padding: var(--ruimte-5) var(--ruimte-4) var(--ruimte-7);
+  }
+}
+
 /* ------------------------------------------------------------- library */
 
 /* Search first, then the filters, then the count. On a phone they wrap into
@@ -801,12 +1044,12 @@ body:has(.frame-strip) .editor-hoofd {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--ruimte-2);
-  margin-bottom: var(--ruimte-3);
+  margin-bottom: var(--ruimte-4);
 }
 
 .bib-balk .invoer {
   flex: 1 1 14rem;
-  max-width: 22rem;
+  max-width: 20rem;
 }
 
 .bib-raster {
@@ -814,8 +1057,8 @@ body:has(.frame-strip) .editor-hoofd {
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--ruimte-3);
+  grid-template-columns: repeat(auto-fill, minmax(248px, 1fr));
+  gap: var(--ruimte-4);
 }
 
 .bib-kaart {
@@ -823,12 +1066,14 @@ body:has(.frame-strip) .editor-hoofd {
   overflow: hidden;
   transition:
     border-color var(--overgang),
-    box-shadow var(--overgang);
+    box-shadow var(--overgang),
+    transform var(--overgang);
 }
 
 .bib-kaart:hover {
   border-color: var(--border-strong);
   box-shadow: var(--schaduw-2);
+  transform: translateY(-1px);
 }
 
 .bib-link {
@@ -837,25 +1082,46 @@ body:has(.frame-strip) .editor-hoofd {
   text-decoration: none;
 }
 
+/* The thumbnail sits in a soft well with the field floating inside it, rather
+   than filling a box edge to edge. It reads as a specimen, not a screenshot. */
 .bib-voorbeeld {
-  padding: var(--ruimte-2);
-  background: var(--surface-sunken);
-  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--ruimte-4) var(--ruimte-3);
+  background: var(--surface-mute);
+  border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
   border-bottom: 1px solid var(--border);
 }
 
+.bib-voorbeeld svg {
+  border-radius: var(--radius-sm);
+  box-shadow: var(--schaduw-1);
+  display: block;
+}
+
 .bib-tekst {
-  padding: var(--ruimte-3);
+  padding: var(--ruimte-3) var(--ruimte-4) var(--ruimte-4);
   display: grid;
-  gap: 2px;
+  gap: 3px;
   /* Room for the two buttons in the corner, so a long name never slides under
      them. */
   padding-right: 5.5rem;
 }
 
 .bib-naam {
-  font-weight: 600;
+  font-family: var(--font-display-stack);
+  font-weight: 700;
   font-size: var(--tekst-md);
+  letter-spacing: var(--spoor-krap);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bib-meta {
+  font-size: var(--tekst-xs);
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bib-acties {
@@ -868,23 +1134,33 @@ body:has(.frame-strip) .editor-hoofd {
 
 /* Big enough for a finger, quiet enough not to fight the thumbnail. */
 .bib-ster {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: var(--radius-vol);
   background: var(--surface-raised);
-  color: var(--text-muted);
+  color: var(--text-faint);
   cursor: pointer;
+  box-shadow: var(--schaduw-1);
   transition:
     color var(--overgang),
-    border-color var(--overgang);
+    border-color var(--overgang),
+    background-color var(--overgang);
 }
 
 .bib-ster:hover {
   border-color: var(--border-strong);
   color: var(--text);
+  background: var(--hover);
+}
+
+@media (pointer: coarse) {
+  .bib-ster {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .bib-ster--aan,
@@ -903,18 +1179,19 @@ body:has(.frame-strip) .editor-hoofd {
 .bib-bevestig {
   position: absolute;
   inset: 0;
-  background: var(--surface-raised);
+  background: rgb(255 255 255 / 0.97);
+  backdrop-filter: blur(2px);
   padding: var(--ruimte-4);
   display: grid;
   align-content: center;
   justify-items: center;
   text-align: center;
-  gap: var(--ruimte-2);
+  gap: var(--ruimte-3);
   font-size: var(--tekst-sm);
 }
 
 .leeg-kaart {
-  padding: var(--ruimte-6);
+  padding: var(--ruimte-8) var(--ruimte-6);
   text-align: center;
   display: grid;
   gap: var(--ruimte-3);
