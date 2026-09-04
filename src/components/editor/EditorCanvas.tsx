@@ -27,7 +27,7 @@ import { SelectedEntityMenu } from './SelectedEntityMenu'
 import { useMetresPerPixel } from './useMetresPerPixel'
 
 type DragDoel =
-  | { soort: 'entiteit'; id: string; offset: Point }
+  | { soort: 'entiteit'; id: string; offset: Point; groepIds: string[] }
   | { soort: 'tip'; id: string }
   | { soort: 'bend'; id: string; puntIndex: number }
   | { soort: 'hint'; id: string; segmentIndex: number; puntIndex: number | null }
@@ -168,13 +168,19 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
       if (!hasPosition(entity)) return
 
+      // Grabbing something that is already part of a multiple selection drags
+      // the whole selection, and does not throw that selection away.
+      const hoortBijSelectie = selection.has(entityId) && selection.size > 1
+
       if (event.shiftKey) toggle(entityId)
-      else select([entityId])
-      setMenuOpen(!event.shiftKey)
+      else if (!hoortBijSelectie) select([entityId])
+
+      setMenuOpen(!event.shiftKey && !hoortBijSelectie)
       beginSleep({
         soort: 'entiteit',
         id: entityId,
         offset: { x: entity.pos.x - point.x, y: entity.pos.y - point.y },
+        groepIds: hoortBijSelectie ? [...selection] : [entityId],
       })
       return
     }
@@ -231,19 +237,36 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
     if (doel.soort === 'entiteit') {
       const pos = maybeSnap({ x: ruw.x + doel.offset.x, y: ruw.y + doel.offset.y }, event.altKey)
+      const groep = new Set(doel.groepIds)
       wijzigFrame(
         'Verplaatsen',
         (list) => {
-          const entity = list.find((e) => e.id === doel.id)
-          if (!entity || !hasPosition(entity)) return
-          const delta = { x: pos.x - entity.pos.x, y: pos.y - entity.pos.y }
-          entity.pos = pos
+          const primair = list.find((e) => e.id === doel.id)
+          if (!primair || !hasPosition(primair)) return
+
+          // Only the entity under the finger snaps to the grid; everything else
+          // follows by exactly the same delta, so the shape of the selection
+          // never distorts while you drag it.
+          const delta = { x: pos.x - primair.pos.x, y: pos.y - primair.pos.y }
+          if (delta.x === 0 && delta.y === 0) return
+
+          const verplaatsteArrows = new Set<string>()
+          for (const entity of list) {
+            if (!groep.has(entity.id)) continue
+            if (hasPosition(entity)) {
+              entity.pos = { x: entity.pos.x + delta.x, y: entity.pos.y + delta.y }
+            } else if (isArrow(entity)) {
+              verplaatsArrow(entity, delta)
+              verplaatsteArrows.add(entity.id)
+            }
+          }
+
           // Arrows belong to their player: nudging him takes the shape he drew
           // along instead of leaving it behind on the grass.
-          if (entity.type === 'player') {
-            for (const other of list) {
-              if (isArrow(other) && other.ownerId === doel.id) verplaatsArrow(other, delta)
-            }
+          for (const entity of list) {
+            if (!isArrow(entity)) continue
+            if (verplaatsteArrows.has(entity.id)) continue
+            if (groep.has(entity.ownerId)) verplaatsArrow(entity, delta)
           }
         },
         state.groupId,
@@ -329,6 +352,10 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
   const opZ = <T extends { z: number }>(list: T[]) => list.slice().sort((a, b) => a.z - b.z)
 
+  const canvasBreedte = view.width / UNITS_PER_METRE / metresPerPixel
+  const canvasHoogte = view.height / UNITS_PER_METRE / metresPerPixel
+  const toonScrim = menuOpen && geselecteerd !== undefined
+
   return (
     <div style={{ position: 'relative' }}>
       <svg
@@ -395,6 +422,40 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           ))}
         </g>
 
+        {/* While the menu is open the field steps back, so the arc reads as a
+            layer above the diagram instead of as part of it. The token you
+            tapped stays bright: it is what you are working on. */}
+        {toonScrim && (
+          <rect
+            x={view.origin.x}
+            y={view.origin.y}
+            width={view.width}
+            height={view.height}
+            fill="var(--scrim)"
+            pointerEvents="none"
+          />
+        )}
+
+        {toonScrim && geselecteerd?.type === 'player' && (
+          <PlayerToken
+            player={geselecteerd}
+            view={view}
+            radiusM={radiusM}
+            hitRadiusM={hitM}
+            stijl={doc.meta.tokenstijl}
+            selected
+          />
+        )}
+        {toonScrim && geselecteerd?.type === 'cone' && (
+          <ConeToken
+            cone={geselecteerd}
+            view={view}
+            radiusM={radiusM}
+            hitRadiusM={hitM}
+            selected
+          />
+        )}
+
         {kader && <KaderVlak kader={kader} view={view} metresPerPixel={metresPerPixel} />}
 
         <g>
@@ -418,7 +479,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           key={geselecteerd.id}
           entity={geselecteerd}
           anchor={anchor}
-          tokenRadiusPx={(radiusM * UNITS_PER_METRE) / (UNITS_PER_METRE * metresPerPixel)}
+          tokenRadiusPx={radiusM / metresPerPixel}
+          canvas={{ breedte: canvasBreedte, hoogte: canvasHoogte }}
         />
       )}
     </div>

@@ -1,25 +1,9 @@
 'use client'
 
+import { Aanvink, Keuze, VeldRij } from '@/components/ui/Veld'
 import { categorieenVoor, type DiagramType, type Tokenstijl } from '@/lib/diagram/schema'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { nl } from '@/lib/strings'
-
-const veld: React.CSSProperties = {
-  font: 'inherit',
-  fontSize: '0.8125rem',
-  minHeight: 40,
-  borderRadius: 'var(--radius)',
-  border: '1px solid var(--border)',
-  background: 'var(--surface-raised)',
-  color: 'var(--text)',
-  padding: '0 0.5rem',
-}
-
-const labelStijl: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  color: 'var(--text-muted)',
-}
 
 export function DiagramInstellingen() {
   const meta = useDiagramStore((s) => s.doc.meta)
@@ -27,10 +11,8 @@ export function DiagramInstellingen() {
 
   return (
     <>
-      <label style={{ display: 'grid', gap: 4 }}>
-        <span style={labelStijl}>{nl.instellingen.type}</span>
-        <select
-          style={veld}
+      <VeldRij label={nl.instellingen.type}>
+        <Keuze
           value={meta.type ?? ''}
           onChange={(e) => {
             const type = (e.target.value || null) as DiagramType | null
@@ -45,13 +27,11 @@ export function DiagramInstellingen() {
           <option value="">{nl.instellingen.kies}</option>
           <option value="speelvariant">{nl.instellingen.speelvariant}</option>
           <option value="drill">{nl.instellingen.drill}</option>
-        </select>
-      </label>
+        </Keuze>
+      </VeldRij>
 
-      <label style={{ display: 'grid', gap: 4 }}>
-        <span style={labelStijl}>{nl.instellingen.categorie}</span>
-        <select
-          style={veld}
+      <VeldRij label={nl.instellingen.categorie}>
+        <Keuze
           disabled={!meta.type}
           value={meta.categorie ?? ''}
           onChange={(e) => {
@@ -68,13 +48,11 @@ export function DiagramInstellingen() {
                 {categorie}
               </option>
             ))}
-        </select>
-      </label>
+        </Keuze>
+      </VeldRij>
 
-      <label style={{ display: 'grid', gap: 4 }}>
-        <span style={labelStijl}>{nl.instellingen.tokenstijl}</span>
-        <select
-          style={veld}
+      <VeldRij label={nl.instellingen.tokenstijl}>
+        <Keuze
           value={meta.tokenstijl}
           onChange={(e) => {
             const tokenstijl = e.target.value as Tokenstijl
@@ -86,23 +64,20 @@ export function DiagramInstellingen() {
           <option value="letters">{nl.instellingen.letters}</option>
           <option value="xo">{nl.instellingen.xo}</option>
           <option value="blanco">{nl.instellingen.blanco}</option>
-        </select>
-      </label>
+        </Keuze>
+      </VeldRij>
 
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8, alignSelf: 'end', minHeight: 40 }}>
-        <input
-          type="checkbox"
+      <div style={{ alignSelf: 'end' }}>
+        <Aanvink
+          label={nl.instellingen.conceptUitleg}
           checked={meta.draft}
-          onChange={(e) => {
-            const draftVlag = e.target.checked
+          onChange={(waarde) =>
             change(nl.instellingen.concept, (draft) => {
-              draft.meta.draft = draftVlag
+              draft.meta.draft = waarde
             })
-          }}
-          style={{ width: 18, height: 18 }}
+          }
         />
-        <span style={{ fontSize: '0.8125rem' }}>{nl.instellingen.conceptUitleg}</span>
-      </label>
+      </div>
     </>
   )
 }

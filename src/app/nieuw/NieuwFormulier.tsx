@@ -8,6 +8,7 @@ import type { Weergave } from '@/lib/diagram/schema'
 import { maakDiagram } from '@/lib/data/diagrams'
 import { newDoc } from '@/lib/editor/document'
 import { newId } from '@/lib/editor/ids'
+import { Knop } from '@/components/ui/Knop'
 import { nl } from '@/lib/strings'
 
 const WEERGAVEN: { id: Weergave; naam: string; uitleg: string }[] = [
@@ -17,21 +18,6 @@ const WEERGAVEN: { id: Weergave; naam: string; uitleg: string }[] = [
 ]
 
 const OPSTELLINGEN: Opstelling[] = ['vertical-stack', 'horizontal-stack', 'leeg']
-
-function kaart(gekozen: boolean): React.CSSProperties {
-  return {
-    display: 'grid',
-    gap: '0.375rem',
-    textAlign: 'left',
-    font: 'inherit',
-    padding: '0.75rem',
-    borderRadius: 'var(--radius)',
-    border: `2px solid ${gekozen ? 'var(--accent)' : 'var(--border)'}`,
-    background: 'var(--surface-raised)',
-    color: 'var(--text)',
-    cursor: 'pointer',
-  }
-}
 
 export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   const router = useRouter()
@@ -59,20 +45,24 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   }
 
   if (!magBewerken) {
-    return <p style={{ color: 'var(--text-muted)' }}>{nl.nieuw.geenRechten}</p>
+    return (
+      <div className="kaart" style={{ padding: 'var(--ruimte-5)' }}>
+        <p className="stil">{nl.nieuw.geenRechten}</p>
+      </div>
+    )
   }
 
   return (
-    <div style={{ display: 'grid', gap: '1.5rem' }}>
+    <div style={{ display: 'grid', gap: 'var(--ruimte-5)' }}>
       <section>
-        <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, margin: '0 0 0.5rem' }}>
+        <h2 className="kop" style={{ marginBottom: 'var(--ruimte-3)' }}>
           {nl.nieuw.veldtype}
         </h2>
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
-            gap: '0.75rem',
+            gap: 'var(--ruimte-3)',
           }}
         >
           {WEERGAVEN.map((w) => (
@@ -81,16 +71,27 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
               type="button"
               onClick={() => setWeergave(w.id)}
               aria-pressed={weergave === w.id}
-              style={kaart(weergave === w.id)}
+              className={`kaart kaart--klikbaar ${weergave === w.id ? 'kaart--gekozen' : ''}`}
+              style={{
+                display: 'grid',
+                gap: 'var(--ruimte-1)',
+                textAlign: 'left',
+                font: 'inherit',
+                padding: 'var(--ruimte-3)',
+                cursor: 'pointer',
+              }}
             >
-              <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{w.naam}</span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{w.uitleg}</span>
+              <span style={{ fontWeight: 600, fontSize: 'var(--tekst-sm)' }}>{w.naam}</span>
+              <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
+                {w.uitleg}
+              </span>
               <span
                 style={{
-                  marginTop: '0.25rem',
+                  marginTop: 'var(--ruimte-1)',
                   maxWidth: w.id === 'half' ? '7rem' : undefined,
                   // Not decoration: this is exactly what you are choosing.
-                  filter: weergave === w.id ? 'none' : 'saturate(0.25) opacity(0.7)',
+                  filter: weergave === w.id ? 'none' : 'saturate(0.2) opacity(0.65)',
+                  transition: 'filter var(--overgang)',
                 }}
               >
                 <FieldCanvas kind={w.id} />
@@ -101,58 +102,28 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
       </section>
 
       <section>
-        <h2 style={{ fontSize: '0.9375rem', fontWeight: 600, margin: '0 0 0.5rem' }}>
+        <h2 className="kop" style={{ marginBottom: 'var(--ruimte-3)' }}>
           {nl.nieuw.opstelling}
         </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div className="btn-groep">
           {OPSTELLINGEN.map((o) => (
-            <button
-              key={o}
-              type="button"
-              onClick={() => setOpstelling(o)}
-              aria-pressed={opstelling === o}
-              style={{
-                ...kaart(opstelling === o),
-                minHeight: 44,
-                padding: '0 1rem',
-                alignItems: 'center',
-                fontSize: '0.875rem',
-                fontWeight: opstelling === o ? 600 : 400,
-              }}
-            >
+            <Knop key={o} actief={opstelling === o} onClick={() => setOpstelling(o)}>
               {OPSTELLING_LABELS[o]}
-            </button>
+            </Knop>
           ))}
         </div>
       </section>
 
       {fout && (
-        <p role="alert" style={{ color: 'var(--waarschuwing)', fontSize: '0.875rem', margin: 0 }}>
+        <p role="alert" style={{ color: 'var(--waarschuwing)', fontSize: 'var(--tekst-sm)' }}>
           {nl.nieuw.fout} {fout}
         </p>
       )}
 
       <div>
-        <button
-          type="button"
-          onClick={aanmaken}
-          disabled={bezig}
-          style={{
-            font: 'inherit',
-            fontSize: '0.9375rem',
-            fontWeight: 600,
-            minHeight: 44,
-            padding: '0 1.5rem',
-            borderRadius: 'var(--radius)',
-            border: 'none',
-            background: 'var(--accent)',
-            color: 'var(--accent-contrast)',
-            cursor: bezig ? 'progress' : 'pointer',
-            opacity: bezig ? 0.7 : 1,
-          }}
-        >
+        <Knop variant="primair" onClick={aanmaken} disabled={bezig}>
           {bezig ? nl.nieuw.bezig : nl.nieuw.doorgaan}
-        </button>
+        </Knop>
       </div>
     </div>
   )

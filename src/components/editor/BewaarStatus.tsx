@@ -11,8 +11,15 @@ const TEKST: Record<Status, string> = {
   fout: nl.opslaan.fout,
 }
 
+const KLEUR: Record<Status, string> = {
+  schoon: 'var(--text-faint)',
+  wachtend: 'var(--text-muted)',
+  bezig: 'var(--text-muted)',
+  bewaard: 'var(--goed)',
+  fout: 'var(--waarschuwing)',
+}
+
 export function BewaarStatusLabel({ status, fout }: { status: Status; fout: string | null }) {
-  const isFout = status === 'fout'
   return (
     <span
       role="status"
@@ -21,24 +28,14 @@ export function BewaarStatusLabel({ status, fout }: { status: Status; fout: stri
         display: 'inline-flex',
         alignItems: 'center',
         gap: 6,
-        fontSize: '0.8125rem',
-        color: isFout ? 'var(--waarschuwing)' : 'var(--text-muted)',
+        fontSize: 'var(--tekst-sm)',
+        color: status === 'fout' ? 'var(--waarschuwing)' : 'var(--text-muted)',
         whiteSpace: 'nowrap',
       }}
     >
       <span
         aria-hidden
-        style={{
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          background: isFout
-            ? 'var(--waarschuwing)'
-            : status === 'bewaard'
-              ? '#4f7d5c'
-              : 'var(--text-muted)',
-          opacity: status === 'schoon' ? 0.35 : 1,
-        }}
+        style={{ width: 7, height: 7, borderRadius: '50%', background: KLEUR[status], flexShrink: 0 }}
       />
       {TEKST[status]}
     </span>

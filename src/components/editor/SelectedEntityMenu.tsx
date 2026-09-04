@@ -39,6 +39,7 @@ interface Props {
   entity: Entity
   anchor: { x: number; y: number }
   tokenRadiusPx: number
+  canvas: { breedte: number; hoogte: number }
 }
 
 const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
@@ -48,7 +49,7 @@ const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
   sight: <CutIcon />,
 }
 
-export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
+export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Props) {
   const change = useDiagramStore((s) => s.change)
   const weergave = useDiagramStore((s) => s.doc.meta.weergave)
   const activeFrame = useUiStore((s) => s.activeFrame)
@@ -259,7 +260,13 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
   }
 
   return (
-    <EntityMenu anchor={anchor} tokenRadiusPx={tokenRadiusPx} acties={acties} paneel={paneel} />
+    <EntityMenu
+      anchor={anchor}
+      tokenRadiusPx={tokenRadiusPx}
+      canvas={canvas}
+      acties={acties}
+      paneel={paneel}
+    />
   )
 }
 

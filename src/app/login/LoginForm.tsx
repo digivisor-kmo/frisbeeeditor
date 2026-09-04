@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Knop } from '@/components/ui/Knop'
+import { Invoer } from '@/components/ui/Veld'
 import { createClient } from '@/lib/supabase/client'
 import { nl } from '@/lib/strings'
 
@@ -35,57 +37,38 @@ export function LoginForm({ verder }: { verder: string }) {
 
   if (status === 'verstuurd') {
     return (
-      <p style={{ margin: 0, lineHeight: 1.5 }}>
-        {nl.login.verstuurd} <strong>{email}</strong>. {nl.login.verstuurdUitleg}
-      </p>
+      <div style={{ display: 'grid', gap: 'var(--ruimte-2)' }}>
+        <p style={{ fontWeight: 600 }}>{nl.login.verstuurd}</p>
+        <p style={{ fontSize: 'var(--tekst-sm)', wordBreak: 'break-word' }}>{email}</p>
+        <p className="stil">{nl.login.verstuurdUitleg}</p>
+      </div>
     )
   }
 
   return (
-    <form onSubmit={onSubmit} style={{ display: 'grid', gap: '0.75rem' }}>
-      <label htmlFor="email" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-        {nl.login.emailLabel}
-      </label>
-      <input
-        id="email"
-        type="email"
-        required
-        autoComplete="email"
-        inputMode="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="jij@voorbeeld.be"
-        style={{
-          font: 'inherit',
-          fontSize: '1rem',
-          padding: '0.75rem',
-          minHeight: '44px',
-          borderRadius: 'var(--radius)',
-          border: '1px solid var(--border)',
-          background: 'var(--surface-raised)',
-          color: 'var(--text)',
-        }}
-      />
-      <button
-        type="submit"
-        disabled={status === 'bezig'}
-        style={{
-          font: 'inherit',
-          fontWeight: 600,
-          minHeight: '44px',
-          padding: '0.75rem',
-          borderRadius: 'var(--radius)',
-          border: 'none',
-          background: 'var(--accent)',
-          color: 'var(--accent-contrast)',
-          cursor: status === 'bezig' ? 'progress' : 'pointer',
-          opacity: status === 'bezig' ? 0.7 : 1,
-        }}
-      >
+    <form onSubmit={onSubmit} style={{ display: 'grid', gap: 'var(--ruimte-3)' }}>
+      <div>
+        <label className="veld-label" htmlFor="email">
+          {nl.login.emailLabel}
+        </label>
+        <Invoer
+          id="email"
+          type="email"
+          required
+          autoComplete="email"
+          inputMode="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="jij@voorbeeld.be"
+        />
+      </div>
+
+      <Knop type="submit" variant="primair" disabled={status === 'bezig'}>
         {status === 'bezig' ? nl.login.bezig : nl.login.knop}
-      </button>
+      </Knop>
+
       {status === 'fout' && (
-        <p role="alert" style={{ margin: 0, fontSize: '0.875rem', color: 'var(--team-b)' }}>
+        <p role="alert" style={{ fontSize: 'var(--tekst-sm)', color: 'var(--waarschuwing)' }}>
           {nl.login.fout} {melding}
         </p>
       )}

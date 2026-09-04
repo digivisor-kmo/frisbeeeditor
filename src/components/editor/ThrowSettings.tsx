@@ -1,5 +1,6 @@
 'use client'
 
+import { Knop } from '@/components/ui/Knop'
 import { THROW_LABELS, THROW_TYPES } from '@/lib/diagram/arrows'
 import type { ThrowType } from '@/lib/diagram/schema'
 import { nl } from '@/lib/strings'
@@ -12,32 +13,15 @@ interface Props {
 export function ThrowSettings({ huidig, onKies }: Props) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 6 }}>
-        {nl.menu.worptype}
-      </div>
+      <span className="veld-label">{nl.menu.worptype}</span>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
         {THROW_TYPES.map((type) => (
-          <button
-            key={type}
-            type="button"
-            onClick={() => onKies(type)}
-            style={{
-              font: 'inherit',
-              fontSize: 12,
-              minHeight: 36,
-              borderRadius: 6,
-              cursor: 'pointer',
-              border: `1px solid ${huidig === type ? 'var(--accent)' : 'var(--border)'}`,
-              background: huidig === type ? 'var(--accent-zacht)' : 'var(--surface-raised)',
-              color: 'var(--text)',
-              fontWeight: huidig === type ? 600 : 400,
-            }}
-          >
+          <Knop key={type} klein actief={huidig === type} onClick={() => onKies(type)}>
             {THROW_LABELS[type]}
-          </button>
+          </Knop>
         ))}
       </div>
-      <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '8px 0 0', lineHeight: 1.35 }}>
+      <p className="stil" style={{ fontSize: 'var(--tekst-xs)', marginTop: 'var(--ruimte-2)' }}>
         {nl.menu.worptypeUitleg}
       </p>
     </div>

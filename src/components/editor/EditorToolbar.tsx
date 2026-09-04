@@ -1,30 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { Knop } from '@/components/ui/Knop'
+import { Aanvink } from '@/components/ui/Veld'
 import type { Side } from '@/lib/diagram/schema'
 import { canRedo, canUndo, useDiagramStore } from '@/lib/editor/diagramStore'
 import { useUiStore, type Tool } from '@/lib/editor/uiStore'
-import { watOntbreekt } from '@/lib/editor/validatie'
 import type { BewaarStatus } from '@/lib/editor/useAutosave'
+import { watOntbreekt } from '@/lib/editor/validatie'
 import { nl } from '@/lib/strings'
 import { BewaarStatusLabel } from './BewaarStatus'
 import { DiagramInstellingen } from './DiagramInstellingen'
 import { OccupancyCounter } from './OccupancyCounter'
 import { ValidatieIndicator } from './ValidatieIndicator'
-
-const knop = (actief: boolean, uitgeschakeld = false): React.CSSProperties => ({
-  font: 'inherit',
-  fontSize: '0.8125rem',
-  fontWeight: actief ? 600 : 400,
-  minHeight: 44,
-  padding: '0 0.875rem',
-  borderRadius: 'var(--radius)',
-  border: `1px solid ${actief ? 'var(--accent)' : 'var(--border)'}`,
-  background: actief ? 'var(--accent-zacht)' : 'var(--surface-raised)',
-  color: 'var(--text)',
-  cursor: uitgeschakeld ? 'not-allowed' : 'pointer',
-  opacity: uitgeschakeld ? 0.45 : 1,
-})
 
 /**
  * Only the tools that actually work appear. Drawing and text boxes come later,
@@ -62,102 +50,56 @@ export function EditorToolbar({ kant, setKant, status, fout }: Props) {
   const ontbreekt = watOntbreekt(doc)
 
   return (
-    <div style={{ display: 'grid', gap: '0.5rem' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          {TOOLS.map((t) => (
-            <button key={t.id} type="button" onClick={() => setTool(t.id)} style={knop(tool === t.id)}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.25rem' }}>
-          <button type="button" onClick={undo} disabled={!kanTerug} style={knop(false, !kanTerug)}>
-            {nl.editor.ongedaan}
-          </button>
-          <button
-            type="button"
-            onClick={redo}
-            disabled={!kanVooruit}
-            style={knop(false, !kanVooruit)}
-          >
-            {nl.editor.opnieuw}
-          </button>
-        </div>
-
-        <div
-          style={{
-            marginLeft: 'auto',
-            display: 'flex',
-            gap: '0.5rem',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-          }}
-        >
-          <OccupancyCounter entities={entities} />
-          <ValidatieIndicator ontbreekt={ontbreekt} />
-          <BewaarStatusLabel status={status} fout={fout} />
-          <button
-            type="button"
-            onClick={() => setPaneelOpen((o) => !o)}
-            aria-expanded={paneelOpen}
-            style={knop(paneelOpen)}
-          >
-            {paneelOpen ? nl.instellingen.minder : nl.instellingen.meer}
-          </button>
-        </div>
-      </div>
-
+    <div className="editor-chrome" style={{ display: 'grid', gap: 'var(--ruimte-2)' }}>
       {paneelOpen && (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-            gap: '0.625rem',
-            padding: '0.75rem',
-            background: 'var(--surface-raised)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-          }}
-        >
+        <div className="paneel editor-paneel">
           <DiagramInstellingen />
 
-          <div style={{ display: 'grid', gap: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>
-              {nl.instellingen.nieuweSpeler}
-            </span>
-            <div style={{ display: 'flex', gap: 4 }}>
-              <button
-                type="button"
-                onClick={() => setKant('offense')}
-                style={{ ...knop(kant === 'offense'), flex: 1, minHeight: 40 }}
-              >
+          <div>
+            <span className="veld-label">{nl.instellingen.nieuweSpeler}</span>
+            <div className="btn-groep" style={{ width: '100%' }}>
+              <Knop klein actief={kant === 'offense'} onClick={() => setKant('offense')} style={{ flex: 1 }}>
                 {nl.editor.aanval}
-              </button>
-              <button
-                type="button"
-                onClick={() => setKant('defense')}
-                style={{ ...knop(kant === 'defense'), flex: 1, minHeight: 40 }}
-              >
+              </Knop>
+              <Knop klein actief={kant === 'defense'} onClick={() => setKant('defense')} style={{ flex: 1 }}>
                 {nl.editor.verdediging}
-              </button>
+              </Knop>
             </div>
           </div>
 
-          <label
-            style={{ display: 'flex', alignItems: 'center', gap: 8, alignSelf: 'end', minHeight: 40 }}
-          >
-            <input
-              type="checkbox"
-              checked={snap}
-              onChange={(e) => setSnap(e.target.checked)}
-              style={{ width: 18, height: 18 }}
-            />
-            <span style={{ fontSize: '0.8125rem' }}>{nl.editor.rasterUitleg}</span>
-          </label>
+          <div style={{ alignSelf: 'end' }}>
+            <Aanvink label={nl.editor.rasterUitleg} checked={snap} onChange={setSnap} />
+          </div>
         </div>
       )}
+
+      <div className="editor-balk">
+        <div className="btn-groep">
+          {TOOLS.map((t) => (
+            <Knop key={t.id} klein actief={tool === t.id} onClick={() => setTool(t.id)}>
+              {t.label}
+            </Knop>
+          ))}
+        </div>
+
+        <div className="btn-groep">
+          <Knop klein onClick={undo} disabled={!kanTerug}>
+            {nl.editor.ongedaan}
+          </Knop>
+          <Knop klein onClick={redo} disabled={!kanVooruit}>
+            {nl.editor.opnieuw}
+          </Knop>
+        </div>
+
+        <div className="editor-balk__rechts">
+          <OccupancyCounter entities={entities} />
+          <ValidatieIndicator ontbreekt={ontbreekt} />
+          <BewaarStatusLabel status={status} fout={fout} />
+          <Knop klein actief={paneelOpen} aria-expanded={paneelOpen} onClick={() => setPaneelOpen((o) => !o)}>
+            {paneelOpen ? nl.instellingen.minder : nl.instellingen.meer}
+          </Knop>
+        </div>
+      </div>
     </div>
   )
 }

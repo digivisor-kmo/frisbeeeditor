@@ -15,25 +15,37 @@ export default async function LoginPage({
         minHeight: '100dvh',
         display: 'grid',
         placeItems: 'center',
-        padding: '1.5rem',
+        padding: 'var(--ruimte-5) var(--ruimte-4)',
       }}
     >
-      <div style={{ width: '100%', maxWidth: '24rem' }}>
-        <h1 style={{ fontSize: '1.375rem', fontWeight: 600, margin: 0 }}>{nl.app.naam}</h1>
-        <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 1.5rem' }}>{nl.login.uitleg}</p>
+      <div style={{ width: '100%', maxWidth: '23rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ruimte-3)' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icoon.svg" alt="" width={40} height={40} style={{ borderRadius: 10 }} />
+          <div>
+            <h1 className="titel" style={{ fontSize: 'var(--tekst-lg)' }}>
+              {nl.app.naam}
+            </h1>
+            <p className="stil">{nl.app.ondertitel}</p>
+          </div>
+        </div>
 
-        <div
-          style={{
-            background: 'var(--surface-raised)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            padding: '1.25rem',
-          }}
-        >
+        <div className="kaart" style={{ padding: 'var(--ruimte-4)', marginTop: 'var(--ruimte-5)' }}>
+          <p style={{ marginBottom: 'var(--ruimte-4)' }} className="stil">
+            {nl.login.uitleg}
+          </p>
           {params.fout === 'link' && (
             <p
               role="alert"
-              style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', color: 'var(--team-b)' }}
+              style={{
+                marginBottom: 'var(--ruimte-3)',
+                padding: 'var(--ruimte-2) var(--ruimte-3)',
+                borderRadius: 'var(--radius)',
+                background: 'var(--waarschuwing-zacht)',
+                border: '1px solid var(--waarschuwing-rand)',
+                color: 'var(--waarschuwing)',
+                fontSize: 'var(--tekst-sm)',
+              }}
             >
               {nl.login.linkVerlopen}
             </p>

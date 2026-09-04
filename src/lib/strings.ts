@@ -35,6 +35,8 @@ export const nl = {
   editor: {
     titel: 'Editor',
     terug: 'Terug',
+    laden: 'Diagram laden…',
+    nietGeladen: 'Dit diagram kon niet geladen worden',
     nietsBewaard: 'Nog niets wordt bewaard. Herlaad je de pagina, dan is je werk weg.',
     selecteren: 'Selecteren',
     speler: 'Speler',
@@ -95,7 +97,10 @@ export const nl = {
   },
   bibliotheek: {
     titel: 'Diagrammen',
-    leeg: 'Er staat nog niets in. Maak je eerste diagram.',
+    leegTitel: 'Nog geen diagrammen',
+    leeg: 'Maak je eerste diagram. Je kiest een veld en een startopstelling, en de rest teken je erin.',
+    leegSpeler: 'Zodra je trainer diagrammen aanmaakt, verschijnen ze hier.',
+    geenVoorbeeld: 'Geen voorbeeld',
     nieuw: 'Nieuw diagram',
     concept: 'Concept',
     geenNaam: 'Naamloos diagram',

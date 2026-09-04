@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { paintFor } from '@/components/field/tokens/colors'
+import { Knop } from '@/components/ui/Knop'
+import { Keuze, VeldRij } from '@/components/ui/Veld'
 import { ARROW_LABELS } from '@/lib/diagram/arrows'
 import { ROLE_LABELS, rolesFor, rotationFor } from '@/lib/diagram/roles'
 import {
@@ -36,37 +38,6 @@ function gedeeld<T>(waarden: T[]): T | null {
   if (waarden.length === 0) return null
   const eerste = waarden[0]!
   return waarden.every((w) => w === eerste) ? eerste : null
-}
-
-const knop = (actief: boolean, uitgeschakeld = false): React.CSSProperties => ({
-  font: 'inherit',
-  fontSize: '0.8125rem',
-  fontWeight: actief ? 600 : 400,
-  minHeight: 40,
-  padding: '0 0.75rem',
-  borderRadius: 'var(--radius)',
-  border: `1px solid ${actief ? 'var(--accent)' : 'var(--border)'}`,
-  background: actief ? 'var(--accent-zacht)' : 'var(--surface-raised)',
-  color: 'var(--text)',
-  cursor: uitgeschakeld ? 'not-allowed' : 'pointer',
-  opacity: uitgeschakeld ? 0.5 : 1,
-})
-
-const veld: React.CSSProperties = {
-  font: 'inherit',
-  fontSize: '0.8125rem',
-  minHeight: 40,
-  borderRadius: 'var(--radius)',
-  border: '1px solid var(--border)',
-  background: 'var(--surface-raised)',
-  color: 'var(--text)',
-  padding: '0 0.5rem',
-}
-
-const labelStijl: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  color: 'var(--text-muted)',
 }
 
 export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
@@ -113,31 +84,31 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
   return (
     <section
       aria-label={nl.bulk.titel}
+      className="kaart"
       style={{
-        marginTop: '0.75rem',
-        background: 'var(--surface-raised)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        padding: '0.75rem',
+        marginTop: 'var(--ruimte-3)',
+        padding: 'var(--ruimte-3)',
         display: 'grid',
-        gap: '0.75rem',
+        gap: 'var(--ruimte-3)',
       }}
     >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', alignItems: 'center' }}>
-        {(['alles', 'player', 'cone', 'arrow'] as Filter[])
-          .filter((f) => f === 'alles' || tellers[f] > 0)
-          .map((f) => (
-            <button key={f} type="button" onClick={() => setFilter(f)} style={knop(actief === f)}>
-              {FILTER_LABELS[f]} {tellers[f]}
-            </button>
-          ))}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--ruimte-2)', alignItems: 'center' }}>
+        <div className="btn-groep">
+          {(['alles', 'player', 'cone', 'arrow'] as Filter[])
+            .filter((f) => f === 'alles' || tellers[f] > 0)
+            .map((f) => (
+              <Knop key={f} klein actief={actief === f} onClick={() => setFilter(f)}>
+                {FILTER_LABELS[f]} {tellers[f]}
+              </Knop>
+            ))}
+        </div>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.375rem' }}>
-          <button type="button" onClick={clearSelection} style={knop(false)}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--ruimte-2)' }}>
+          <Knop klein onClick={clearSelection}>
             {nl.bulk.deselecteren}
-          </button>
-          <button
-            type="button"
+          </Knop>
+          <Knop
+            klein
             onClick={() => {
               const nieuw: string[] = []
               change(nl.bulk.dupliceren, (draft) => {
@@ -149,12 +120,12 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               })
               if (nieuw.length > 0) select(nieuw)
             }}
-            style={knop(false)}
           >
             {nl.bulk.dupliceren}
-          </button>
-          <button
-            type="button"
+          </Knop>
+          <Knop
+            klein
+            variant="gevaar"
             onClick={() => {
               change(nl.bulk.verwijderen, (draft) => {
                 const content = draft.frames[activeFrame]?.content
@@ -165,31 +136,24 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               })
               clearSelection()
             }}
-            style={{
-              ...knop(false),
-              color: 'var(--waarschuwing)',
-              borderColor: 'var(--waarschuwing)',
-            }}
           >
             {nl.bulk.verwijderen}
-          </button>
+          </Knop>
         </div>
       </div>
 
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-          gap: '0.625rem',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
+          gap: 'var(--ruimte-3)',
           borderTop: '1px solid var(--border)',
-          paddingTop: '0.75rem',
+          paddingTop: 'var(--ruimte-3)',
         }}
       >
         {spelers.length > 0 && (
-          <label style={{ display: 'grid', gap: 4 }}>
-            <span style={labelStijl}>{nl.menu.kant}</span>
-            <select
-              style={veld}
+          <VeldRij label={nl.menu.kant}>
+            <Keuze
               value={gedeeldeKant ?? GEMENGD}
               onChange={(e) => {
                 const side = e.target.value as Side
@@ -204,19 +168,17 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               {gedeeldeKant === null && <option value={GEMENGD}>{nl.bulk.gemengd}</option>}
               <option value="offense">{nl.editor.aanval}</option>
               <option value="defense">{nl.editor.verdediging}</option>
-            </select>
-          </label>
+            </Keuze>
+          </VeldRij>
         )}
 
         {spelers.length > 0 && gedeeldeKant !== null && (
-          <label style={{ display: 'grid', gap: 4 }}>
-            <span style={labelStijl}>{nl.menu.positie}</span>
-            <select
-              style={veld}
+          <VeldRij label={nl.menu.positie}>
+            <Keuze
               value={gedeeldeRol ?? GEMENGD}
               onChange={(e) => {
                 const role = e.target.value as PlayerRole
-                if (role === (GEMENGD as unknown as PlayerRole)) return
+                if (e.target.value === GEMENGD) return
                 wijzigDoelen(nl.menu.positie, (entity) => {
                   if (entity.type === 'player') (entity as Player).role = role
                 })
@@ -228,15 +190,13 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
                   {ROLE_LABELS[role]}
                 </option>
               ))}
-            </select>
-          </label>
+            </Keuze>
+          </VeldRij>
         )}
 
         {arrows.length > 0 && (
-          <label style={{ display: 'grid', gap: 4 }}>
-            <span style={labelStijl}>{nl.bulk.arrowtype}</span>
-            <select
-              style={veld}
+          <VeldRij label={nl.bulk.arrowtype}>
+            <Keuze
               value={gedeeldType ?? GEMENGD}
               onChange={(e) => {
                 const kind = e.target.value as ArrowKind
@@ -250,13 +210,13 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               {gedeeldType === null && <option value={GEMENGD}>{nl.bulk.gemengd}</option>}
               <option value="cut">{ARROW_LABELS.cut}</option>
               <option value="juke">{ARROW_LABELS.juke}</option>
-            </select>
-          </label>
+            </Keuze>
+          </VeldRij>
         )}
 
         {metKleur.length > 0 && (
-          <div style={{ display: 'grid', gap: 4 }}>
-            <span style={labelStijl}>
+          <div>
+            <span className="veld-label">
               {nl.menu.kleur}
               {gedeeldeKleur === null ? ` · ${nl.bulk.gemengd}` : ''}
             </span>
@@ -265,24 +225,16 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
                 <button
                   key={color}
                   type="button"
+                  className="kleurstaal"
                   title={nl.kleuren[color]}
                   aria-label={nl.kleuren[color]}
+                  aria-pressed={gedeeldeKleur === color}
                   onClick={() =>
                     wijzigDoelen(nl.menu.kleur, (entity) => {
                       if (entity.type === 'player' || entity.type === 'cone') entity.color = color
                     })
                   }
-                  style={{
-                    width: 34,
-                    height: 34,
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    background: paintFor(color, 'offense').fill,
-                    border:
-                      gedeeldeKleur === color
-                        ? '2px solid var(--accent)'
-                        : '1px solid var(--border)',
-                  }}
+                  style={{ background: paintFor(color, 'offense').fill }}
                 />
               ))}
             </div>

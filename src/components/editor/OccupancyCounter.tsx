@@ -7,39 +7,41 @@ import { nl } from '@/lib/strings'
 export function OccupancyCounter({ entities }: { entities: readonly Entity[] }) {
   const { offense, defense } = occupancy(entities)
 
-  const chip = (aantal: number, letter: string) => {
-    const afwijkend = aantal !== TEAM_SIZE
-    return (
+  const chip = (aantal: number, letter: string, kleur: string) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+      <span
+        aria-hidden
+        style={{ width: 8, height: 8, borderRadius: '50%', background: kleur, flexShrink: 0 }}
+      />
       <span
         style={{
           fontVariantNumeric: 'tabular-nums',
           fontWeight: 600,
-          color: afwijkend ? 'var(--waarschuwing)' : 'var(--text)',
+          color: aantal === TEAM_SIZE ? 'var(--text)' : 'var(--waarschuwing)',
         }}
       >
         {letter} {aantal}
       </span>
-    )
-  }
+    </span>
+  )
 
   return (
-    <div
+    <span
       title={nl.editor.bezettingUitleg}
       style={{
         display: 'inline-flex',
-        gap: '0.5rem',
+        gap: 'var(--ruimte-2)',
         alignItems: 'center',
-        padding: '0 0.75rem',
-        minHeight: '44px',
+        padding: '0 var(--ruimte-3)',
+        minHeight: 36,
         borderRadius: 'var(--radius)',
         border: '1px solid var(--border)',
         background: 'var(--surface-raised)',
-        fontSize: '0.875rem',
+        fontSize: 'var(--tekst-sm)',
       }}
     >
-      {chip(offense, 'A')}
-      <span style={{ color: 'var(--text-muted)' }}>/</span>
-      {chip(defense, 'V')}
-    </div>
+      {chip(offense, 'A', 'var(--team-a)')}
+      {chip(defense, 'V', 'var(--team-b)')}
+    </span>
   )
 }

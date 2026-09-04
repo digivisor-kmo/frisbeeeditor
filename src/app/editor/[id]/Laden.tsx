@@ -27,13 +27,40 @@ export function Laden({ id }: { id: string }) {
 
   if (fout) {
     return (
-      <main style={{ maxWidth: '32rem', margin: '4rem auto', padding: '0 1rem' }}>
-        <p style={{ color: 'var(--waarschuwing)' }}>{fout}</p>
-        <Link href="/">{nl.editor.terug}</Link>
+      <main style={{ maxWidth: '28rem', margin: '5rem auto', padding: '0 var(--ruimte-4)' }}>
+        <div className="kaart" style={{ padding: 'var(--ruimte-5)', display: 'grid', gap: 'var(--ruimte-3)' }}>
+          <p className="kop">{nl.editor.nietGeladen}</p>
+          <p className="stil">{fout}</p>
+          <div>
+            <Link href="/" className="btn">
+              {nl.editor.terug}
+            </Link>
+          </div>
+        </div>
       </main>
     )
   }
 
-  if (!doc) return null
+  // A blank white page is the worst possible loading state: it reads as broken.
+  if (!doc) {
+    return (
+      <main
+        style={{
+          maxWidth: '76rem',
+          margin: '0 auto',
+          padding: 'var(--ruimte-4) var(--ruimte-4) var(--ruimte-7)',
+        }}
+        aria-busy="true"
+      >
+        <div className="skelet" style={{ height: 34, width: '16rem', marginBottom: 'var(--ruimte-3)' }} />
+        <div className="skelet" style={{ height: 36, marginBottom: 'var(--ruimte-3)' }} />
+        <div className="skelet" style={{ aspectRatio: '106 / 43', borderRadius: 'var(--radius-lg)' }} />
+        <p className="stil" style={{ marginTop: 'var(--ruimte-3)' }}>
+          {nl.editor.laden}
+        </p>
+      </main>
+    )
+  }
+
   return <EditorScherm doc={doc} />
 }

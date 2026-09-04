@@ -77,17 +77,25 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
   if (geladenId !== geladen.id) return null
 
   return (
-    <main style={{ maxWidth: '76rem', margin: '0 auto', padding: '1rem 1rem 4rem' }}>
+    <main
+      className="editor-hoofd"
+      style={{
+        maxWidth: '76rem',
+        margin: '0 auto',
+        padding: 'var(--ruimte-4) var(--ruimte-4) var(--ruimte-7)',
+      }}
+    >
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: '1rem',
-          marginBottom: '0.75rem',
+          gap: 'var(--ruimte-3)',
+          marginBottom: 'var(--ruimte-3)',
         }}
       >
         <input
+          className="naam-invoer"
           aria-label={nl.editor.naamPlaceholder}
           value={naam}
           placeholder={nl.editor.naamPlaceholder}
@@ -97,21 +105,8 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
               draft.meta.naam = nieuw
             })
           }}
-          style={{
-            font: 'inherit',
-            fontSize: '1.125rem',
-            fontWeight: 600,
-            color: 'var(--text)',
-            background: 'transparent',
-            border: '1px solid transparent',
-            borderRadius: 6,
-            padding: '0.25rem 0.5rem',
-            marginLeft: '-0.5rem',
-            minWidth: 0,
-            flex: 1,
-          }}
         />
-        <Link href="/" style={{ fontSize: '0.875rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+        <Link href="/" className="btn btn--klein">
           {nl.editor.terug}
         </Link>
       </div>
@@ -119,12 +114,10 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
       <EditorToolbar kant={kant} setKant={setKant} status={status} fout={fout} />
 
       <div
+        className="kaart"
         style={{
-          marginTop: '0.75rem',
-          background: 'var(--surface-raised)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: '0.5rem',
+          marginTop: 'var(--ruimte-3)',
+          padding: 'var(--ruimte-2)',
           maxWidth: weergave === 'half' ? '30rem' : undefined,
           marginInline: weergave === 'half' ? 'auto' : undefined,
         }}
@@ -136,7 +129,7 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
           exactly in the top metres of the pitch. */}
       <BulkPaneel key={selectieSleutel} entities={entities} />
 
-      <p style={{ marginTop: '0.75rem', color: 'var(--text-muted)', fontSize: '0.8125rem' }}>
+      <p className="stil" style={{ marginTop: 'var(--ruimte-3)', maxWidth: '46rem' }}>
         {nl.editor.hulp}
       </p>
     </main>

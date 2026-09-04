@@ -1,20 +1,32 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { DiagramThumbnail } from '@/components/field/DiagramThumbnail'
+import { frameContentSchema, type FrameContent, type Weergave } from '@/lib/diagram/schema'
 import { createClient } from '@/lib/supabase/server'
-import type { DiagramRow, Profile } from '@/lib/supabase/database.types'
+import type { Json, Profile } from '@/lib/supabase/database.types'
 import { nl } from '@/lib/strings'
 
-type Rij = Pick<
-  DiagramRow,
-  'id' | 'naam' | 'type' | 'categorie' | 'weergave' | 'draft' | 'gewijzigd_op'
->
+interface Rij {
+  id: string
+  naam: string
+  type: string | null
+  categorie: string | null
+  weergave: string
+  draft: boolean
+  gewijzigd_op: string
+  frames: { volgorde: number; content: Json }[]
+}
 
 function datum(waarde: string): string {
-  return new Date(waarde).toLocaleDateString('nl-BE', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+  return new Date(waarde).toLocaleDateString('nl-BE', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+/** A frame straight from the database still has to pass the schema. */
+function eersteFrame(rij: Rij): FrameContent | null {
+  const frame = rij.frames.find((f) => f.volgorde === 0) ?? rij.frames[0]
+  if (!frame) return null
+  const resultaat = frameContentSchema.safeParse(frame.content)
+  return resultaat.success ? resultaat.data : null
 }
 
 export default async function Home() {
@@ -32,7 +44,7 @@ export default async function Home() {
 
   const { data: diagrammen } = await supabase
     .from('diagrams')
-    .select('id, naam, type, categorie, weergave, draft, gewijzigd_op')
+    .select('id, naam, type, categorie, weergave, draft, gewijzigd_op, frames(volgorde, content)')
     .order('gewijzigd_op', { ascending: false })
     .returns<Rij[]>()
 
@@ -40,38 +52,37 @@ export default async function Home() {
   const lijst = diagrammen ?? []
 
   return (
-    <main style={{ maxWidth: '58rem', margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
+    <main
+      style={{
+        maxWidth: '64rem',
+        margin: '0 auto',
+        padding: 'var(--ruimte-5) var(--ruimte-4) var(--ruimte-7)',
+      }}
+    >
       <header
         style={{
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '0.75rem',
-          alignItems: 'baseline',
+          gap: 'var(--ruimte-3)',
+          alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
-        <div>
-          <h1 style={{ fontSize: '1.375rem', fontWeight: 600, margin: 0 }}>{nl.app.naam}</h1>
-          <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0', fontSize: '0.875rem' }}>
-            {profile?.naam ?? profile?.email ?? user.email} ·{' '}
-            {magBewerken ? nl.rechten.trainer : nl.rechten.speler}
-          </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ruimte-3)' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/icoon.svg" alt="" width={36} height={36} style={{ borderRadius: 9 }} />
+          <div>
+            <h1 className="titel" style={{ fontSize: 'var(--tekst-lg)' }}>
+              {nl.app.naam}
+            </h1>
+            <p className="stil">
+              {profile?.naam ?? profile?.email ?? user.email} ·{' '}
+              {magBewerken ? nl.rechten.trainer : nl.rechten.speler}
+            </p>
+          </div>
         </div>
         <form action="/auth/signout" method="post">
-          <button
-            type="submit"
-            style={{
-              font: 'inherit',
-              fontSize: '0.875rem',
-              minHeight: 44,
-              padding: '0 1rem',
-              borderRadius: 'var(--radius)',
-              border: '1px solid var(--border)',
-              background: 'var(--surface-raised)',
-              color: 'var(--text)',
-              cursor: 'pointer',
-            }}
-          >
+          <button type="submit" className="btn btn--klein">
             {nl.login.afmelden}
           </button>
         </form>
@@ -80,83 +91,94 @@ export default async function Home() {
       <div
         style={{
           display: 'flex',
-          alignItems: 'baseline',
+          alignItems: 'center',
           justifyContent: 'space-between',
-          marginTop: '2rem',
-          marginBottom: '0.75rem',
-          gap: '1rem',
+          gap: 'var(--ruimte-4)',
+          margin: 'var(--ruimte-6) 0 var(--ruimte-3)',
         }}
       >
-        <h2 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>{nl.bibliotheek.titel}</h2>
+        <h2 className="kop">{nl.bibliotheek.titel}</h2>
         {magBewerken && (
-          <Link
-            href="/nieuw"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              minHeight: 44,
-              padding: '0 1.125rem',
-              borderRadius: 'var(--radius)',
-              background: 'var(--accent)',
-              color: 'var(--accent-contrast)',
-              textDecoration: 'none',
-              fontSize: '0.875rem',
-              fontWeight: 600,
-            }}
-          >
+          <Link href="/nieuw" className="btn btn--primair">
             {nl.bibliotheek.nieuw}
           </Link>
         )}
       </div>
 
       {lijst.length === 0 ? (
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{nl.bibliotheek.leeg}</p>
+        <div
+          className="kaart"
+          style={{ padding: 'var(--ruimte-6)', textAlign: 'center', display: 'grid', gap: 'var(--ruimte-3)' }}
+        >
+          <p className="kop">{nl.bibliotheek.leegTitel}</p>
+          <p className="stil" style={{ maxWidth: '28rem', margin: '0 auto' }}>
+            {magBewerken ? nl.bibliotheek.leeg : nl.bibliotheek.leegSpeler}
+          </p>
+          {magBewerken && (
+            <div>
+              <Link href="/nieuw" className="btn btn--primair">
+                {nl.bibliotheek.nieuw}
+              </Link>
+            </div>
+          )}
+        </div>
       ) : (
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: '0.5rem' }}>
-          {lijst.map((diagram) => (
-            <li key={diagram.id}>
-              <Link
-                href={`/editor/${diagram.id}`}
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: '0.5rem 1rem',
-                  alignItems: 'baseline',
-                  justifyContent: 'space-between',
-                  padding: '0.875rem 1rem',
-                  minHeight: 44,
-                  background: 'var(--surface-raised)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius)',
-                  textDecoration: 'none',
-                  color: 'var(--text)',
-                }}
-              >
-                <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
-                  {diagram.naam.trim() === '' ? nl.bibliotheek.geenNaam : diagram.naam}
-                  {diagram.draft && (
-                    <span
+        <ul
+          style={{
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+            gap: 'var(--ruimte-3)',
+          }}
+        >
+          {lijst.map((diagram) => {
+            const content = eersteFrame(diagram)
+            return (
+              <li key={diagram.id}>
+                <Link href={`/editor/${diagram.id}`} className="kaart kaart--klikbaar">
+                  <div
+                    style={{
+                      padding: 'var(--ruimte-2)',
+                      background: 'var(--surface-sunken)',
+                      borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+                      borderBottom: '1px solid var(--border)',
+                    }}
+                  >
+                    <div
                       style={{
-                        marginLeft: '0.5rem',
-                        fontSize: '0.6875rem',
-                        fontWeight: 600,
-                        color: 'var(--text-muted)',
-                        border: '1px solid var(--border)',
-                        borderRadius: 4,
-                        padding: '1px 5px',
+                        maxWidth: diagram.weergave === 'half' ? '7.5rem' : undefined,
+                        margin: '0 auto',
                       }}
                     >
-                      {nl.bibliotheek.concept}
+                      {content ? (
+                        <DiagramThumbnail
+                          content={content}
+                          weergave={diagram.weergave as Weergave}
+                        />
+                      ) : (
+                        <div style={{ aspectRatio: '2.5', display: 'grid', placeItems: 'center' }}>
+                          <span className="stil">{nl.bibliotheek.geenVoorbeeld}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div style={{ padding: 'var(--ruimte-3)', display: 'grid', gap: 2 }}>
+                    <span style={{ fontWeight: 600, fontSize: 'var(--tekst-md)' }}>
+                      {diagram.naam.trim() === '' ? nl.bibliotheek.geenNaam : diagram.naam}
                     </span>
-                  )}
-                </span>
-                <span style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
-                  {[diagram.type, diagram.categorie].filter(Boolean).join(' · ') || '—'} ·{' '}
-                  {datum(diagram.gewijzigd_op)}
-                </span>
-              </Link>
-            </li>
-          ))}
+                    <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
+                      {[diagram.type, diagram.categorie].filter(Boolean).join(' · ') || '—'} ·{' '}
+                      {datum(diagram.gewijzigd_op)}
+                      {diagram.draft ? ` · ${nl.bibliotheek.concept}` : ''}
+                    </span>
+                  </div>
+                </Link>
+              </li>
+            )
+          })}
         </ul>
       )}
     </main>

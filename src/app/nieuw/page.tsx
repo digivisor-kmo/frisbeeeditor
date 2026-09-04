@@ -19,17 +19,26 @@ export default async function NieuwPage() {
     .single<Pick<Profile, 'can_edit'>>()
 
   return (
-    <main style={{ maxWidth: '58rem', margin: '0 auto', padding: '1.5rem 1rem 4rem' }}>
+    <main
+      style={{
+        maxWidth: '58rem',
+        margin: '0 auto',
+        padding: 'var(--ruimte-5) var(--ruimte-4) var(--ruimte-7)',
+      }}
+    >
       <div
         style={{
           display: 'flex',
-          alignItems: 'baseline',
+          alignItems: 'center',
           justifyContent: 'space-between',
-          marginBottom: '1.25rem',
+          gap: 'var(--ruimte-3)',
+          marginBottom: 'var(--ruimte-5)',
         }}
       >
-        <h1 style={{ fontSize: '1.375rem', fontWeight: 600, margin: 0 }}>{nl.nieuw.titel}</h1>
-        <Link href="/" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+        <h1 className="titel" style={{ fontSize: 'var(--tekst-lg)' }}>
+          {nl.nieuw.titel}
+        </h1>
+        <Link href="/" className="btn btn--klein">
           {nl.editor.terug}
         </Link>
       </div>

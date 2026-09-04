@@ -1,32 +1,50 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Every colour in the application comes from here.
- * The field is the only saturated surface on screen; everything else is quiet.
+ * Design tokens and the component layer.
+ *
+ * Every colour, size and radius in the application comes from here. The field
+ * is the only saturated surface on screen; everything around it is quiet, so
+ * that the diagram is what you look at.
  */
 :root {
-  --surface: #f5f6f7;
+  /* Surfaces and text */
+  --surface: #f4f5f6;
   --surface-raised: #ffffff;
-  --border: #e3e6e9;
-  --text: #24282d;
-  --text-muted: #6c757d;
+  --surface-sunken: #eceef0;
+  --border: #dfe3e7;
+  --border-strong: #c3cad1;
+  --text: #1f2429;
+  --text-muted: #667079;
+  --text-faint: #8b959d;
+
+  /* Interaction */
+  --hover: #f2f4f6;
+  --pressed: #e7eaee;
 
   /* Placeholder blue. Replace with the DUC club blue from the brand file. */
   --accent: #1d5fbf;
+  --accent-hover: #1a55ab;
+  --accent-pressed: #164a95;
   --accent-contrast: #ffffff;
+  --accent-zacht: #eaf1fc;
+  --accent-rand: #b9d0f0;
 
+  --waarschuwing: #b04a17;
+  --waarschuwing-zacht: #fdf2e9;
+  --waarschuwing-rand: #f0d5bd;
+
+  --goed: #3f7a52;
+
+  /* Field */
   --field: #4f7d5c;
   --field-line: #ffffff;
+  --scrim: rgb(18 24 20 / 0.34);
 
   --team-a: #191c20;
   --team-a-contrast: #ffffff;
   --team-b: #e2801f;
   --team-b-contrast: #191c20;
-
-  --waarschuwing: #b4531a;
-  --waarschuwing-zacht: #fdf3e8;
-  --waarschuwing-rand: #f0d8bf;
-  --accent-zacht: #eaf1fc;
 
   --token-geel: #e7c53c;
   --token-paars: #7a5cc4;
@@ -36,14 +54,43 @@
   --token-licht: #ffffff;
 
   --arrow: #ffffff;
-  --arrow-rand: rgb(0 0 0 / 0.28);
   --handle: #191c20;
 
-  --radius: 8px;
-  --shadow-float: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
+  /* Type scale */
+  --tekst-xs: 0.6875rem;
+  --tekst-sm: 0.8125rem;
+  --tekst-md: 0.9375rem;
+  --tekst-lg: 1.125rem;
+  --tekst-xl: 1.5rem;
+
+  /* Spacing scale */
+  --ruimte-1: 0.25rem;
+  --ruimte-2: 0.5rem;
+  --ruimte-3: 0.75rem;
+  --ruimte-4: 1rem;
+  --ruimte-5: 1.5rem;
+  --ruimte-6: 2rem;
+  --ruimte-7: 3rem;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --radius-vol: 999px;
+
+  /* Elevation. Low and soft, only for things that float above the field. */
+  --schaduw-1: 0 1px 2px rgb(16 24 32 / 0.06);
+  --schaduw-2: 0 1px 2px rgb(16 24 32 / 0.06), 0 4px 12px rgb(16 24 32 / 0.08);
+  --schaduw-3: 0 2px 4px rgb(16 24 32 / 0.08), 0 12px 28px rgb(16 24 32 / 0.14);
+
+  /* The only movement allowed on the interface: state feedback, nothing else. */
+  --overgang: 120ms ease-out;
+
+  /* Minimum comfortable touch target. */
+  --raakvlak: 44px;
 }
 
-/* Print theme: used for PDF export. White field, grey lines, outlined tokens. */
+/* Print theme, used for PDF export: white field, grey lines, outlined tokens. */
 [data-veldthema="print"] {
   --field: #ffffff;
   --field-line: #97a0a8;
@@ -52,7 +99,7 @@
   --token-wit: #ffffff;
   --token-donker: #191c20;
   --arrow: #3a4149;
-  --arrow-rand: rgb(255 255 255 / 0.6);
+  --scrim: rgb(18 24 20 / 0.1);
 }
 
 * {
@@ -68,7 +115,471 @@ body {
 body {
   background: var(--surface);
   color: var(--text);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--tekst-md);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol {
+  margin: 0;
+}
+
+/* One visible focus ring everywhere, and only for keyboard users. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ------------------------------------------------------------------ button */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ruimte-2);
+  min-height: var(--raakvlak);
+  padding: 0 var(--ruimte-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--tekst-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--overgang),
+    border-color var(--overgang),
+    color var(--overgang),
+    box-shadow var(--overgang);
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--hover);
+  border-color: var(--border-strong);
+}
+
+.btn:active:not(:disabled) {
+  background: var(--pressed);
+}
+
+.btn:disabled {
+  color: var(--text-faint);
+  background: var(--surface-sunken);
+  border-color: var(--border);
+  cursor: not-allowed;
+}
+
+.btn[aria-pressed='true'],
+.btn.is-actief {
+  background: var(--accent-zacht);
+  border-color: var(--accent-rand);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.btn[aria-pressed='true']:hover:not(:disabled),
+.btn.is-actief:hover:not(:disabled) {
+  background: #e0ebfa;
+  border-color: var(--accent);
+}
+
+.btn--primair {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+}
+
+.btn--primair:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn--primair:active:not(:disabled) {
+  background: var(--accent-pressed);
+}
+
+.btn--gevaar {
+  color: var(--waarschuwing);
+  border-color: var(--waarschuwing-rand);
+}
+
+.btn--gevaar:hover:not(:disabled) {
+  background: var(--waarschuwing-zacht);
+  border-color: var(--waarschuwing);
+}
+
+.btn--klein {
+  min-height: 36px;
+  padding: 0 var(--ruimte-3);
+  font-size: var(--tekst-sm);
+}
+
+.btn--rond {
+  width: var(--raakvlak);
+  height: var(--raakvlak);
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--radius-vol);
+}
+
+/* Groups of buttons that read as one control. */
+.btn-groep {
+  display: inline-flex;
+}
+
+.btn-groep .btn {
+  border-radius: 0;
+  margin-left: -1px;
+}
+
+.btn-groep .btn:first-child {
+  border-radius: var(--radius) 0 0 var(--radius);
+  margin-left: 0;
+}
+
+.btn-groep .btn:last-child {
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.btn-groep .btn:hover:not(:disabled),
+.btn-groep .btn.is-actief {
+  position: relative;
+  z-index: 1;
+}
+
+/* -------------------------------------------------------------------- card */
+
+.kaart {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--schaduw-1);
+}
+
+.kaart--klikbaar {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition:
+    border-color var(--overgang),
+    box-shadow var(--overgang),
+    background-color var(--overgang);
+}
+
+.kaart--klikbaar:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--schaduw-2);
+}
+
+.kaart--gekozen {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ------------------------------------------------------------------ fields */
+
+.veld-label {
+  display: block;
+  font-size: var(--tekst-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  margin-bottom: var(--ruimte-1);
+}
+
+.invoer,
+.keuze {
+  width: 100%;
+  min-height: var(--raakvlak);
+  padding: 0 var(--ruimte-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--tekst-sm);
+  transition:
+    border-color var(--overgang),
+    box-shadow var(--overgang);
+}
+
+.invoer:hover:not(:disabled),
+.keuze:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+
+.invoer:focus,
+.keuze:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-zacht);
+}
+
+.invoer::placeholder {
+  color: var(--text-faint);
+}
+
+.keuze:disabled {
+  background: var(--surface-sunken);
+  color: var(--text-faint);
+  cursor: not-allowed;
+}
+
+.aanvink {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  min-height: var(--raakvlak);
+  font-size: var(--tekst-sm);
+  cursor: pointer;
+}
+
+.aanvink input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ panels */
+
+.paneel {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--ruimte-3);
+}
+
+.zwevend {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--schaduw-3);
+}
+
+/* ------------------------------------------------------------------- misc */
+
+.stil {
+  color: var(--text-muted);
+  font-size: var(--tekst-sm);
+}
+
+.titel {
+  font-size: var(--tekst-xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.kop {
+  font-size: var(--tekst-md);
+  font-weight: 600;
+}
+
+.kleurstaal {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-vol);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition:
+    box-shadow var(--overgang),
+    transform var(--overgang);
+}
+
+.kleurstaal:hover {
+  box-shadow: var(--schaduw-2);
+}
+
+.kleurstaal[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--surface-raised), 0 0 0 4px var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0ms !important;
+  }
+}
+
+/* ------------------------------------------------- context menu on the field */
+
+.menu-knop {
+  width: var(--raakvlak);
+  height: var(--raakvlak);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-vol);
+  background: var(--surface-raised);
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: var(--schaduw-2);
+  transition:
+    background-color var(--overgang),
+    border-color var(--overgang),
+    color var(--overgang),
+    box-shadow var(--overgang);
+}
+
+.menu-knop:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--schaduw-3);
+}
+
+.menu-knop:active {
+  background: var(--pressed);
+}
+
+.menu-knop[data-actief='ja'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.menu-knop[data-actief='ja']:hover {
+  background: var(--accent-hover);
+}
+
+.menu-knop[data-gevaar='ja'] {
+  color: var(--waarschuwing);
+}
+
+.menu-knop[data-gevaar='ja']:hover {
+  background: var(--waarschuwing-zacht);
+  border-color: var(--waarschuwing);
+}
+
+.menu-label {
+  font-size: 10.5px;
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  box-shadow: var(--schaduw-1);
+}
+
+/* ------------------------------------------------------------ editor shell */
+
+.editor-balk {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ruimte-2);
+  align-items: center;
+}
+
+.editor-balk__rechts {
+  margin-left: auto;
+  display: flex;
+  gap: var(--ruimte-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.editor-paneel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--ruimte-3);
+}
+
+.naam-invoer {
+  font: inherit;
+  font-size: var(--tekst-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: var(--ruimte-1) var(--ruimte-2);
+  margin-left: calc(var(--ruimte-2) * -1);
+  min-width: 0;
+  flex: 1;
+  transition:
+    background-color var(--overgang),
+    border-color var(--overgang);
+}
+
+.naam-invoer:hover {
+  background: var(--hover);
+  border-color: var(--border);
+}
+
+.naam-invoer:focus {
+  outline: none;
+  background: var(--surface-raised);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-zacht);
+}
+
+.naam-invoer::placeholder {
+  color: var(--text-faint);
+  font-weight: 500;
+}
+
+/*
+ * On a phone the controls go to the bottom, within thumb reach, and the field
+ * gets the rest of the screen. Half the use happens standing beside a pitch.
+ */
+@media (max-width: 720px) {
+  .editor-hoofd {
+    padding-bottom: calc(var(--ruimte-7) + 56px);
+  }
+
+  .editor-chrome {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    background: var(--surface-raised);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 12px rgb(16 24 32 / 0.08);
+    padding: var(--ruimte-2) var(--ruimte-3);
+    padding-bottom: calc(var(--ruimte-2) + env(safe-area-inset-bottom));
+  }
+
+  .editor-balk {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .editor-balk::-webkit-scrollbar {
+    display: none;
+  }
+
+  .editor-balk__rechts {
+    flex-wrap: nowrap;
+  }
+
+  .editor-paneel {
+    grid-template-columns: 1fr;
+    max-height: 52dvh;
+    overflow-y: auto;
+  }
+}
+
+.skelet {
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
