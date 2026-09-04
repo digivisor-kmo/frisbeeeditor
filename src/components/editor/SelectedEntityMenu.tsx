@@ -296,7 +296,7 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
 
     if (paneelOpen) {
       paneel = (
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className="kleurrij">
           {TOKEN_COLORS.map((color: TokenColor) => (
             <button
               key={color}

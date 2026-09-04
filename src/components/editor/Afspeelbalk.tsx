@@ -7,6 +7,7 @@ import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { useAfspelen } from '@/lib/editor/useAfspelen'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
+import { PauzeIcon, SpeelIcon } from './icons'
 
 const SNELHEDEN = [0.5, 1, 1.5, 2]
 
@@ -33,15 +34,16 @@ export function Afspeelbalk() {
   return (
     <div className="afspeelbalk">
       <Knop
-        klein
-        variant={speelt ? 'standaard' : 'primair'}
+        variant="primair"
+        className="speelknop"
         aria-label={speelt ? nl.afspelen.pauze : nl.afspelen.speel}
+        title={speelt ? nl.afspelen.pauze : nl.afspelen.speel}
         onClick={() => {
           if (!speelt && tijdMs >= totaal) setTijd(0)
           setSpeelt(!speelt)
         }}
       >
-        {speelt ? '❚❚' : '▶'}
+        {speelt ? <PauzeIcon size={17} /> : <SpeelIcon size={17} />}
       </Knop>
 
       <input
@@ -51,6 +53,13 @@ export function Afspeelbalk() {
         min={0}
         max={totaal}
         step={10}
+        // The filled part of the track is the position, so it has to follow the
+        // value rather than sit at a fixed width.
+        style={
+          {
+            '--voortgang': `${totaal > 0 ? (Math.min(tijdMs, totaal) / totaal) * 100 : 0}%`,
+          } as React.CSSProperties
+        }
         value={Math.min(tijdMs, totaal)}
         onPointerDown={() => setScrubt(true)}
         onPointerUp={() => setScrubt(false)}

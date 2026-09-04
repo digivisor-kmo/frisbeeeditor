@@ -543,10 +543,15 @@ h3,
 }
 
 .kleurstaal {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   border-radius: var(--radius-vol);
-  border: 1px solid var(--border);
+  /* An inner hairline instead of an outer border: a swatch has to show its own
+     colour to the very edge, and a grey ring around white is a grey ring. */
+  border: 0;
+  box-shadow:
+    inset 0 0 0 1px rgb(16 24 40 / 0.12),
+    var(--schaduw-1);
   cursor: pointer;
   padding: 0;
   transition:
@@ -555,12 +560,24 @@ h3,
 }
 
 .kleurstaal:hover {
-  box-shadow: var(--schaduw-2);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 0 0 1px rgb(16 24 40 / 0.16),
+    var(--schaduw-2);
 }
 
 .kleurstaal[aria-pressed='true'] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--surface-raised), 0 0 0 4px var(--accent);
+  box-shadow:
+    inset 0 0 0 1px rgb(16 24 40 / 0.14),
+    0 0 0 2px var(--surface-raised),
+    0 0 0 4px var(--accent);
+}
+
+@media (pointer: coarse) {
+  .kleurstaal {
+    width: 36px;
+    height: 36px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -905,6 +922,67 @@ h3,
   }
 }
 
+/* A grid of equal buttons, for a set of choices too wide to sit in one track. */
+.keuzerij {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+}
+
+/* --------------------------------------------------------------- bulk panel */
+
+.bulk {
+  margin-top: var(--ruimte-3);
+  padding: var(--ruimte-3) var(--ruimte-4) var(--ruimte-4);
+  display: grid;
+  gap: var(--ruimte-3);
+}
+
+.bulk__kop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ruimte-2);
+}
+
+.bulk__acties {
+  display: flex;
+  gap: var(--ruimte-2);
+  margin-left: auto;
+}
+
+/* The count rides inside its own chip, in a quieter colour, so the word and the
+   number do not read as one long label. */
+.bulk__teller {
+  margin-left: 5px;
+  padding: 1px 5px;
+  border-radius: var(--radius-vol);
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-size: var(--tekst-xs);
+  font-weight: 650;
+}
+
+.btn-groep .btn.is-actief .bulk__teller {
+  background: var(--accent-zacht);
+  color: var(--accent);
+}
+
+.bulk__velden {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: var(--ruimte-3) var(--ruimte-4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--ruimte-3);
+  align-items: start;
+}
+
+.kleurrij {
+  display: flex;
+  gap: var(--ruimte-2);
+  flex-wrap: wrap;
+}
+
 /* ------------------------------------------------------------ frame strip */
 
 .frame-strip {
@@ -949,26 +1027,31 @@ h3,
   flex-shrink: 0;
 }
 
+/* Each frame lies in the same soft well as a diagram does on a library card,
+   so a thumbnail is recognisably the same object wherever it turns up. */
 .frame-thumb {
   position: relative;
   flex-shrink: 0;
-  padding: 3px;
-  border: 2px solid var(--border);
+  padding: 5px;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--surface-sunken);
+  background: var(--surface-mute);
   cursor: grab;
   transition:
     border-color var(--overgang),
-    box-shadow var(--overgang);
+    box-shadow var(--overgang),
+    background-color var(--overgang);
 }
 
 .frame-thumb:hover {
   border-color: var(--border-strong);
+  background: var(--surface-sunken);
 }
 
 .frame-thumb[data-actief='ja'] {
+  background: var(--surface-raised);
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--schaduw-2);
 }
 
 .frame-thumb[data-doel='ja'] {
@@ -981,19 +1064,33 @@ h3,
   width: 110px;
 }
 
+.frame-thumb__veld svg {
+  display: block;
+  border-radius: 3px;
+}
+
+/* The number rides in the corner of the well, not on top of the pitch. */
 .frame-thumb__nummer {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
-  min-width: 17px;
+  left: 6px;
+  top: 6px;
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
   padding: 0 4px;
-  border-radius: var(--radius-sm);
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
+  border-radius: var(--radius-vol);
+  background: rgb(255 255 255 / 0.92);
   font-size: 10px;
   font-weight: 700;
-  line-height: 16px;
-  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--text-muted);
+  box-shadow: var(--schaduw-1);
+}
+
+.frame-thumb[data-actief='ja'] .frame-thumb__nummer {
+  color: var(--accent);
 }
 
 /* The two rows of the dock are one thing with a seam, not two bars stacked by
@@ -1031,16 +1128,101 @@ body:has(.frame-strip) .editor-hoofd {
 .afspeelbalk {
   display: flex;
   align-items: center;
-  gap: var(--ruimte-2);
+  gap: var(--ruimte-3);
   flex-wrap: wrap;
 }
 
+/* The one primary action on this screen, and round, because play is a round
+   button everywhere a person has ever pressed one. */
+.speelknop {
+  width: 38px;
+  height: 38px;
+  min-height: 0;
+  padding: 0;
+  border-radius: var(--radius-vol);
+  flex-shrink: 0;
+}
+
+@media (pointer: coarse) {
+  .speelknop {
+    width: var(--raakvlak);
+    height: var(--raakvlak);
+  }
+}
+
+/*
+ * The scrubber is drawn by hand rather than left to the browser: a native range
+ * input looks like a different product in every browser, and this one sits in
+ * the middle of the dock where you cannot miss it.
+ */
 .scrubber {
   flex: 1;
   min-width: 120px;
-  accent-color: var(--accent);
-  height: 24px;
+  height: 20px;
+  margin: 0;
   cursor: pointer;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.scrubber:focus-visible {
+  outline: none;
+}
+
+.scrubber::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: var(--radius-vol);
+  background: linear-gradient(
+    to right,
+    var(--accent) 0 var(--voortgang, 0%),
+    var(--surface-sunken) var(--voortgang, 0%) 100%
+  );
+}
+
+.scrubber::-moz-range-track {
+  height: 6px;
+  border-radius: var(--radius-vol);
+  background: linear-gradient(
+    to right,
+    var(--accent) 0 var(--voortgang, 0%),
+    var(--surface-sunken) var(--voortgang, 0%) 100%
+  );
+}
+
+.scrubber::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--schaduw-2);
+  transition:
+    transform var(--overgang),
+    border-color var(--overgang);
+}
+
+.scrubber::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--schaduw-2);
+}
+
+.scrubber:hover::-webkit-slider-thumb,
+.scrubber:focus-visible::-webkit-slider-thumb {
+  border-color: var(--accent);
+  transform: scale(1.12);
+}
+
+.scrubber:hover::-moz-range-thumb,
+.scrubber:focus-visible::-moz-range-thumb {
+  border-color: var(--accent);
 }
 
 /* ------------------------------------------------------------ choice card */

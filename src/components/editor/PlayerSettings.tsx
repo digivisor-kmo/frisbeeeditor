@@ -76,7 +76,7 @@ export function PlayerSettings({ player, onChange }: Props) {
 
       <div>
         <span className="veld-label">{nl.menu.kleur}</span>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div className="kleurrij">
           {TOKEN_COLORS.map((color: TokenColor) => (
             <button
               key={color}

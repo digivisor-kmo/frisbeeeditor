@@ -101,28 +101,20 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
   const gedeeldType = gedeeld(arrows.map((a) => (a.type === 'arrow' ? a.kind : 'cut')))
 
   return (
-    <section
-      aria-label={nl.bulk.titel}
-      className="kaart"
-      style={{
-        marginTop: 'var(--ruimte-3)',
-        padding: 'var(--ruimte-3)',
-        display: 'grid',
-        gap: 'var(--ruimte-3)',
-      }}
-    >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--ruimte-2)', alignItems: 'center' }}>
+    <section aria-label={nl.bulk.titel} className="kaart bulk">
+      <div className="bulk__kop">
         <div className="btn-groep">
           {(['alles', 'player', 'cone', 'arrow'] as Filter[])
             .filter((f) => f === 'alles' || tellers[f] > 0)
             .map((f) => (
               <Knop key={f} klein actief={actief === f} onClick={() => setFilter(f)}>
-                {FILTER_LABELS[f]} {tellers[f]}
+                {FILTER_LABELS[f]}
+                <span className="bulk__teller cijfers">{tellers[f]}</span>
               </Knop>
             ))}
         </div>
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 'var(--ruimte-2)' }}>
+        <div className="bulk__acties">
           <Knop klein onClick={clearSelection}>
             {nl.bulk.deselecteren}
           </Knop>
@@ -172,15 +164,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
         </div>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-          gap: 'var(--ruimte-3)',
-          borderTop: '1px solid var(--border)',
-          paddingTop: 'var(--ruimte-3)',
-        }}
-      >
+      <div className="bulk__velden">
         {spelers.length > 0 && (
           <VeldRij label={nl.menu.kant}>
             <Keuze
@@ -248,7 +232,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               {nl.menu.kleur}
               {gedeeldeKleur === null ? ` · ${nl.bulk.gemengd}` : ''}
             </span>
-            <div style={{ display: 'flex', gap: 6 }}>
+            <div className="kleurrij">
               {TOKEN_COLORS.map((color: TokenColor) => (
                 <button
                   key={color}
@@ -257,9 +241,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
                   title={nl.kleuren[color]}
                   aria-label={nl.kleuren[color]}
                   aria-pressed={gedeeldeKleur === color}
-                  onClick={() =>
-                    zetIdentiteitVanDoelen(nl.menu.kleur, { color })
-                  }
+                  onClick={() => zetIdentiteitVanDoelen(nl.menu.kleur, { color })}
                   style={{ background: paintFor(color, 'offense').fill }}
                 />
               ))}

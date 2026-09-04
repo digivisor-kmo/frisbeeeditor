@@ -127,6 +127,23 @@ export function SchuivenIcon({ size = 18 }: IconProps) {
   )
 }
 
+export function SpeelIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)} fill="currentColor" stroke="none">
+      <path d="M7.5 5.1 18.2 12 7.5 18.9z" />
+    </svg>
+  )
+}
+
+export function PauzeIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)} fill="currentColor" stroke="none">
+      <rect x="7.4" y="5.4" width="3.4" height="13.2" rx="1.2" />
+      <rect x="13.2" y="5.4" width="3.4" height="13.2" rx="1.2" />
+    </svg>
+  )
+}
+
 export function TerugIcon({ size = 18 }: IconProps) {
   return (
     <svg {...base(size)}>

@@ -14,7 +14,9 @@ export function ThrowSettings({ huidig, onKies }: Props) {
   return (
     <div>
       <span className="veld-label">{nl.menu.worptype}</span>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+      {/* Five throws in a grid rather than a row: a segmented control this wide
+          would run off a phone, and the names are what you pick on. */}
+      <div className="keuzerij">
         {THROW_TYPES.map((type) => (
           <Knop key={type} klein actief={huidig === type} onClick={() => onKies(type)}>
             {THROW_LABELS[type]}
