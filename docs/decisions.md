@@ -374,3 +374,46 @@ en de opslaanstatus buiten beeld vielen aan de rechterkant. Nu breekt hij af ove
 meerdere rijen. Bediening die je niet ziet bestaat niet. Wat op een telefoon
 wegvalt is alleen wat context is en geen knop: het woord bij de opslaanbolletje
 en het chipje dat zegt hoeveel frames meebewegen.
+
+
+## 2026-09-04 — Vormgeving: twee letters, en waarom dat de eerdere regel overrulet
+
+**Gekozen.** Plus Jakarta Sans voor koppen en de naam van de app, Inter voor
+alles wat je bedient en voor de letters op de tokens. Beide variabel en
+zelf gehost door `next/font`, dus één verzoek en geen layout shift.
+
+**Wat dit vervangt.** De vormgevingsbijlage zei: één humanistische schreefloze
+voor alles. Dat is een goede regel en ik heb hem bewust doorbroken, op vraag van
+Daan, met de referentie thealpy.studio erbij, die precies deze verdeling maakt
+(Satoshi voor de koppen, Inter voor de rest). De discipline zit in de scheiding:
+de displayletter komt nooit in een knop of een veld terecht, dus binnen één
+bedieningselement botsen de twee nooit.
+
+**Waarom het werkt.** Inter heeft de x-hoogte die een positieletter op 26 pixels
+in de zon leesbaar houdt. Plus Jakarta Sans heeft de geometrie en de lichte
+warmte die een scherm gemaakt laat lijken in plaats van in elkaar gezet. Een
+zuivere UI-letter heeft dat laatste met opzet niet.
+
+**Verder in dezelfde beweging.** Een typeschaal met eigen regelafstand en
+spatiëring per stap. Koelere neutralen. Een schaduwladder van twee lagen per
+trap, want één platte blur is precies wat een kaart opgeplakt doet lijken. Een
+focusring als token. Knoppen die 38 pixels hoog zijn voor een muis en 44 voor een
+vinger, via `pointer: coarse`, in plaats van het verschil te delen en geen van
+beide te bedienen. Groepen knoppen zijn een echt segmented control: een verzonken
+baan met een verhoogde pil op de keuze, want drie knoppen naast elkaar lezen als
+drie beslissingen en dit leest als één beslissing met drie antwoorden.
+
+## 2026-09-04 — De actiebalk op iconen
+
+**Gekozen.** Ongedaan, opnieuw, frame toevoegen, vorige en volgende zijn iconen
+met tooltip en aria-label. De gereedschappen dragen icoon plus woord op desktop
+en alleen het icoon op een telefoon. Het framenummer staat binnen de baan tussen
+zijn twee pijlen, met vaste breedte en tabelcijfers zodat 1/2 en 1/10 even breed
+zijn.
+
+**En het cirkelmenu andersom.** Daar staan de woorden nu juist altijd, ook met
+een muis. Een cut, een juke en een worp zijn alle drie een pijl; vijf naamloze
+icoontjes rond een token zijn een raadsel tot je ze hebt geleerd. De boog rekent
+zijn straal op die labels, waardoor hij meteen ook niet meer over de buurman
+valt. De drie arrowicoontjes dragen nu hun eigen vorm: recht, slingerend,
+gestreept met open punt.
