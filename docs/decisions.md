@@ -417,3 +417,24 @@ icoontjes rond een token zijn een raadsel tot je ze hebt geleerd. De boog rekent
 zijn straal op die labels, waardoor hij meteen ook niet meer over de buurman
 valt. De drie arrowicoontjes dragen nu hun eigen vorm: recht, slingerend,
 gestreept met open punt.
+
+## 2026-09-04 — Waar het bulkpaneel staat
+
+**Gekozen.** Het zweeft vast net boven de onderbalk, over de onderste strook van
+het veld heen.
+
+**Alternatief.** In de paginastroom onder het veld, zoals het eerst stond.
+
+**Waarom niet.** Daar landde het achter de vaste onderbalk. Je moest ernaartoe
+scrollen terwijl je een selectie vasthield, en dat is precies het moment waarop
+scrollen niet kan. Onzichtbare bediening is geen bediening.
+
+**De prijs.** Het dekt nu de onderste strook van het speelveld af. Dat is bewust
+de onderkant en niet de bovenkant: de projectinstructie wijst er terecht op dat
+de referentietool zijn paneel over de bovenste meters legt, precies waar bij een
+endzone-set je spelers staan. Wie het veld daar nodig heeft, deselecteert.
+
+**De hoogte van de dock wordt gemeten**, niet geraden, en als `--dock-hoogte`
+gepubliceerd. Die dock is een afspeelbalk plus een framestrip op desktop, krijgt
+een toolbar op een telefoon, en groeit een rij zodra er binnenin iets afbreekt.
+Een vast getal klopt niet meer zodra iemand er een knop bij zet.
