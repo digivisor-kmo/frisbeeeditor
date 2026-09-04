@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { useOmklappen } from '@/components/ui/useOmklappen'
 
 export interface MenuActie {
@@ -25,11 +25,8 @@ interface Props {
 
 const KNOP = 44
 const LABEL_AFSTAND = 31
-const LABEL_TEKENBREEDTE = 5.9
 const STAP_GRADEN = 34
 const MAX_SPREIDING_GRADEN = 170
-
-const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 6
 
 /**
  * The one menu shape for every entity on the field: an arc of round buttons
@@ -41,6 +38,9 @@ const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 6
  * drawn next to their own button they slid underneath the neighbouring one.
  */
 export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Props) {
+  // Which button the pointer or the keyboard is on. Only that one shows its
+  // word.
+  const [tip, setTip] = useState<string | null>(null)
   const ankerRef = useRef<HTMLDivElement>(null)
   const paneelRef = useRef<HTMLDivElement>(null)
 
@@ -50,16 +50,11 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
   const stap = n > 1 ? spreiding / (n - 1) : 0
 
   /*
-   * The arc has to be wide enough that neither the buttons nor their labels
-   * touch. Every label is always visible, on a mouse as well as on a finger:
-   * a cut, a juke and a throw are three arrows, and three arrows without words
-   * is a guessing game the first ten times you open this menu.
+   * The arc only has to keep the buttons apart. The words appear one at a time
+   * under whichever button you are on, so they never need room of their own,
+   * and the menu stays a ring of buttons instead of a wall of labels.
    */
-  let nodigeKoorde = KNOP + 10
-  for (let i = 0; i < n - 1; i++) {
-    const breedte = (labelBreedte(acties[i]!.label) + labelBreedte(acties[i + 1]!.label)) / 2 + 8
-    nodigeKoorde = Math.max(nodigeKoorde, breedte)
-  }
+  const nodigeKoorde = KNOP + 10
   const straalVoorAfstand = n > 1 ? nodigeKoorde / 2 / Math.sin(stap / 2) : 0
   const straal = Math.max(64, tokenRadiusPx + 46, straalVoorAfstand)
 
@@ -131,6 +126,10 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
             aria-label={actie.label}
             onPointerDown={(e) => e.stopPropagation()}
             onClick={actie.onClick}
+            onPointerEnter={(e) => e.pointerType === 'mouse' && setTip(actie.id)}
+            onPointerLeave={() => setTip(null)}
+            onFocus={() => setTip(actie.id)}
+            onBlur={() => setTip(null)}
             className="menu-knop"
             data-actief={actie.actief ? 'ja' : undefined}
             data-gevaar={actie.gevaar ? 'ja' : undefined}
@@ -147,9 +146,11 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
         )
       })}
 
-      {/* One layer for every label, above every button. */}
+      {/* One word at a time, above every button, for whichever button you are
+          on. Six words at once turned the menu into a wall of text. */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }}>
         {acties.map((actie, index) => {
+          if (tip !== actie.id) return null
           const punt = posities[index]!
           return (
             <span
