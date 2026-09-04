@@ -125,5 +125,5 @@ function SchijfInDeLucht({
   const { x, y } = toSvg(punt, view)
   // The same disc as the one in a hand, one size up because in the air it has
   // nothing beside it to give it scale.
-  return <Schijf x={x} y={y} r={metresToUnits(radiusM) * 1.05} />
+  return <Schijf x={x} y={y} r={metresToUnits(radiusM) * 1.15} rand />
 }

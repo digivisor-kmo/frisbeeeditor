@@ -5,10 +5,11 @@ interface Props {
   /** Radius the disc is drawn to, in SVG units. */
   r: number
   /**
-   * A white ring behind it, for when the disc sits on top of a token: without
-   * it a white disc on a white token disappears.
+   * A white edge around it, for when the disc sits on top of a token: without
+   * it a white disc on a white token disappears, and on a black one it looks
+   * like a hole.
    */
-  halo?: boolean
+  rand?: boolean
 }
 
 /**
@@ -18,27 +19,28 @@ interface Props {
  * so the thing that leaves a hand is visibly the same thing that arrives in
  * another. Two separate drawings would drift apart the first time either is
  * touched.
+ *
+ * Deliberately only three shapes. On a token the whole disc is about a dozen
+ * pixels across, and anything more detailed turns into a smudge at that size.
  */
-export function Schijf({ x, y, r, halo = false }: Props) {
-  const rx = r * 0.62
-  const ry = r * 0.42
-  const lijn = Math.max(r * 0.11, 0.6)
+export function Schijf({ x, y, r, rand = false }: Props) {
+  const rx = r * 0.66
+  const ry = r * 0.45
+  const lijn = Math.max(r * 0.13, 0.7)
 
   return (
     <g pointerEvents="none">
-      {halo && (
+      {rand && (
         <ellipse
           cx={x}
           cy={y}
-          rx={rx + lijn * 2.1}
-          ry={ry + lijn * 2.1}
-          fill="var(--field-line)"
+          rx={rx}
+          ry={ry}
+          fill="var(--token-wit)"
+          stroke="var(--field-line)"
+          strokeWidth={lijn * 2.6}
         />
       )}
-
-      {/* The underside, just visible below the rim. It is what makes this read
-          as an object lying at an angle rather than a white oval. */}
-      <ellipse cx={x} cy={y + ry * 0.22} rx={rx} ry={ry} fill="var(--token-donker)" opacity={0.22} />
 
       <ellipse
         cx={x}
@@ -50,16 +52,17 @@ export function Schijf({ x, y, r, halo = false }: Props) {
         strokeWidth={lijn}
       />
 
-      {/* The inner rim of a disc, the line every frisbee has. */}
+      {/* The inner rim, the line every frisbee has. It is what makes this an
+          object rather than a white oval. */}
       <ellipse
         cx={x}
         cy={y}
-        rx={rx * 0.54}
-        ry={ry * 0.48}
+        rx={rx * 0.46}
+        ry={ry * 0.4}
         fill="none"
         stroke="var(--token-donker)"
-        strokeWidth={lijn * 0.6}
-        opacity={0.5}
+        strokeWidth={lijn * 0.7}
+        opacity={0.55}
       />
     </g>
   )

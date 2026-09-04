@@ -29,15 +29,21 @@ export function PlayerToken({ player, view, radiusM, hitRadiusM, stijl, selected
 
   return (
     <g data-entity-id={player.id} style={{ cursor: 'grab' }}>
-      {/* A player stands on the grass, he is not printed into it. One soft
-          ellipse underneath is the whole difference. */}
-      <ellipse
+      {/*
+        No drop shadow. A field is seen from above, so a shadow under a marker
+        implies a light source that is not there, and at this size it peeks out
+        all around and reads as a dirty edge. What the token needs instead is a
+        crisp boundary: the white rim below, and this hairline outside it that
+        holds the shape against the green.
+      */}
+      <circle
         cx={x}
-        cy={y + r * 0.34}
-        rx={r * 0.94}
-        ry={r * 0.8}
-        fill="var(--token-donker)"
-        opacity={0.16}
+        cy={y}
+        r={r + ring * 0.5}
+        fill="none"
+        stroke="var(--token-donker)"
+        strokeWidth={ring * 0.5}
+        opacity={0.28}
         pointerEvents="none"
       />
 
@@ -105,7 +111,7 @@ export function PlayerToken({ player, view, radiusM, hitRadiusM, stijl, selected
         </text>
       )}
 
-      {player.hasDisc && <Schijf x={x + r * 0.92} y={y - r * 0.88} r={r * 0.86} halo />}
+      {player.hasDisc && <Schijf x={x + r * 0.86} y={y - r * 0.82} r={r * 1.02} rand />}
 
       <circle cx={x} cy={y} r={hit} fill="transparent" />
     </g>
