@@ -506,3 +506,39 @@ pixels breed; de knoppen landden boven op de naam. Op een telefoon staat er nu
 één icoon dat naar het accountscherm leidt, en afmelden heeft daar zijn eigen
 plek gekregen. De primaire knop op een paginakop loopt daar ook over de volle
 breedte, binnen duimbereik.
+
+## 2026-09-04 — Mobiel: meten in plaats van aftrekken
+
+**Wat er mis was.** De mobiele opmaak trok een hard getal van de schermhoogte af
+om de veldhoogte te bepalen. Dat getal klopte niet in portret, opnieuw niet in
+landschap, en een derde keer niet zodra de balk over twee rijen brak. Op een echt
+toestel gaf dat een postzegel van een veld midden in een lege witte kaart. Ik had
+het op een desktopbrowser beredeneerd en niet gezien; dat is precies waarom Daan
+het op zijn eigen telefoon moest openen.
+
+**Gekozen.** Niets wordt meer geraden. De hoogte van de vaste onderbalk en de
+ruimte die daarboven overblijft worden gemeten en als `--dock-hoogte` en
+`--veld-ruimte` gepubliceerd, met een ResizeObserver op de balken zelf, zodat het
+meteen klopt als er een rij bijkomt.
+
+**Breedte op auto in de editor**, zodat de doos het veld omsluit. Een doos over
+de volle breedte rond een staand veld van 37 bij 100 meter is wat die twee velden
+wit aan weerskanten veroorzaakte. Op een leesscherm net andersom: daar neemt het
+veld de volle breedte en scrolt de pagina, want daar tekent niemand.
+
+**De balk moest ook slanker.** Hij at 282 van de 911 pixels. Snelheid en focus
+zijn naar het uitklappaneel verhuisd, waar de projectinstructie ze trouwens al
+had staan: kijkinstellingen die je één keer aanraakt horen niet permanent in de
+balk die wel moet blijven. Nu 178 in portret en 133 in landschap.
+
+**Nagemeten** op 412×915 en op 915×412: niets loopt nog over, en het veld is
+250×617 respectievelijk 865×351. In portret is de breedte begrensd door de
+verhouding van het veld zelf, niet door de opmaak.
+
+## 2026-09-04 — De editorkop op een telefoon
+
+Terugknop, naam, delen, bezetting, validatie en opslaanstatus passen niet op één
+regel van vierhonderd pixels. Ze werden afgekapt aan de rechterkant en het
+naamveld verdween volledig. De kop loopt nu over twee rijen: de naam met de
+terugknop, en daaronder de statusstrip. Alles blijft bereikbaar; niets verdwijnt
+achter een rand.
