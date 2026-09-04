@@ -35,6 +35,10 @@
   --token-donker: #191c20;
   --token-licht: #ffffff;
 
+  --arrow: #ffffff;
+  --arrow-rand: rgb(0 0 0 / 0.28);
+  --handle: #191c20;
+
   --radius: 8px;
   --shadow-float: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
 }
@@ -47,6 +51,8 @@
   --team-b-contrast: #191c20;
   --token-wit: #ffffff;
   --token-donker: #191c20;
+  --arrow: #3a4149;
+  --arrow-rand: rgb(255 255 255 / 0.6);
 }
 
 * {

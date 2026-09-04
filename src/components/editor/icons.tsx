@@ -52,3 +52,33 @@ export function PaletteIcon({ size = 20 }: IconProps) {
     </svg>
   )
 }
+
+/** A cut: a straight line with a solid point. */
+export function CutIcon({ size = 20 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M4 18 L15 7" />
+      <path d="M10.5 6.2 L16.5 5.5 L15.8 11.5 Z" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+/** A juke: the same line, but wavy. */
+export function JukeIcon({ size = 20 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M4 18c2-2 0-4.5 2-6.5s4 0 5.5-2" />
+      <path d="M10.5 6.6 L16.5 5.5 L15.4 11.5 Z" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+/** A throw: a dashed line with an open point. */
+export function ThrowIcon({ size = 20 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M4 18 L14.5 7.5" strokeDasharray="3 2.6" />
+      <path d="M11 6.5 L16 5.5 L15 10.5" />
+    </svg>
+  )
+}

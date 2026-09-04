@@ -47,7 +47,7 @@ export const nl = {
     verwijderen: 'Verwijderen',
     bezettingUitleg: 'Aanval en verdediging op het veld. Kleurt zodra het er geen zeven zijn.',
     hulp:
-      'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Shift-klik selecteert er een bij, alt schakelt het raster tijdelijk uit.',
+      'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Tik een speler aan voor het menu; daar teken je ook een cut, juke of worp. Van een arrow open je met de punt het menu en met het lijfje de handvatten.',
   },
   menu: {
     schijf: 'Schijf',
@@ -59,6 +59,10 @@ export const nl = {
     eigenLabel: 'Eigen label',
     eigenLabelLeeg: 'Positie',
     kleur: 'Kleur',
+    typeWisselen: 'Type wisselen',
+    worptype: 'Worptype',
+    worptypeUitleg:
+      'Bepaalt hoe de curve standaard buigt. Heb je de bocht zelf al versleept, dan blijft die staan.',
   },
   kleuren: {
     standaard: 'Standaard',

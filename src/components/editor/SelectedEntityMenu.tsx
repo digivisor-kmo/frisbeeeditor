@@ -2,14 +2,38 @@
 
 import { useState } from 'react'
 import { paintFor } from '@/components/field/tokens/colors'
+import {
+  ARROW_LABELS,
+  createArrow,
+  THROW_KROMMING,
+  tekenbareArrows,
+} from '@/lib/diagram/arrows'
 import { giveDisc } from '@/lib/diagram/entities'
-import { TOKEN_COLORS, type Entity, type Player, type TokenColor } from '@/lib/diagram/schema'
+import {
+  TOKEN_COLORS,
+  type Arrow,
+  type ArrowKind,
+  type Entity,
+  type Player,
+  type ThrowType,
+  type TokenColor,
+} from '@/lib/diagram/schema'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
+import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 import { EntityMenu, type MenuActie } from './EntityMenu'
-import { DiscIcon, GearIcon, PaletteIcon, TrashIcon } from './icons'
+import {
+  CutIcon,
+  DiscIcon,
+  GearIcon,
+  JukeIcon,
+  PaletteIcon,
+  ThrowIcon,
+  TrashIcon,
+} from './icons'
 import { PlayerSettings } from './PlayerSettings'
+import { ThrowSettings } from './ThrowSettings'
 
 interface Props {
   entity: Entity
@@ -17,10 +41,21 @@ interface Props {
   tokenRadiusPx: number
 }
 
+const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
+  cut: <CutIcon />,
+  juke: <JukeIcon />,
+  throw: <ThrowIcon />,
+  sight: <CutIcon />,
+}
+
 export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
   const change = useDiagramStore((s) => s.change)
+  const weergave = useDiagramStore((s) => s.doc.meta.weergave)
   const activeFrame = useUiStore((s) => s.activeFrame)
+  const select = useUiStore((s) => s.select)
   const clearSelection = useUiStore((s) => s.clearSelection)
+  const setMenuOpen = useUiStore((s) => s.setMenuOpen)
+
   // The caller keys this component on the entity id, so selecting another
   // entity remounts it and the settings panel starts closed again.
   const [paneelOpen, setPaneelOpen] = useState(false)
@@ -35,7 +70,9 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
     change(nl.menu.verwijderen, (draft) => {
       const content = draft.frames[activeFrame]?.content
       if (!content) return
-      content.entities = content.entities.filter((e) => e.id !== entity.id)
+      content.entities = content.entities.filter(
+        (e) => e.id !== entity.id && !(e.type === 'arrow' && e.ownerId === entity.id),
+      )
     })
     clearSelection()
   }
@@ -47,7 +84,7 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
     const player = entity
 
     // The disc always sits on the left and the bin always on the right, whatever
-    // else appears in between, so the positions stay learnable.
+    // appears in between, so the positions stay learnable.
     acties.push({
       id: 'disc',
       label: nl.menu.schijf,
@@ -69,6 +106,36 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
       onClick: () => setPaneelOpen((open) => !open),
     })
 
+    // One button per arrow this player can draw, each with its own icon. The
+    // throw only appears for whoever holds the disc, which quietly enforces a
+    // rule of the game.
+    for (const kind of tekenbareArrows(player.hasDisc)) {
+      acties.push({
+        id: `arrow-${kind}`,
+        label: ARROW_LABELS[kind],
+        icon: ARROW_ICONS[kind],
+        onClick: () => {
+          const id = newId()
+          change(`${ARROW_LABELS[kind]} tekenen`, (draft) => {
+            const content = draft.frames[activeFrame]?.content
+            if (!content) return
+            content.entities.push(
+              createArrow({
+                id,
+                ownerId: player.id,
+                van: player.pos,
+                kind,
+                weergave,
+                entities: content.entities,
+              }),
+            )
+          })
+          select([id])
+          setMenuOpen(false)
+        },
+      })
+    }
+
     acties.push({
       id: 'delete',
       label: nl.menu.verwijderen,
@@ -84,6 +151,60 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
           onChange={(recipe, label) =>
             wijzig(label, (draft) => {
               if (draft.type === 'player') recipe(draft as Player)
+            })
+          }
+        />
+      )
+    }
+  } else if (entity.type === 'arrow') {
+    const arrow = entity
+
+    for (const kind of ['cut', 'juke', 'throw'] as const) {
+      // A throw can only exist while its owner holds the disc.
+      if (kind === 'throw' && arrow.kind !== 'throw') continue
+      acties.push({
+        id: `kind-${kind}`,
+        label: ARROW_LABELS[kind],
+        icon: ARROW_ICONS[kind],
+        actief: arrow.kind === kind,
+        onClick: () =>
+          wijzig(nl.menu.typeWisselen, (draft) => {
+            if (draft.type !== 'arrow') return
+            draft.kind = kind
+            if (kind !== 'throw') {
+              draft.throwType = undefined
+              draft.targetId = undefined
+            }
+          }),
+      })
+    }
+
+    if (arrow.kind === 'throw') {
+      acties.push({
+        id: 'throwtype',
+        label: nl.menu.worptype,
+        icon: <GearIcon />,
+        actief: paneelOpen,
+        onClick: () => setPaneelOpen((open) => !open),
+      })
+    }
+
+    acties.push({
+      id: 'delete',
+      label: nl.menu.verwijderen,
+      icon: <TrashIcon />,
+      gevaar: true,
+      onClick: verwijder,
+    })
+
+    if (paneelOpen && arrow.kind === 'throw') {
+      paneel = (
+        <ThrowSettings
+          huidig={arrow.throwType ?? 'backhand'}
+          onKies={(type: ThrowType) =>
+            wijzig(nl.menu.worptype, (draft) => {
+              if (draft.type !== 'arrow') return
+              zetWorptype(draft, type)
             })
           }
         />
@@ -138,11 +259,38 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx }: Props) {
   }
 
   return (
-    <EntityMenu
-      anchor={anchor}
-      tokenRadiusPx={tokenRadiusPx}
-      acties={acties}
-      paneel={paneel}
-    />
+    <EntityMenu anchor={anchor} tokenRadiusPx={tokenRadiusPx} acties={acties} paneel={paneel} />
   )
+}
+
+/**
+ * Switching throw type re-bends a still-straight throw, so you can see what you
+ * picked. A throw that has already been shaped by hand is left alone.
+ */
+function zetWorptype(arrow: Arrow, type: ThrowType) {
+  const vorige = arrow.throwType ?? 'backhand'
+  arrow.throwType = type
+
+  const punten = arrow.path.points
+  if (punten.length !== 3) return
+
+  const start = punten[0]!
+  const eind = punten[2]!
+  const midden = { x: (start.x + eind.x) / 2, y: (start.y + eind.y) / 2 }
+  const dx = eind.x - start.x
+  const dy = eind.y - start.y
+  const lengte = Math.hypot(dx, dy) || 1
+
+  const verwacht = {
+    x: midden.x - (dy / lengte) * lengte * THROW_KROMMING[vorige],
+    y: midden.y + (dx / lengte) * lengte * THROW_KROMMING[vorige],
+  }
+  const zelfGetekend =
+    Math.hypot(punten[1]!.x - verwacht.x, punten[1]!.y - verwacht.y) > 0.3
+  if (zelfGetekend) return
+
+  punten[1] = {
+    x: midden.x - (dy / lengte) * lengte * THROW_KROMMING[type],
+    y: midden.y + (dx / lengte) * lengte * THROW_KROMMING[type],
+  }
 }
