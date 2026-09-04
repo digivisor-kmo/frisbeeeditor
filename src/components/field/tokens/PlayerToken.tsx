@@ -111,7 +111,9 @@ export function PlayerToken({ player, view, radiusM, hitRadiusM, stijl, selected
         </text>
       )}
 
-      {player.hasDisc && <Schijf x={x + r * 0.86} y={y - r * 0.82} r={r * 1.02} rand />}
+            {/* Resting on his shoulder, overlapping the rim, rather than floating off
+          the corner: it belongs to this player and has to look like it. */}
+      {player.hasDisc && <Schijf x={x + r * 0.74} y={y - r * 0.72} r={r * 1.02} rand />}
 
       <circle cx={x} cy={y} r={hit} fill="transparent" />
     </g>
