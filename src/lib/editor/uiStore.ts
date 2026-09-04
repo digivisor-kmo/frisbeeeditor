@@ -27,11 +27,17 @@ interface UiStore {
    * the thing you are moving.
    */
   menuOpen: boolean
+  /**
+   * Index in `path.points` of the bend that shows its delete cross. Only one at
+   * a time, otherwise a curve with four bends becomes a field of little crosses.
+   */
+  actieveBocht: number | null
 
   setMode: (mode: EditorMode) => void
   setTool: (tool: Tool) => void
   setSnap: (snap: boolean) => void
   setMenuOpen: (open: boolean) => void
+  setActieveBocht: (index: number | null) => void
   setActiveFrame: (index: number) => void
 
   select: (ids: string[]) => void
@@ -53,15 +59,17 @@ export const useUiStore = create<UiStore>((set, get) => ({
   activeFrame: 0,
   snap: true,
   menuOpen: false,
+  actieveBocht: null,
 
   setMode: (mode) => set({ mode }),
   setTool: (tool) => set({ tool, mode: 'idle', menuOpen: false }),
   setSnap: (snap) => set({ snap }),
   setMenuOpen: (menuOpen) => set({ menuOpen }),
+  setActieveBocht: (actieveBocht) => set({ actieveBocht }),
   setActiveFrame: (activeFrame) =>
     set({ activeFrame, selection: new Set<string>(), menuOpen: false }),
 
-  select: (ids) => set({ selection: new Set(ids) }),
+  select: (ids) => set({ selection: new Set(ids), actieveBocht: null }),
   toggle: (id) =>
     set((state) => {
       const next = new Set(state.selection)
@@ -69,7 +77,8 @@ export const useUiStore = create<UiStore>((set, get) => ({
       else next.add(id)
       return { selection: next }
     }),
-  clearSelection: () => set({ selection: new Set<string>(), menuOpen: false }),
+  clearSelection: () =>
+    set({ selection: new Set<string>(), menuOpen: false, actieveBocht: null }),
   isSelected: (id) => get().selection.has(id),
   pruneSelection: (bestaandeIds) =>
     set((state) => {

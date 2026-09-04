@@ -223,3 +223,14 @@ export function toPolylineD(points: readonly Point[]): string {
   if (points.length === 0) return ''
   return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
 }
+
+/**
+ * The middle of every segment, on the curve.
+ *
+ * These are the spots where a small grey handle sits: an invitation to make a
+ * new bend there. With n bend points there are n + 1 segments, so there are
+ * always n + 1 of these.
+ */
+export function segmentMidpoints(points: readonly Point[]): Point[] {
+  return toBezier(points).map((seg) => evalBezier(seg, 0.5))
+}

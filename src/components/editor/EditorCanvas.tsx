@@ -6,7 +6,7 @@ import { ArrowShape } from '@/components/field/ArrowShape'
 import { FieldSurface } from '@/components/field/FieldSurface'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
-import { snapThrowEnd, verplaatsArrow } from '@/lib/diagram/arrows'
+import { snapThrowEnd, verplaatsArrow, verwijderBocht, voegBochtToe } from '@/lib/diagram/arrows'
 import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
 import { isArrow, isPlayer, type Point, type Side } from '@/lib/diagram/schema'
 import {
@@ -27,8 +27,8 @@ import { useMetresPerPixel } from './useMetresPerPixel'
 type DragDoel =
   | { soort: 'entiteit'; id: string; offset: Point }
   | { soort: 'tip'; id: string }
-  | { soort: 'bend'; id: string }
-  | { soort: 'hint'; id: string }
+  | { soort: 'bend'; id: string; puntIndex: number }
+  | { soort: 'hint'; id: string; segmentIndex: number; puntIndex: number | null }
 
 interface DragState {
   doel: DragDoel
@@ -67,6 +67,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const pruneSelection = useUiStore((s) => s.pruneSelection)
   const menuOpen = useUiStore((s) => s.menuOpen)
   const setMenuOpen = useUiStore((s) => s.setMenuOpen)
+  const actieveBocht = useUiStore((s) => s.actieveBocht)
+  const setActieveBocht = useUiStore((s) => s.setActieveBocht)
 
   const view = useMemo(() => createView(doc.meta.weergave), [doc.meta.weergave])
   const metresPerPixel = useMetresPerPixel(svgRef, view)
@@ -129,11 +131,14 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         if (event.shiftKey) toggle(entityId)
         else select([entityId])
 
-        if (part === 'bendDelete') {
+        const index = part ? Number(part.split('-')[1]) : NaN
+
+        if (part?.startsWith('bendDelete-')) {
           wijzigFrame('Bocht weghalen', (list) => {
             const a = list.find((e) => e.id === entityId)
-            if (a && a.type === 'arrow' && a.path.points.length === 3) a.path.points.splice(1, 1)
+            if (a && a.type === 'arrow') verwijderBocht(a, index)
           })
+          setActieveBocht(null)
           setMenuOpen(false)
           return
         }
@@ -141,9 +146,19 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         // The tip opens the menu; the body only shows the handles. Keeping those
         // apart is what makes an arrow workable without any explanation.
         setMenuOpen(part === 'tip')
-        if (part === 'tip') beginSleep({ soort: 'tip', id: entityId })
-        else if (part === 'bend') beginSleep({ soort: 'bend', id: entityId })
-        else if (part === 'hint') beginSleep({ soort: 'hint', id: entityId })
+
+        if (part === 'tip') {
+          setActieveBocht(null)
+          beginSleep({ soort: 'tip', id: entityId })
+        } else if (part?.startsWith('bend-')) {
+          setActieveBocht(index)
+          beginSleep({ soort: 'bend', id: entityId, puntIndex: index })
+        } else if (part?.startsWith('hint-')) {
+          setActieveBocht(null)
+          beginSleep({ soort: 'hint', id: entityId, segmentIndex: index, puntIndex: null })
+        } else {
+          setActieveBocht(null)
+        }
         return
       }
 
@@ -236,11 +251,30 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         }
 
         const bocht = maybeSnap(ruw, event.altKey)
-        if (arrow.path.points.length === 2) arrow.path.points.splice(1, 0, bocht)
-        else arrow.path.points[1] = bocht
+
+        if (doel.soort === 'hint') {
+          // The first move turns the invitation into a real bend; every move
+          // after that just drags the bend it created.
+          if (doel.puntIndex === null) {
+            const nieuw = voegBochtToe(arrow, doel.segmentIndex, bocht)
+            if (nieuw === null) return
+            doel.puntIndex = nieuw
+            return
+          }
+          arrow.path.points[doel.puntIndex] = bocht
+          return
+        }
+
+        arrow.path.points[doel.puntIndex] = bocht
       },
       state.groupId,
     )
+
+    // A bend that was just created out of an invitation handle becomes the
+    // active one, so its delete cross is right there if you misplaced it.
+    if (doel.soort === 'hint' && doel.puntIndex !== null && actieveBocht !== doel.puntIndex) {
+      setActieveBocht(doel.puntIndex)
+    }
   }
 
   function endDrag(event: React.PointerEvent<SVGSVGElement>) {
@@ -349,6 +383,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
                 view={view}
                 tokenRadiusM={radiusM}
                 hitRadiusM={hitM}
+                actieveBocht={actieveBocht}
               />
             ))}
         </g>

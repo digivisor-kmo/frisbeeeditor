@@ -148,9 +148,39 @@ export function verplaatsArrow(arrow: Arrow, delta: Point): void {
 export const arrowStart = (arrow: Arrow): Point => arrow.path.points[0]!
 export const arrowEnd = (arrow: Arrow): Point => arrow.path.points[arrow.path.points.length - 1]!
 
-/** In phase one an arrow has at most one bend point, in the middle of its path. */
-export const arrowBend = (arrow: Arrow): Point | null =>
-  arrow.path.points.length === 3 ? arrow.path.points[1]! : null
+/**
+ * How many bends one arrow may carry. There is no rule that needs a limit, but
+ * past a handful the handles start covering each other and nothing on a field
+ * needs that many.
+ */
+export const MAX_BOCHTEN = 8
+
+/** The bend points: everything between the start and the end. */
+export const arrowBochten = (arrow: Arrow): Point[] => arrow.path.points.slice(1, -1)
+
+/** Indices of the bend points inside `path.points`. */
+export const bochtIndices = (arrow: Arrow): number[] =>
+  arrow.path.points.slice(1, -1).map((_, i) => i + 1)
+
+/** Number of segments, which is also the number of small invitation handles. */
+export const segmentAantal = (arrow: Arrow): number => arrow.path.points.length - 1
+
+/**
+ * Turns the small handle in the middle of segment `segmentIndex` into a real
+ * bend point. Mutates an immer draft and returns the index of the new point.
+ */
+export function voegBochtToe(arrow: Arrow, segmentIndex: number, punt: Point): number | null {
+  if (arrowBochten(arrow).length >= MAX_BOCHTEN) return null
+  const index = Math.min(Math.max(segmentIndex + 1, 1), arrow.path.points.length - 1)
+  arrow.path.points.splice(index, 0, punt)
+  return index
+}
+
+export function verwijderBocht(arrow: Arrow, puntIndex: number): boolean {
+  if (puntIndex < 1 || puntIndex > arrow.path.points.length - 2) return false
+  arrow.path.points.splice(puntIndex, 1)
+  return true
+}
 
 export const ARROW_LABELS: Record<ArrowKind, string> = {
   cut: 'Cut',

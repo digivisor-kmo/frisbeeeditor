@@ -6,6 +6,7 @@ import {
   midpoint,
   pointAtDistance,
   pointAtFraction,
+  segmentMidpoints,
   tangentAt,
   toBezier,
   toPathD,
@@ -176,5 +177,27 @@ describe('trimStart', () => {
 
   it('houdt het aantal punten gelijk', () => {
     expect(trimStart(bocht, 1)).toHaveLength(3)
+  })
+})
+
+describe('segmentMidpoints', () => {
+  it('geeft er precies één per segment', () => {
+    expect(segmentMidpoints(recht)).toHaveLength(1)
+    expect(segmentMidpoints(bocht)).toHaveLength(2)
+    expect(segmentMidpoints([{ x: 0, y: 0 }])).toHaveLength(0)
+  })
+
+  it('legt ze op de curve, niet ernaast', () => {
+    const punten = segmentMidpoints(bocht)
+    const segments = toBezier(bocht)
+    punten.forEach((punt, i) => {
+      expect(punt).toEqual(evalBezier(segments[i]!, 0.5))
+    })
+  })
+
+  it('zet het handvat van een rechte lijn precies in het midden', () => {
+    const [m] = segmentMidpoints(recht)
+    expect(m!.x).toBeCloseTo(5, 9)
+    expect(m!.y).toBeCloseTo(0, 9)
   })
 })
