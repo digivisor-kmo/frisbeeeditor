@@ -8,7 +8,13 @@ import { FieldSurface } from '@/components/field/FieldSurface'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
 import { frameOpTijd } from '@/lib/diagram/animation'
-import { arrowEnd, snapThrowEnd, verwijderBocht, voegBochtToe } from '@/lib/diagram/arrows'
+import {
+  arrowEnd,
+  snapThrowEnd,
+  THROW_SNAP_M,
+  verwijderBocht,
+  voegBochtToe,
+} from '@/lib/diagram/arrows'
 import {
   herberekenSchijfVanaf,
   synchroniseerArrowMetVorigFrame,
@@ -25,6 +31,7 @@ import {
   klem,
   maakCamera,
   MAX_ZOOM,
+  metresToUnits,
   MIN_ZOOM,
   snapToGrid,
   toField,
@@ -79,6 +86,9 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<DragState | null>(null)
   const [tipInSleep, setTipInSleep] = useState<string | null>(null)
+  // Where a throw would land if you let go now. Without it a snap that missed by
+  // half a metre is indistinguishable from one that caught.
+  const [snapDoel, setSnapDoel] = useState<Point | null>(null)
   const [kader, setKader] = useState<Kader | null>(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const knijp = useRef<KnijpState | null>(null)
@@ -168,6 +178,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   function stopSleep() {
     drag.current = null
     setTipInSleep(null)
+    setSnapDoel(null)
     setKader(null)
     setMode('idle')
   }
@@ -374,6 +385,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       return
     }
 
+    let gevangen: Point | null = null
+
     wijzigFrames(
       doel.soort === 'tip' ? 'Arrow bijstellen' : 'Bocht bijstellen',
       (frames) => {
@@ -387,9 +400,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           const oudEinde = { ...arrowEnd(arrow) }
 
           if (arrow.kind === 'throw') {
-            const { pos, targetId } = snapThrowEnd(gesnapt, list, arrow.ownerId)
+            // Keep the magnet about a fingertip wide however far you zoomed out.
+            const bereik = Math.max(THROW_SNAP_M, metresPerPixel * 26)
+            const { pos, targetId } = snapThrowEnd(gesnapt, list, arrow.ownerId, bereik)
             arrow.path.points[arrow.path.points.length - 1] = { ...pos }
             arrow.targetId = targetId
+            gevangen = targetId ? { ...pos } : null
             // A different receiver means the disc lands somewhere else.
             herberekenSchijfVanaf(frames, activeFrame)
           } else {
@@ -428,6 +444,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       },
       state.groupId,
     )
+
+    if (doel.soort === 'tip') setSnapDoel(gevangen)
 
     // A bend that was just created out of an invitation handle becomes the
     // active one, so its delete cross is right there if you misplaced it.
@@ -550,6 +568,19 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
             />
           ))}
         </g>
+
+        {snapDoel && (
+          <circle
+            cx={toSvg(snapDoel, view).x}
+            cy={toSvg(snapDoel, view).y}
+            r={metresToUnits(radiusM * 1.55)}
+            fill="none"
+            stroke="var(--accent)"
+            strokeWidth={metresToUnits(radiusM * 0.16)}
+            opacity={0.95}
+            pointerEvents="none"
+          />
+        )}
 
         <g style={{ display: animeert ? 'none' : undefined }}>
           {opZ(players).map((player) => (

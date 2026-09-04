@@ -12,6 +12,11 @@ export function bewegingsArrows(content: FrameContent): Arrow[] {
   return content.entities.filter(isArrow).filter(isBeweging)
 }
 
+/** Throws that arrive somewhere: they move the disc, which is movement too. */
+export function aangekomenWorpen(content: FrameContent): Arrow[] {
+  return content.entities.filter(isArrow).filter((a) => a.kind === 'throw' && Boolean(a.targetId))
+}
+
 /**
  * Whether a next frame can be built from this one.
  *
@@ -20,7 +25,9 @@ export function bewegingsArrows(content: FrameContent): Arrow[] {
  * out the button, otherwise you go looking for what you did wrong.
  */
 export function kanFrameToevoegen(content: FrameContent, aantalFrames: number): boolean {
-  return aantalFrames < MAX_FRAMES && bewegingsArrows(content).length > 0
+  if (aantalFrames >= MAX_FRAMES) return false
+  // A swing where nobody runs is still a next frame: the disc changed hands.
+  return bewegingsArrows(content).length > 0 || aangekomenWorpen(content).length > 0
 }
 
 /**

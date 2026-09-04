@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { paintFor } from '@/components/field/tokens/colors'
 import {
+  arrowEnd,
   ARROW_LABELS,
   createArrow,
+  snapThrowEnd,
   THROW_KROMMING,
   tekenbareArrows,
 } from '@/lib/diagram/arrows'
@@ -64,6 +66,9 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
   const change = useDiagramStore((s) => s.change)
   const weergave = useDiagramStore((s) => s.doc.meta.weergave)
   const activeFrame = useUiStore((s) => s.activeFrame)
+  // The store's own array, not a derived one: deriving here would hand Zustand
+  // a fresh reference on every read and spin the render loop.
+  const entities = useDiagramStore((s) => s.doc.frames[activeFrame]?.content.entities)
   const select = useUiStore((s) => s.select)
   const clearSelection = useUiStore((s) => s.clearSelection)
   const setMenuOpen = useUiStore((s) => s.setMenuOpen)
@@ -192,10 +197,15 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
     }
   } else if (entity.type === 'arrow') {
     const arrow = entity
+    const eigenaarHeeftSchijf = (entities ?? []).some(
+      (e) => e.id === arrow.ownerId && e.type === 'player' && e.hasDisc,
+    )
 
     for (const kind of ['cut', 'juke', 'throw'] as const) {
-      // A throw can only exist while its owner holds the disc.
-      if (kind === 'throw' && arrow.kind !== 'throw') continue
+      // A throw can only exist while its owner holds the disc, but if he does,
+      // turning a cut into a throw has to be possible: the same button appears
+      // in his own menu, so hiding it here would be inconsistent.
+      if (kind === 'throw' && arrow.kind !== 'throw' && !eigenaarHeeftSchijf) continue
       acties.push({
         id: `kind-${kind}`,
         label: ARROW_LABELS[kind],
@@ -215,6 +225,17 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
             if (kind !== 'throw') {
               target.throwType = undefined
               target.targetId = undefined
+            } else {
+              // A throw goes to somebody. Look who is standing where this arrow
+              // already ends, so the switch does not leave a throw into nowhere.
+              target.throwType = target.throwType ?? 'backhand'
+              const { pos, targetId } = snapThrowEnd(
+                arrowEnd(target),
+                content.entities,
+                target.ownerId,
+              )
+              target.path.points[target.path.points.length - 1] = { ...pos }
+              target.targetId = targetId
             }
             const na = arrowVerplaatsing(content, target)
             verplaatsVanaf(frames, activeFrame + 1, target.ownerId, {

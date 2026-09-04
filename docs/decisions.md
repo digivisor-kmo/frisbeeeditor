@@ -324,3 +324,33 @@ hij aan het typen is.
 
 **Ook rechtgezet.** Een ster zetten dook het diagram naar boven in "recent
 gewijzigd". De trigger negeert nu een wijziging die alleen `favoriet` betreft.
+
+## 2026-09-04 — Een worp die nergens aankomt mag niet stil mislukken
+
+Vier dingen samen maakten het gooien van een schijf onbetrouwbaar aanvoelen. Ze
+hebben één oorzaak: een worp zonder ontvanger deed niets en zag er precies uit
+als een worp die wel aankwam.
+
+**Een verse worp mikt nu op iemand.** Hij verscheen blind twaalf meter in de
+aanvalsrichting, dus je moest élke keer de punt naar de ontvanger slepen, en als
+je er anderhalve meter naast zat gebeurde er niets. Nu kiest hij de
+waarschijnlijkste ontvanger: bij voorkeur iemand die cut, en dan naar het eind
+van die cut, want daar gooi je naartoe. Klopt de gok niet, dan kost dat één
+sleepbeweging, wat vroeger de vaste prijs was.
+
+**Het magneetbereik groeit mee met de zoom.** Anderhalve meter is op een uitgezoomd
+veld nog geen twintig pixels. Nu minstens een vingertop breed, hoe ver je ook
+uitgezoomd bent.
+
+**Je ziet waar hij vastklikt.** Tijdens het slepen verschijnt een ring rond de
+ontvanger. Los je daar, dan weet je dat het gelukt is.
+
+**Een worp zonder ontvanger ziet er onaf uit** — een open cirkel in plaats van een
+pijlpunt — en staat in de teller "nog te doen". Zwijgen was hier het probleem.
+
+**Ook rechtgezet.** Een frame toevoegen kon alleen met een cut of een juke. Een
+swing waarbij de schijf van hand wisselt en niemand loopt is doodgewone ultimate,
+en dat kon dus niet: de knop bleef grijs en zei dat je eerst een cut moest zetten,
+alsof je worp niet meetelde. Een worp met een ontvanger is nu ook beweging. En een
+cut van de schijfdrager kan je nu in een worp veranderen; die knop stond wel in
+zijn spelersmenu maar niet in dat van de arrow zelf.

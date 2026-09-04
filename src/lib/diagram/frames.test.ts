@@ -207,3 +207,42 @@ describe('volgendFrame', () => {
     expect(dragers).toHaveLength(1)
   })
 })
+
+describe('een worp telt ook als beweging', () => {
+  it('laat een volgend frame toe bij een worp met ontvanger', () => {
+    const werper = createPlayer({ id: 'p1', pos: { x: 30, y: 18 }, side: 'offense', entities: [] })
+    werper.hasDisc = true
+    const ontvanger = createPlayer({ id: 'p2', pos: { x: 50, y: 18 }, side: 'offense', entities: [] })
+    const worp = createArrow({
+      id: 'a1',
+      ownerId: 'p1',
+      van: { x: 30, y: 18 },
+      kind: 'throw',
+      weergave: 'volledig',
+      entities: [werper, ontvanger],
+    })
+
+    const content: FrameContent = { entities: [werper, ontvanger, worp] }
+    expect(worp.targetId).toBe('p2')
+    expect(kanFrameToevoegen(content, 1)).toBe(true)
+
+    const volgend = volgendFrame(content)
+    const nieuweDrager = volgend.entities.find((e) => e.type === 'player' && e.hasDisc)
+    expect(nieuweDrager?.id).toBe('p2')
+  })
+
+  it('laat geen volgend frame toe bij een worp zonder ontvanger', () => {
+    const werper = createPlayer({ id: 'p1', pos: { x: 30, y: 18 }, side: 'offense', entities: [] })
+    werper.hasDisc = true
+    const worp = createArrow({
+      id: 'a1',
+      ownerId: 'p1',
+      van: { x: 30, y: 18 },
+      kind: 'throw',
+      weergave: 'volledig',
+      entities: [werper],
+    })
+    expect(worp.targetId).toBeUndefined()
+    expect(kanFrameToevoegen({ entities: [werper, worp] }, 1)).toBe(false)
+  })
+})

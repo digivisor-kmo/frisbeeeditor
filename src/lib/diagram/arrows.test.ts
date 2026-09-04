@@ -11,6 +11,7 @@ import {
   arrowStart,
   createArrow,
   NIEUWE_ARROW_LENGTE_M,
+  kiesOntvanger,
   snapThrowEnd,
   tekenbareArrows,
   THROW_KROMMING,
@@ -306,5 +307,69 @@ describe('bochtpunten', () => {
     voegBochtToe(arrow, 0, { x: 24, y: 22 })
     voegBochtToe(arrow, 1, { x: 28, y: 15 })
     expect(bochtIndices(arrow)).toEqual([1, 2])
+  })
+})
+
+describe('een nieuwe worp mikt op iemand', () => {
+  const werper = () => speler('p1', 30, 18, { hasDisc: true })
+
+  const cut = (id: string, ownerId: string, van: { x: number; y: number }, naar: { x: number; y: number }) => {
+    const arrow = createArrow({ id, ownerId, van, kind: 'cut', weergave: 'volledig', entities: [] })
+    arrow.path.points = [{ ...van }, { ...naar }]
+    return arrow
+  }
+
+  it('kiest de cutter boven wie stilstaat', () => {
+    const staat = speler('p2', 45, 18)
+    const loopt = speler('p3', 40, 26)
+    const entities: Entity[] = [werper(), staat, loopt, cut('a1', 'p3', { x: 40, y: 26 }, { x: 62, y: 30 })]
+
+    const keuze = kiesOntvanger(entities, 'p1', 'volledig')
+    expect(keuze?.id).toBe('p3')
+    // Naar waar hij aankomt, niet naar waar hij nu staat.
+    expect(keuze?.pos).toEqual({ x: 62, y: 30 })
+  })
+
+  it('gooit niet naar achter', () => {
+    const achter = speler('p2', 10, 18)
+    expect(kiesOntvanger([werper(), achter], 'p1', 'volledig')).toBeNull()
+  })
+
+  it('gooit niet naar de tegenpartij', () => {
+    const tegenstander = { ...speler('p2', 50, 18), side: 'defense' as const }
+    expect(kiesOntvanger([werper(), tegenstander], 'p1', 'volledig')).toBeNull()
+  })
+
+  it('zet meteen een ontvanger op een verse worp', () => {
+    const ontvanger = speler('p2', 50, 18)
+    const arrow = createArrow({
+      id: 'a1',
+      ownerId: 'p1',
+      van: { x: 30, y: 18 },
+      kind: 'throw',
+      weergave: 'volledig',
+      entities: [werper(), ontvanger],
+    })
+    expect(arrow.targetId).toBe('p2')
+    expect(arrowEnd(arrow)).toEqual({ x: 50, y: 18 })
+  })
+
+  it('laat de worp los als er niemand is om naar te gooien', () => {
+    const arrow = createArrow({
+      id: 'a1',
+      ownerId: 'p1',
+      van: { x: 30, y: 18 },
+      kind: 'throw',
+      weergave: 'volledig',
+      entities: [werper()],
+    })
+    expect(arrow.targetId).toBeUndefined()
+  })
+
+  it('vangt op een ruimere afstand als het bereik meegroeit', () => {
+    const entities: Entity[] = [werper(), speler('p2', 50, 18)]
+    const ver = { x: 53, y: 18 }
+    expect(snapThrowEnd(ver, entities, 'p1').targetId).toBeUndefined()
+    expect(snapThrowEnd(ver, entities, 'p1', 4).targetId).toBe('p2')
   })
 })

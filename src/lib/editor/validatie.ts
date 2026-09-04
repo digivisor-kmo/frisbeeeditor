@@ -1,8 +1,10 @@
 import { occupancy } from '@/lib/diagram/entities'
+import { isArrow } from '@/lib/diagram/schema'
+import { nl } from '@/lib/strings'
 import type { EditorDoc } from './document'
 
 export interface Ontbreekt {
-  veld: 'naam' | 'type' | 'categorie' | 'spelers'
+  veld: 'naam' | 'type' | 'categorie' | 'spelers' | 'worp'
   tekst: string
 }
 
@@ -30,6 +32,16 @@ export function watOntbreekt(doc: EditorDoc): Ontbreekt[] {
   if (offense + defense === 0) {
     ontbreekt.push({ veld: 'spelers', tekst: 'Zet minstens één speler op het veld' })
   }
+
+  // A throw without a receiver hands the disc to nobody and animates nothing.
+  // Without this line that failure is completely silent.
+  const los = doc.frames.reduce(
+    (som, frame) =>
+      som +
+      frame.content.entities.filter((e) => isArrow(e) && e.kind === 'throw' && !e.targetId).length,
+    0,
+  )
+  if (los > 0) ontbreekt.push({ veld: 'worp', tekst: nl.validatie.losseWorp(los) })
 
   return ontbreekt
 }

@@ -21,7 +21,14 @@ import {
  */
 export const NIEUWE_ARROW_LENGTE_M = 12
 
-/** A throw endpoint within this distance of a player locks onto him. */
+/**
+ * A throw endpoint within this distance of a receiver locks onto him.
+ *
+ * This is the floor, not the whole story: the editor widens it so the target
+ * stays roughly a fingertip wide however far you have zoomed out. A throw that
+ * silently fails to arrive because you were two metres off is the single most
+ * confusing thing this editor can do.
+ */
 export const THROW_SNAP_M = 1.5
 
 /**
@@ -70,6 +77,48 @@ function klem(p: Point): Point {
   }
 }
 
+/**
+ * Who a fresh throw should be aimed at.
+ *
+ * A throw goes to a person, and almost always to somebody who is cutting: his
+ * arrival point, not where he stands now. Guessing that here means the common
+ * case works with no dragging at all, and a wrong guess costs one drag, which is
+ * what the old behaviour cost every single time.
+ */
+export function kiesOntvanger(
+  entities: readonly Entity[],
+  ownerId: string,
+  weergave: Weergave,
+): { id: string; pos: Point } | null {
+  const werper = entities.find((e) => e.id === ownerId)
+  if (!werper || !isPlayer(werper)) return null
+
+  const richting = aanvalsRichting(weergave)
+  const bewegingen = entities
+    .filter(isArrow)
+    .filter((a) => (MOVEMENT_KINDS as readonly string[]).includes(a.kind))
+
+  const kandidaten = entities
+    .filter(isPlayer)
+    .filter((p) => p.id !== ownerId && p.side === werper.side)
+    .map((p) => {
+      const beweging = bewegingen.find((a) => a.ownerId === p.id)
+      const doel = beweging ? arrowEnd(beweging) : p.pos
+      const heen = (doel.x - werper.pos.x) * richting.x + (doel.y - werper.pos.y) * richting.y
+      return { id: p.id, pos: doel, cut: Boolean(beweging), heen }
+    })
+    // Nobody throws backwards to open the offence up; a dump is the exception
+    // and a trainer drags the tip for it.
+    .filter((k) => k.heen > 0)
+
+  if (kandidaten.length === 0) return null
+
+  // A cutter beats a stander, and among equals the one furthest downfield.
+  kandidaten.sort((a, b) => (a.cut === b.cut ? b.heen - a.heen : a.cut ? -1 : 1))
+  const beste = kandidaten[0]!
+  return { id: beste.id, pos: { ...beste.pos } }
+}
+
 export function createArrow(options: {
   id: string
   ownerId: string
@@ -80,10 +129,17 @@ export function createArrow(options: {
   throwType?: ThrowType
 }): Arrow {
   const richting = aanvalsRichting(options.weergave)
-  const eind = klem({
-    x: options.van.x + richting.x * NIEUWE_ARROW_LENGTE_M,
-    y: options.van.y + richting.y * NIEUWE_ARROW_LENGTE_M,
-  })
+  const ontvanger =
+    options.kind === 'throw'
+      ? kiesOntvanger(options.entities, options.ownerId, options.weergave)
+      : null
+
+  const eind =
+    ontvanger?.pos ??
+    klem({
+      x: options.van.x + richting.x * NIEUWE_ARROW_LENGTE_M,
+      y: options.van.y + richting.y * NIEUWE_ARROW_LENGTE_M,
+    })
 
   const punten: Point[] = [options.van, eind]
 
@@ -107,6 +163,7 @@ export function createArrow(options: {
       z: nextZ(options.entities),
       kind: 'throw',
       ownerId: options.ownerId,
+      targetId: ontvanger?.id,
       path: { points: punten },
       throwType,
     }
@@ -134,13 +191,15 @@ export function snapThrowEnd(
   pos: Point,
   entities: readonly Entity[],
   ownerId: string,
+  snapM: number = THROW_SNAP_M,
 ): { pos: Point; targetId?: string } {
   type Kandidaat = { pos: Point; id: string; afstand: number }
   let beste: Kandidaat | null = null
+  const bereik = Math.max(snapM, THROW_SNAP_M)
 
   const overweeg = (kandidaat: Point, id: string) => {
     const afstand = Math.hypot(kandidaat.x - pos.x, kandidaat.y - pos.y)
-    if (afstand > THROW_SNAP_M) return
+    if (afstand > bereik) return
     if (!beste || afstand < beste.afstand) beste = { pos: { ...kandidaat }, id, afstand }
   }
 

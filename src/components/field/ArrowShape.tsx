@@ -54,6 +54,9 @@ export function ArrowShape({
 
   const gestreept = arrow.kind === 'throw'
   const gevuldeKop = arrow.kind !== 'throw'
+  // A throw that lands on nobody hands the disc to nobody and animates nothing.
+  // It has to look unfinished, or you go hunting for a bug that is not there.
+  const losseWorp = arrow.kind === 'throw' && !arrow.targetId
 
   const links: Point = {
     x: eind.point.x - richting.x * kop + -richting.y * kop * 0.42,
@@ -77,7 +80,21 @@ export function ArrowShape({
         pointerEvents="none"
       />
 
+      {!tipVerborgen && losseWorp && (
+        <circle
+          cx={eind.point.x}
+          cy={eind.point.y}
+          r={kop * 0.6}
+          fill="none"
+          stroke="var(--arrow)"
+          strokeWidth={dikte * 0.8}
+          opacity={0.75}
+          pointerEvents="none"
+        />
+      )}
+
       {!tipVerborgen &&
+        !losseWorp &&
         (gevuldeKop ? (
           <polygon
             points={`${eind.point.x},${eind.point.y} ${links.x},${links.y} ${rechts.x},${rechts.y}`}
