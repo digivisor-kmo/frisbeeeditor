@@ -635,3 +635,105 @@ ol {
     margin: 0 auto;
   }
 }
+
+/* ------------------------------------------------------------ frame strip */
+
+.frame-strip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 4;
+  display: flex;
+  gap: var(--ruimte-3);
+  align-items: center;
+  padding: var(--ruimte-2) var(--ruimte-3);
+  padding-bottom: calc(var(--ruimte-2) + env(safe-area-inset-bottom));
+  background: var(--surface-raised);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 12px rgb(16 24 32 / 0.06);
+}
+
+.frame-strip__rij {
+  display: flex;
+  gap: var(--ruimte-2);
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 2px;
+  flex: 1;
+  touch-action: pan-x;
+}
+
+.frame-strip__acties {
+  display: flex;
+  gap: var(--ruimte-2);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.frame-thumb {
+  position: relative;
+  flex-shrink: 0;
+  padding: 3px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-sunken);
+  cursor: grab;
+  transition:
+    border-color var(--overgang),
+    box-shadow var(--overgang);
+}
+
+.frame-thumb:hover {
+  border-color: var(--border-strong);
+}
+
+.frame-thumb[data-actief='ja'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.frame-thumb[data-doel='ja'] {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+
+.frame-thumb__veld {
+  display: block;
+  width: 110px;
+}
+
+.frame-thumb__nummer {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  min-width: 17px;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  color: var(--text);
+}
+
+/* The strip is permanent context, so the page keeps room for it. */
+body:has(.frame-strip) .editor-hoofd {
+  padding-bottom: calc(var(--ruimte-7) + 96px);
+}
+
+@media (max-width: 720px) {
+  .frame-strip {
+    bottom: 60px;
+  }
+
+  .frame-thumb__veld {
+    width: 74px;
+  }
+
+  body:has(.frame-strip) .veld-kaart .veld-svg {
+    height: calc(100dvh - 320px);
+  }
+}

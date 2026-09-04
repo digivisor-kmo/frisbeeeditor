@@ -6,7 +6,8 @@ import {
   undo as undoPatches,
   type History,
 } from './history'
-import { newDoc, type EditorDoc } from './document'
+import { volgendFrame } from '@/lib/diagram/frames'
+import { newDoc, newFrame, type EditorDoc } from './document'
 import { newId } from './ids'
 
 interface DiagramStore {
@@ -28,9 +29,16 @@ interface DiagramStore {
   undo: () => void
   redo: () => void
   markSaved: () => void
+
+  /** Adds the continuation of frame `index` right after it, and returns its position. */
+  voegFrameToe: (index: number) => number
+  dupliceerFrame: (index: number) => number
+  verwijderFrame: (index: number) => void
+  verplaatsFrame: (van: number, naar: number) => void
+  zetFrameDuur: (index: number, duurMs: number) => void
 }
 
-export const useDiagramStore = create<DiagramStore>((set) => ({
+export const useDiagramStore = create<DiagramStore>((set, get) => ({
   doc: newDoc({ frameId: newId() }),
   history: emptyHistory(),
   dirty: false,
@@ -59,6 +67,57 @@ export const useDiagramStore = create<DiagramStore>((set) => ({
     }),
 
   markSaved: () => set({ dirty: false }),
+
+  voegFrameToe: (index) => {
+    const bron = get().doc.frames[index]
+    if (!bron) return index
+    const frame = newFrame(newId(), volgendFrame(bron.content))
+    get().change('Frame toevoegen', (draft) => {
+      draft.frames.splice(index + 1, 0, frame)
+    })
+    return index + 1
+  },
+
+  dupliceerFrame: (index) => {
+    const bron = get().doc.frames[index]
+    if (!bron) return index
+    // A copy is a copy: the same entities in the same spots, with a new frame id.
+    const kopie = {
+      ...bron,
+      id: newId(),
+      content: JSON.parse(JSON.stringify(bron.content)) as typeof bron.content,
+    }
+    get().change('Frame dupliceren', (draft) => {
+      draft.frames.splice(index + 1, 0, kopie)
+    })
+    return index + 1
+  },
+
+  verwijderFrame: (index) =>
+    get().change('Frame verwijderen', (draft) => {
+      // A diagram always has at least one frame.
+      if (draft.frames.length <= 1) return
+      draft.frames.splice(index, 1)
+    }),
+
+  verplaatsFrame: (van, naar) =>
+    get().change('Frame verplaatsen', (draft) => {
+      if (van === naar) return
+      const frame = draft.frames[van]
+      if (!frame) return
+      draft.frames.splice(van, 1)
+      draft.frames.splice(naar, 0, frame)
+    }),
+
+  zetFrameDuur: (index, duurMs) =>
+    get().change(
+      'Frameduur',
+      (draft) => {
+        const frame = draft.frames[index]
+        if (frame) frame.duurMs = duurMs
+      },
+      `duur-${index}`,
+    ),
 }))
 
 export const canUndo = (state: DiagramStore) => state.history.undo.length > 0

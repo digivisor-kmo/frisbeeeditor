@@ -1,5 +1,6 @@
 import type { Cone } from '@/lib/diagram/schema'
 import { metresToUnits, toSvg, type FieldView } from '@/lib/field/geometry'
+import { coneFill } from './colors'
 
 interface Props {
   cone: Cone
@@ -42,7 +43,7 @@ export function ConeToken({ cone, view, radiusM, hitRadiusM, selected }: Props) 
       )}
       <polygon
         points={points}
-        fill="var(--token-wit)"
+        fill={coneFill(cone.color)}
         stroke="var(--token-donker)"
         strokeWidth={stroke}
         strokeLinejoin="round"

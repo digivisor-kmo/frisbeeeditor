@@ -127,22 +127,31 @@ export async function bewaarDiagram(doc: EditorDoc): Promise<void> {
     .eq('id', doc.id)
   if (error) throw new Error(error.message)
 
-  for (const [index, frame] of doc.frames.entries()) {
-    // Validate before writing: the frame invariants are the last line of
-    // defence before a broken diagram lands in the database.
-    const content = frameContentSchema.parse(frame.content)
-    const { error: frameError } = await supabase
-      .from('frames')
-      .update({
-        duur_ms: frame.duurMs,
-        toelichting: frame.toelichting,
-        content,
-        schema_version: SCHEMA_VERSION,
-      })
-      .eq('id', frame.id)
-      .eq('diagram_id', doc.id)
-    if (frameError) throw new Error(`Frame ${index + 1}: ${frameError.message}`)
-  }
+  // Validate before writing: the frame invariants are the last line of defence
+  // before a broken diagram lands in the database.
+  const rijen = doc.frames.map((frame, index) => ({
+    id: frame.id,
+    diagram_id: doc.id!,
+    volgorde: index,
+    duur_ms: frame.duurMs,
+    toelichting: frame.toelichting,
+    content: frameContentSchema.parse(frame.content),
+    schema_version: SCHEMA_VERSION,
+  }))
+
+  // One statement, so the deferred unique constraint on (diagram_id, volgorde)
+  // is only checked once every row has moved. Reordering frames would trip it
+  // halfway otherwise.
+  const { error: frameError } = await supabase.from('frames').upsert(rijen)
+  if (frameError) throw new Error(frameError.message)
+
+  const behouden = doc.frames.map((frame) => frame.id)
+  const { error: opruimError } = await supabase
+    .from('frames')
+    .delete()
+    .eq('diagram_id', doc.id)
+    .not('id', 'in', `(${behouden.join(',')})`)
+  if (opruimError) throw new Error(opruimError.message)
 }
 
 export async function verwijderDiagram(id: string): Promise<void> {

@@ -18,3 +18,12 @@ export function paintFor(color: TokenColor, side: Side): Paint {
     ? { fill: 'var(--team-a)', text: 'var(--team-a-contrast)' }
     : { fill: 'var(--team-b)', text: 'var(--team-b-contrast)' }
 }
+
+/**
+ * A cone in its default colour is white; the palette colours apply to it just
+ * like they do to a token. Without this the colour picker on a cone changed the
+ * data and nothing on the field.
+ */
+export function coneFill(color: TokenColor): string {
+  return color === 'standaard' ? 'var(--token-wit)' : PALETTE[color].fill
+}

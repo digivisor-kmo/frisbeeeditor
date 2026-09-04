@@ -85,6 +85,19 @@ export const nl = {
     minder: 'Minder',
     nieuweSpeler: 'Nieuwe speler',
   },
+  frames: {
+    frame: 'Frame',
+    kort: 'Frame',
+    vorige: 'Vorig frame',
+    volgende: 'Volgend frame',
+    toevoegen: 'Voegt het volgende frame toe: iedereen met een cut of juke staat daar al op zijn eindpunt.',
+    geenBeweging:
+      'Zet eerst een cut of een juke in dit frame. Zonder beweging zou het volgende frame een identieke kopie zijn.',
+    maximum: 'Tien frames is het maximum.',
+    duur: 'Duur',
+    dupliceren: 'Dupliceren',
+    verwijderen: 'Verwijderen',
+  },
   opslaan: {
     schoon: 'Nog niets gewijzigd',
     wachtend: 'Wijzigingen',

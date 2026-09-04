@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useOmklappen } from '@/components/ui/useOmklappen'
 
 export interface MenuActie {
   id: string
@@ -55,6 +56,8 @@ const labelBreedte = (label: string) => label.length * LABEL_TEKENBREEDTE + 14
 export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Props) {
   const hover = useHover()
   const [tip, setTip] = useState<string | null>(null)
+  const ankerRef = useRef<HTMLDivElement>(null)
+  const paneelRef = useRef<HTMLDivElement>(null)
 
   const n = acties.length
   const graden = Math.min(MAX_SPREIDING_GRADEN, STAP_GRADEN * (n - 1))
@@ -118,10 +121,21 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
     Math.max(anchor.x, paneelBreedte / 2 + 8),
     Math.max(paneelBreedte / 2 + 8, canvas.breedte - paneelBreedte / 2 - 8),
   )
-  const paneelY = omlaag ? anchor.y - straal - KNOP : anchor.y + straal * 0.62 + KNOP
+
+  // Preference is the side the arc is not on, but the window has the last word:
+  // a panel that falls off the bottom of the screen is unreachable.
+  const richting = useOmklappen(ankerRef, paneelRef, paneel !== undefined, omlaag ? 'boven' : 'onder')
+  const zelfdeKantAlsBoog = (richting === 'boven') === !omlaag
+  const paneelAfstand = zelfdeKantAlsBoog ? straal + KNOP * 1.1 : KNOP * 0.9
+  const paneelY = richting === 'boven' ? anchor.y - paneelAfstand : anchor.y + paneelAfstand
 
   return (
     <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 2 }}>
+      <div
+        ref={ankerRef}
+        aria-hidden
+        style={{ position: 'absolute', left: anchor.x, top: anchor.y, width: 0, height: 0 }}
+      />
       {acties.map((actie, index) => {
         const punt = posities[index]!
         return (
@@ -176,13 +190,14 @@ export function EntityMenu({ anchor, tokenRadiusPx, canvas, acties, paneel }: Pr
 
       {paneel && (
         <div
+          ref={paneelRef}
           onPointerDown={(e) => e.stopPropagation()}
           className="zwevend"
           style={{
             position: 'absolute',
             left: paneelX,
             top: paneelY,
-            transform: `translate(-50%, ${omlaag ? '-100%' : '0'})`,
+            transform: `translate(-50%, ${richting === 'boven' ? '-100%' : '0'})`,
             pointerEvents: 'auto',
             padding: 'var(--ruimte-3)',
             width: paneelBreedte,

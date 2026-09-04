@@ -11,6 +11,7 @@ import { watOntbreekt } from '@/lib/editor/validatie'
 import { nl } from '@/lib/strings'
 import { BewaarStatusLabel } from './BewaarStatus'
 import { DiagramInstellingen } from './DiagramInstellingen'
+import { FrameNavigator } from './FrameNavigator'
 import { OccupancyCounter } from './OccupancyCounter'
 import { ValidatieIndicator } from './ValidatieIndicator'
 
@@ -76,6 +77,8 @@ export function EditorToolbar({ kant, setKant, status, fout }: Props) {
       )}
 
       <div className="editor-balk">
+        <FrameNavigator />
+
         <div className="btn-groep">
           {TOOLS.map((t) => (
             <Knop key={t.id} klein actief={tool === t.id} onClick={() => setTool(t.id)}>

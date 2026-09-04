@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { BulkPaneel } from '@/components/editor/BulkPaneel'
 import { EditorCanvas } from '@/components/editor/EditorCanvas'
 import { EditorToolbar } from '@/components/editor/EditorToolbar'
+import { FrameStrip } from '@/components/editor/FrameStrip'
 import type { Side } from '@/lib/diagram/schema'
 import type { EditorDoc } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
@@ -20,7 +21,8 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
   const naam = useDiagramStore((s) => s.doc.meta.naam)
   const weergave = useDiagramStore((s) => s.doc.meta.weergave)
   const geladenId = useDiagramStore((s) => s.doc.id)
-  const entities = useDiagramStore((s) => s.doc.frames[0]?.content.entities ?? [])
+  const activeFrame = useUiStore((s) => s.activeFrame)
+  const entities = useDiagramStore((s) => s.doc.frames[activeFrame]?.content.entities ?? [])
   const selectieSleutel = useUiStore((s) => [...s.selection].sort().join(','))
 
   const [kant, setKant] = useState<Side>('offense')
@@ -128,6 +130,8 @@ export function EditorScherm({ doc: geladen }: { doc: EditorDoc }) {
       {/* Under the field, never over it: at an endzone set your players stand
           exactly in the top metres of the pitch. */}
       <BulkPaneel key={selectieSleutel} entities={entities} />
+
+      <FrameStrip />
 
       <p className="stil hulp-tekst" style={{ marginTop: 'var(--ruimte-3)', maxWidth: '46rem' }}>
         {nl.editor.hulp}
