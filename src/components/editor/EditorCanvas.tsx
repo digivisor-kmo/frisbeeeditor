@@ -456,6 +456,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         viewBox={camera.viewBox}
         role="application"
         aria-label="Veld"
+        className="veld-svg"
         style={{
           width: '100%',
           height: 'auto',

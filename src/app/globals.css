@@ -605,3 +605,17 @@ ol {
     gap: var(--ruimte-2);
   }
 }
+
+@media (max-width: 720px) {
+  /*
+   * Portrait: fit the field to the height, not the width. The whole pitch has
+   * to be on screen at once; scrolling to find the endzone is not an option
+   * when you are standing beside it explaining a set.
+   */
+  .veld-kaart .veld-svg {
+    height: calc(100dvh - 200px);
+    width: auto;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+}
