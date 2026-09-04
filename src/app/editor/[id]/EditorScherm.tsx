@@ -21,6 +21,7 @@ import type { Side } from '@/lib/diagram/schema'
 import { framesVan, type EditorDoc } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { useAutosave } from '@/lib/editor/useAutosave'
+import { useDockHoogte } from '@/lib/editor/useDockHoogte'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 
@@ -51,6 +52,7 @@ export function EditorScherm({
 
   const [kant, setKant] = useState<Side>('offense')
   const { status, fout } = useAutosave(magBewerken)
+  useDockHoogte()
 
   useEffect(() => {
     load(geladen)

@@ -931,11 +931,33 @@ h3,
 
 /* --------------------------------------------------------------- bulk panel */
 
+/*
+ * The panel floats just above the dock instead of sitting under the field.
+ * In the page flow it landed behind the fixed bar and you had to scroll to it
+ * while holding a selection, which is exactly the moment you cannot.
+ *
+ * Still under the field, never over it: at an endzone set your players stand in
+ * the top metres of the pitch.
+ */
 .bulk {
-  margin-top: var(--ruimte-3);
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--dock-hoogte, 150px) + var(--ruimte-3));
+  z-index: 5;
+  width: min(72rem, calc(100vw - 2 * var(--ruimte-4)));
   padding: var(--ruimte-3) var(--ruimte-4) var(--ruimte-4);
   display: grid;
   gap: var(--ruimte-3);
+  box-shadow: var(--schaduw-3);
+}
+
+@media (max-width: 720px) {
+  .bulk {
+    padding: var(--ruimte-3);
+    max-height: 46dvh;
+    overflow-y: auto;
+  }
 }
 
 .bulk__kop {
