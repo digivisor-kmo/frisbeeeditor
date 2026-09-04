@@ -31,6 +31,12 @@ interface UiStore {
   toggle: (id: string) => void
   clearSelection: () => void
   isSelected: (id: string) => boolean
+  /**
+   * Drops ids that no longer exist. Undo can remove an entity that is still
+   * selected, and a selection pointing at nothing makes the delete button lie
+   * about how much it will remove.
+   */
+  pruneSelection: (bestaandeIds: ReadonlySet<string>) => void
 }
 
 export const useUiStore = create<UiStore>((set, get) => ({
@@ -55,4 +61,11 @@ export const useUiStore = create<UiStore>((set, get) => ({
     }),
   clearSelection: () => set({ selection: new Set<string>() }),
   isSelected: (id) => get().selection.has(id),
+  pruneSelection: (bestaandeIds) =>
+    set((state) => {
+      const next = new Set<string>()
+      for (const id of state.selection) if (bestaandeIds.has(id)) next.add(id)
+      if (next.size === state.selection.size) return state
+      return { selection: next }
+    }),
 }))

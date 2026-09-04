@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { FieldSurface } from '@/components/field/FieldSurface'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
@@ -38,6 +38,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const toggle = useUiStore((s) => s.toggle)
   const clearSelection = useUiStore((s) => s.clearSelection)
   const setMode = useUiStore((s) => s.setMode)
+  const pruneSelection = useUiStore((s) => s.pruneSelection)
 
   const view = useMemo(() => createView(doc.meta.weergave), [doc.meta.weergave])
   const metresPerPixel = useMetresPerPixel(svgRef, view)
@@ -45,7 +46,14 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const hitM = hitRadiusM(metresPerPixel)
 
   const frame = doc.frames[activeFrame]
-  const entities = frame?.content.entities ?? []
+  const entities = useMemo(
+    () => doc.frames[activeFrame]?.content.entities ?? [],
+    [doc, activeFrame],
+  )
+
+  useEffect(() => {
+    pruneSelection(new Set(entities.map((e) => e.id)))
+  }, [entities, pruneSelection])
 
   const pointOf = (clientX: number, clientY: number): Point => {
     const svg = svgRef.current

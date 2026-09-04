@@ -85,3 +85,18 @@ describe('uiStore', () => {
     expect(useUiStore.getState().selection.size).toBe(0)
   })
 })
+
+describe('selectie opschonen', () => {
+  it('laat ids vallen die niet meer bestaan', () => {
+    useUiStore.getState().select(['a', 'b', 'c'])
+    useUiStore.getState().pruneSelection(new Set(['a', 'c']))
+    expect([...useUiStore.getState().selection]).toEqual(['a', 'c'])
+  })
+
+  it('laat de selectie ongemoeid als alles nog bestaat', () => {
+    useUiStore.getState().select(['a', 'b'])
+    const voor = useUiStore.getState().selection
+    useUiStore.getState().pruneSelection(new Set(['a', 'b', 'z']))
+    expect(useUiStore.getState().selection).toBe(voor)
+  })
+})
