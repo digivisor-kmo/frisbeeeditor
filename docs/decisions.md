@@ -2,6 +2,35 @@
 
 Wat gekozen is, welk alternatief er was, en waarom. Nieuwste bovenaan.
 
+## 2026-09-04 — Tokengrootte volgt de zoom, met grenzen aan beide kanten
+
+**Gekozen.** De straal van een token is `13 px omgerekend naar meter`, geklemd
+tussen 0,8 en 1,6 meter. Het raakvlak is een aparte onzichtbare cirkel van
+minstens 44 px.
+
+**Alternatief.** Een vaste maat in meters, of een vaste maat in pixels.
+
+**Waarom.** Een speler is ongeveer een meter breed, en een veld van honderd
+meter op een telefoon van 360 px betekent 3,6 px per meter. Een token van één
+meter is dan drie pixels: onzichtbaar en niet aan te tikken. Een vaste maat in
+pixels is ook fout, want dan groeien de tokens mee bij het inzoomen tot ze het
+veld opvreten. De geklemde variant is op een laptop en op een telefoon met het
+halve veld allebei ongeveer 26 px breed. Daar staan tests op.
+
+Dit legt wel iets bloot: het volledige veld op een telefoon blijft krap, ook met
+de ondergrens. Het halve veld is daar de bruikbare weergave, en zoomen en pannen
+zijn geen luxe maar noodzaak. Dat komt in een latere stap.
+
+## 2026-09-04 — Pionnen zijn driehoeken, geen kruisjes
+
+**Gekozen.** Een pion wordt getekend als een driehoekje.
+
+**Alternatief.** Een wit kruisje, zoals in de referentietool.
+
+**Waarom.** De brickmarks op het veld zijn al kruisjes. Een pion op of naast een
+brickmark is dan niet meer te onderscheiden, en de brickmark ligt precies waar
+je bij een pull play je pionnen legt.
+
 ## 2026-09-04 — Kleuren zijn palletsleutels, geen hexwaarden
 
 **Gekozen.** Het `color`-veld op een entiteit is een sleutel uit een vaste lijst:

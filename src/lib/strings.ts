@@ -32,9 +32,27 @@ export const nl = {
     halfUitleg: 'Staand, één endzone plus 32 meter. Voor endzone-sets en drills.',
     vrijUitleg: 'Geen lijnen. Voor drills zonder veldreferentie.',
   },
+  editor: {
+    titel: 'Editor',
+    terug: 'Terug',
+    nietsBewaard:
+      'Dit diagram wordt nog niet bewaard. Opslaan komt in de volgende stap; als je de pagina herlaadt is je werk weg.',
+    selecteren: 'Selecteren',
+    speler: 'Speler',
+    pion: 'Pion',
+    aanval: 'Aanval',
+    verdediging: 'Verdediging',
+    raster: 'Raster',
+    ongedaan: 'Ongedaan',
+    opnieuw: 'Opnieuw',
+    verwijderen: 'Verwijderen',
+    bezettingUitleg: 'Aanval en verdediging op het veld. Kleurt zodra het er geen zeven zijn.',
+    hulp:
+      'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Shift-klik selecteert er een bij, alt schakelt het raster tijdelijk uit.',
+  },
   bouw: {
-    stap: 'Het veld en het inloggen staan er.',
+    stap: 'In aanbouw.',
     toelichting:
-      'Spelers, pionnen en arrows komen in de volgende stappen. Er valt hier nog niets te tekenen.',
+      'Het veld, het inloggen en het plaatsen van spelers en pionnen werken. Arrows, opslaan en de bibliotheek komen in de volgende stappen. Kies hieronder een startpunt om de editor te openen.',
   },
 } as const

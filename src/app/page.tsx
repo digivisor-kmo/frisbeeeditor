@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { createClient } from '@/lib/supabase/server'
@@ -93,6 +94,34 @@ export default async function Home() {
       >
         <strong style={{ color: 'var(--text)' }}>{nl.bouw.stap}</strong> {nl.bouw.toelichting}
       </p>
+
+      <nav style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1.25rem' }}>
+        {[
+          { href: '/editor?weergave=volledig&opstelling=vertical-stack', label: 'Volledig veld, vertical stack' },
+          { href: '/editor?weergave=volledig&opstelling=horizontal-stack', label: 'Volledig veld, horizontal stack' },
+          { href: '/editor?weergave=half&opstelling=vertical-stack', label: 'Half veld, vertical stack' },
+          { href: '/editor?weergave=vrij&opstelling=leeg', label: 'Vrij vlak, leeg' },
+        ].map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              minHeight: '44px',
+              padding: '0 1rem',
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--border)',
+              background: 'var(--surface-raised)',
+              color: 'var(--text)',
+              textDecoration: 'none',
+              fontSize: '0.875rem',
+            }}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </nav>
 
       <div style={{ display: 'grid', gap: '2rem', marginTop: '2rem' }}>
         {views.map((v) => (

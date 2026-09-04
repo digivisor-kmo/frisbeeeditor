@@ -23,6 +23,18 @@
   --team-b: #e2801f;
   --team-b-contrast: #191c20;
 
+  --waarschuwing: #b4531a;
+  --waarschuwing-zacht: #fdf3e8;
+  --waarschuwing-rand: #f0d8bf;
+  --accent-zacht: #eaf1fc;
+
+  --token-geel: #e7c53c;
+  --token-paars: #7a5cc4;
+  --token-wit: #ffffff;
+  --token-grijs: #8c959d;
+  --token-donker: #191c20;
+  --token-licht: #ffffff;
+
   --radius: 8px;
   --shadow-float: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
 }
@@ -33,6 +45,8 @@
   --field-line: #97a0a8;
   --team-a-contrast: #191c20;
   --team-b-contrast: #191c20;
+  --token-wit: #ffffff;
+  --token-donker: #191c20;
 }
 
 * {
