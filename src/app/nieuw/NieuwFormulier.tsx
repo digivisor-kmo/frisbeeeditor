@@ -53,49 +53,32 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 'var(--ruimte-5)' }}>
+    <div style={{ display: 'grid', gap: 'var(--ruimte-6)' }}>
       <section>
         <h2 className="kop" style={{ marginBottom: 'var(--ruimte-3)' }}>
           {nl.nieuw.veldtype}
         </h2>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
-            gap: 'var(--ruimte-3)',
-          }}
-        >
+        <div className="keuzeraster">
           {WEERGAVEN.map((w) => (
             <button
               key={w.id}
               type="button"
               onClick={() => setWeergave(w.id)}
               aria-pressed={weergave === w.id}
-              className={`kaart kaart--klikbaar ${weergave === w.id ? 'kaart--gekozen' : ''}`}
-              style={{
-                display: 'grid',
-                gap: 'var(--ruimte-1)',
-                textAlign: 'left',
-                font: 'inherit',
-                padding: 'var(--ruimte-3)',
-                cursor: 'pointer',
-              }}
+              className={`kaart keuzekaart ${weergave === w.id ? 'keuzekaart--aan' : ''}`}
             >
-              <span style={{ fontWeight: 600, fontSize: 'var(--tekst-sm)' }}>{w.naam}</span>
-              <span className="stil" style={{ fontSize: 'var(--tekst-xs)' }}>
-                {w.uitleg}
+              {/* Every card has the same well, so the three previews sit on one
+                  line however tall or wide the field inside them is. */}
+              <span className="keuzekaart__put">
+                <span
+                  className="keuzekaart__veld"
+                  style={{ maxWidth: w.id === 'half' ? '3.6rem' : '100%' }}
+                >
+                  <FieldCanvas kind={w.id} />
+                </span>
               </span>
-              <span
-                style={{
-                  marginTop: 'var(--ruimte-1)',
-                  maxWidth: w.id === 'half' ? '7rem' : undefined,
-                  // Not decoration: this is exactly what you are choosing.
-                  filter: weergave === w.id ? 'none' : 'saturate(0.2) opacity(0.65)',
-                  transition: 'filter var(--overgang)',
-                }}
-              >
-                <FieldCanvas kind={w.id} />
-              </span>
+              <span className="keuzekaart__naam">{w.naam}</span>
+              <span className="keuzekaart__uitleg">{w.uitleg}</span>
             </button>
           ))}
         </div>
@@ -115,12 +98,12 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
       </section>
 
       {fout && (
-        <p role="alert" style={{ color: 'var(--waarschuwing)', fontSize: 'var(--tekst-sm)' }}>
+        <p role="alert" className="melding melding--fout">
           {nl.nieuw.fout} {fout}
         </p>
       )}
 
-      <div>
+      <div className="voetrij">
         <Knop variant="primair" onClick={aanmaken} disabled={bezig}>
           {bezig ? nl.nieuw.bezig : nl.nieuw.doorgaan}
         </Knop>

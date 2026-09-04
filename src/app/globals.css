@@ -932,6 +932,90 @@ body:has(.frame-strip) .editor-hoofd {
   cursor: pointer;
 }
 
+/* ------------------------------------------------------------ choice card */
+
+.keuzeraster {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--ruimte-3);
+}
+
+.keuzekaart {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  text-align: left;
+  font: inherit;
+  padding: var(--ruimte-3);
+  cursor: pointer;
+  border-color: var(--border);
+  transition:
+    border-color var(--overgang),
+    box-shadow var(--overgang),
+    background-color var(--overgang);
+}
+
+.keuzekaart:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--schaduw-2);
+}
+
+.keuzekaart--aan {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--schaduw-2);
+}
+
+/* A well of fixed height: the field floats in it instead of setting the height
+   of the card, so three cards with three shapes still line up. */
+.keuzekaart__put {
+  display: grid;
+  place-items: center;
+  height: 104px;
+  margin-bottom: var(--ruimte-2);
+  padding: var(--ruimte-2);
+  background: var(--surface-mute);
+  border-radius: var(--radius);
+}
+
+.keuzekaart__veld {
+  display: block;
+  width: 100%;
+  max-height: 88px;
+  filter: saturate(0.25) opacity(0.7);
+  transition: filter var(--overgang);
+}
+
+.keuzekaart__veld svg {
+  display: block;
+  border-radius: 4px;
+}
+
+.keuzekaart--aan .keuzekaart__veld {
+  filter: none;
+}
+
+.keuzekaart__naam {
+  font-family: var(--font-display-stack);
+  font-weight: 700;
+  font-size: var(--tekst-md);
+  letter-spacing: var(--spoor-krap);
+}
+
+.keuzekaart__uitleg {
+  font-size: var(--tekst-xs);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* The row a form ends on: a hairline above it, the one primary action on it. */
+.voetrij {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ruimte-2);
+  padding-top: var(--ruimte-4);
+  border-top: 1px solid var(--border);
+}
+
 /* ----------------------------------------------------------------- login */
 
 .inlog {
