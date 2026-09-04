@@ -34,7 +34,7 @@ export function AnimatieLaag({
   stijl,
   focus,
 }: Props) {
-  const schijf = schijfOpTijd(vorig, t)
+  const schijf = schijfOpTijd(vorig, volgend, t)
   const drager = schijfDragerOpTijd(vorig, t)
 
   const ids = new Set([...vorig.entities, ...volgend.entities].map((e) => e.id))

@@ -1,7 +1,16 @@
 import { FIELD_M } from '@/lib/field/geometry'
 import type { Point } from '@/lib/field/geometry'
 import { nextZ } from './entities'
-import { isPlayer, type Arrow, type ArrowKind, type Entity, type ThrowType, type Weergave } from './schema'
+import {
+  isArrow,
+  isPlayer,
+  MOVEMENT_KINDS,
+  type Arrow,
+  type ArrowKind,
+  type Entity,
+  type ThrowType,
+  type Weergave,
+} from './schema'
 
 /**
  * Length of a freshly drawn arrow, in metres.
@@ -116,25 +125,41 @@ export function createArrow(options: {
 /**
  * A throw ends at a receiver, so its endpoint locks onto a nearby player. A cut
  * ends in open space and must never snap: that is the whole point of a cut.
+ *
+ * A receiver counts twice: where he stands now, and where his cut takes him.
+ * In ultimate you throw to the second one far more often than to the first, and
+ * without it a throw to a cutter is simply not expressible.
  */
 export function snapThrowEnd(
   pos: Point,
   entities: readonly Entity[],
   ownerId: string,
 ): { pos: Point; targetId?: string } {
-  let beste: { pos: Point; id: string; afstand: number } | null = null
+  type Kandidaat = { pos: Point; id: string; afstand: number }
+  let beste: Kandidaat | null = null
+
+  const overweeg = (kandidaat: Point, id: string) => {
+    const afstand = Math.hypot(kandidaat.x - pos.x, kandidaat.y - pos.y)
+    if (afstand > THROW_SNAP_M) return
+    if (!beste || afstand < beste.afstand) beste = { pos: { ...kandidaat }, id, afstand }
+  }
+
+  const bewegingen = entities
+    .filter(isArrow)
+    .filter((a) => (MOVEMENT_KINDS as readonly string[]).includes(a.kind))
 
   for (const entity of entities) {
     if (!isPlayer(entity) || entity.id === ownerId) continue
-    const afstand = Math.hypot(entity.pos.x - pos.x, entity.pos.y - pos.y)
-    if (afstand > THROW_SNAP_M) continue
-    if (!beste || afstand < beste.afstand) {
-      beste = { pos: entity.pos, id: entity.id, afstand }
-    }
+    overweeg(entity.pos, entity.id)
+    const beweging = bewegingen.find((a) => a.ownerId === entity.id)
+    if (beweging) overweeg(arrowEnd(beweging), entity.id)
   }
 
-  if (!beste) return { pos }
-  return { pos: beste.pos, targetId: beste.id }
+  // The assignment happens inside a closure, which control-flow analysis does
+  // not follow, so the narrowed type has to be restated here.
+  const gevonden = beste as Kandidaat | null
+  if (!gevonden) return { pos }
+  return { pos: gevonden.pos, targetId: gevonden.id }
 }
 
 /** Moves a whole arrow along with the player it belongs to. */

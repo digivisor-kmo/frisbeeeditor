@@ -170,19 +170,26 @@ describe('de schijf', () => {
     return { entities: [werper, ontvanger, worp] }
   }
 
+  /** The frame after the throw: the receiver has it, the arrow is spent. */
+  function naWorp(): FrameContent {
+    return {
+      entities: [speler('p1', 20, 18), speler('p2', 50, 18, { hasDisc: true })],
+    }
+  }
+
   it('vertrekt pas als de ontvanger al onderweg is', () => {
-    expect(schijfOpTijd(metWorp(), WORP_START - 0.05)).toBeNull()
+    expect(schijfOpTijd(metWorp(), naWorp(), WORP_START - 0.05)).toBeNull()
   })
 
   it('is halverwege de vlucht ergens op het pad', () => {
-    const onderweg = schijfOpTijd(metWorp(), (WORP_START + WORP_AANKOMST) / 2)!
+    const onderweg = schijfOpTijd(metWorp(), naWorp(), (WORP_START + WORP_AANKOMST) / 2)!
     expect(onderweg.point.x).toBeGreaterThan(20)
     expect(onderweg.point.x).toBeLessThan(50)
     expect(onderweg.vanId).toBe('p1')
   })
 
   it('is na aankomst niet meer in de lucht', () => {
-    expect(schijfOpTijd(metWorp(), WORP_AANKOMST + 0.05)).toBeNull()
+    expect(schijfOpTijd(metWorp(), naWorp(), WORP_AANKOMST + 0.05)).toBeNull()
   })
 
   it('ligt voor de aankomst nog bij de werper en daarna bij de ontvanger', () => {
@@ -192,8 +199,70 @@ describe('de schijf', () => {
 
   it('doet niets als er geen worp met ontvanger is', () => {
     const zonder: FrameContent = { entities: [speler('p1', 10, 10, { hasDisc: true })] }
-    expect(schijfOpTijd(zonder, 0.5)).toBeNull()
+    expect(schijfOpTijd(zonder, zonder, 0.5)).toBeNull()
     expect(schijfDragerOpTijd(zonder, 0.5)).toBeNull()
+  })
+
+  it('vliegt niet uit een hand die de schijf niet heeft', () => {
+    const content = metWorp()
+    for (const entity of content.entities) {
+      if (entity.type === 'player') entity.hasDisc = false
+    }
+    expect(schijfOpTijd(content, naWorp(), 0.5)).toBeNull()
+    expect(schijfDragerOpTijd(content, 0.5)).toBeNull()
+  })
+
+  it('komt aan in de handen van een ontvanger die zelf beweegt', () => {
+    // The receiver cuts from where the throw was aimed to ten metres further.
+    const vorig = metWorp()
+    const cut = createArrow({
+      id: 'a2',
+      ownerId: 'p2',
+      van: { x: 50, y: 18 },
+      kind: 'cut',
+      weergave: 'volledig',
+      entities: [],
+    })
+    cut.path.points = [
+      { x: 50, y: 18 },
+      { x: 60, y: 18 },
+    ]
+    vorig.entities.push(cut)
+
+    const volgend: FrameContent = {
+      entities: [speler('p1', 20, 18), speler('p2', 60, 18, { hasDisc: true })],
+    }
+
+    const bijAankomst = schijfOpTijd(vorig, volgend, WORP_AANKOMST)!
+    const ontvanger = positieOpTijd(vorig, volgend, 'p2', WORP_AANKOMST)!
+    expect(bijAankomst.point.x).toBeCloseTo(ontvanger.x, 6)
+    expect(bijAankomst.point.y).toBeCloseTo(ontvanger.y, 6)
+  })
+
+  it('vertrekt uit de hand van een werper die zelf beweegt', () => {
+    const vorig = metWorp()
+    const cut = createArrow({
+      id: 'a3',
+      ownerId: 'p1',
+      van: { x: 20, y: 18 },
+      kind: 'cut',
+      weergave: 'volledig',
+      entities: [],
+    })
+    cut.path.points = [
+      { x: 20, y: 18 },
+      { x: 20, y: 28 },
+    ]
+    vorig.entities.push(cut)
+
+    const volgend: FrameContent = {
+      entities: [speler('p1', 20, 28), speler('p2', 50, 18, { hasDisc: true })],
+    }
+
+    const bijVertrek = schijfOpTijd(vorig, volgend, WORP_START)!
+    const werper = positieOpTijd(vorig, volgend, 'p1', WORP_START)!
+    expect(bijVertrek.point.x).toBeCloseTo(werper.x, 6)
+    expect(bijVertrek.point.y).toBeCloseTo(werper.y, 6)
   })
 })
 

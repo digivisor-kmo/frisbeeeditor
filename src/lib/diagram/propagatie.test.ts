@@ -10,6 +10,8 @@ import {
   verplaatsVanaf,
   verwijderVanaf,
   voegToeVanaf,
+  volgWorpenNaar,
+  worpAnkers,
   zetIdentiteit,
 } from './propagatie'
 import { isPlayer, type FrameContent, type Player } from './schema'
@@ -249,5 +251,64 @@ describe('de schijf loopt vooruit mee', () => {
     herberekenSchijfVanaf(frames, 0)
     const drager = frames[1]!.entities.filter(isPlayer).find((p) => p.hasDisc)?.id
     expect(drager).toBe('p1')
+  })
+})
+
+describe('worpen volgen hun ontvanger', () => {
+  const worp = (id: string, ownerId: string, van: { x: number; y: number }, naar: { x: number; y: number }, targetId: string) => {
+    const arrow = createArrow({ id, ownerId, van, kind: 'throw', weergave: 'volledig', entities: [] })
+    arrow.path.points = [{ ...van }, { ...naar }]
+    arrow.targetId = targetId
+    return arrow
+  }
+
+  it('kent zowel de plek van de speler als het eind van zijn cut', () => {
+    const content: FrameContent = {
+      entities: [speler('p1', 20, 10), cut('a1', 'p1', { x: 20, y: 10 }, { x: 40, y: 10 })],
+    }
+    expect(worpAnkers(content, 'p1')).toEqual([
+      { x: 20, y: 10 },
+      { x: 40, y: 10 },
+    ])
+  })
+
+  it('schuift het eindpunt mee als de ontvanger verzet wordt', () => {
+    const content: FrameContent = {
+      entities: [
+        speler('p1', 20, 10, { hasDisc: true }),
+        speler('p2', 50, 10),
+        worp('w1', 'p1', { x: 20, y: 10 }, { x: 50, y: 10 }, 'p2'),
+      ],
+    }
+    volgWorpenNaar(content, 'p2', worpAnkers(content, 'p2'), { x: 0, y: 5 })
+    const arrow = content.entities.find((e) => e.id === 'w1')!
+    expect(arrow.type === 'arrow' && arrow.path.points[1]).toEqual({ x: 50, y: 15 })
+  })
+
+  it('schuift mee als de worp op het eind van een cut gericht was', () => {
+    const content: FrameContent = {
+      entities: [
+        speler('p1', 20, 10, { hasDisc: true }),
+        speler('p2', 50, 10),
+        cut('a1', 'p2', { x: 50, y: 10 }, { x: 70, y: 4 }),
+        worp('w1', 'p1', { x: 20, y: 10 }, { x: 70, y: 4 }, 'p2'),
+      ],
+    }
+    volgWorpenNaar(content, 'p2', [{ x: 70, y: 4 }], { x: 3, y: -1 })
+    const arrow = content.entities.find((e) => e.id === 'w1')!
+    expect(arrow.type === 'arrow' && arrow.path.points[1]).toEqual({ x: 73, y: 3 })
+  })
+
+  it('laat een worp die ergens anders eindigt met rust', () => {
+    const content: FrameContent = {
+      entities: [
+        speler('p1', 20, 10, { hasDisc: true }),
+        speler('p2', 50, 10),
+        worp('w1', 'p1', { x: 20, y: 10 }, { x: 44, y: 10 }, 'p2'),
+      ],
+    }
+    volgWorpenNaar(content, 'p2', worpAnkers(content, 'p2'), { x: 0, y: 5 })
+    const arrow = content.entities.find((e) => e.id === 'w1')!
+    expect(arrow.type === 'arrow' && arrow.path.points[1]).toEqual({ x: 44, y: 10 })
   })
 })

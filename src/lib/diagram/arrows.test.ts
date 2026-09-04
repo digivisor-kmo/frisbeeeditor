@@ -167,6 +167,43 @@ describe('snappen van een worp', () => {
     const result = snapThrowEnd({ x: 50.9, y: 20 }, [...entities, dichterbij], 'p1')
     expect(result.targetId).toBe('p3')
   })
+
+  it('klikt vast op het eindpunt van de cut van een speler', () => {
+    const cut = createArrow({
+      id: 'a1',
+      ownerId: 'p2',
+      van: { x: 50, y: 20 },
+      kind: 'cut',
+      weergave: 'volledig',
+      entities: [],
+    })
+    cut.path.points = [
+      { x: 50, y: 20 },
+      { x: 70, y: 8 },
+    ]
+
+    const result = snapThrowEnd({ x: 70.4, y: 8.3 }, [...entities, cut], 'p1')
+    expect(result.targetId).toBe('p2')
+    expect(result.pos).toEqual({ x: 70, y: 8 })
+  })
+
+  it('kiest tussen de speler en zijn eindpunt wat het dichtst ligt', () => {
+    const cut = createArrow({
+      id: 'a1',
+      ownerId: 'p2',
+      van: { x: 50, y: 20 },
+      kind: 'cut',
+      weergave: 'volledig',
+      entities: [],
+    })
+    cut.path.points = [
+      { x: 50, y: 20 },
+      { x: 51, y: 20 },
+    ]
+
+    const result = snapThrowEnd({ x: 50.2, y: 20 }, [...entities, cut], 'p1')
+    expect(result.pos).toEqual({ x: 50, y: 20 })
+  })
 })
 
 describe('arrow meeverplaatsen', () => {

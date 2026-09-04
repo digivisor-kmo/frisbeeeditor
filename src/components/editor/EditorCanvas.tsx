@@ -14,6 +14,8 @@ import {
   synchroniseerArrowMetVorigFrame,
   verplaatsVanaf,
   voegToeVanaf,
+  volgWorpenNaar,
+  worpAnkers,
 } from '@/lib/diagram/propagatie'
 import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
 import { isArrow, isPlayer, type Point, type Side } from '@/lib/diagram/schema'
@@ -347,7 +349,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         'Verplaatsen',
         (frames) => {
           const huidig = frames[activeFrame]
-          const primair = huidig?.entities.find((e) => e.id === doel.id)
+          if (!huidig) return
+          const primair = huidig.entities.find((e) => e.id === doel.id)
           if (!primair || !hasPosition(primair)) return
 
           // Only the entity under the finger snaps to the grid; everything else
@@ -357,6 +360,9 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           if (delta.x === 0 && delta.y === 0) return
 
           for (const id of groep) {
+            // A throw aimed at him was aimed at a person, not at a patch of
+            // grass, so it comes along.
+            volgWorpenNaar(huidig, id, worpAnkers(huidig, id), delta)
             // His position in this frame is the end of the arrow that brought
             // him here, so that arrow has to follow.
             synchroniseerArrowMetVorigFrame(frames, activeFrame, id, delta)
@@ -391,10 +397,14 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
             arrow.path.points[arrow.path.points.length - 1] = gesnapt
             arrow.targetId = undefined
             const nieuwEinde = arrowEnd(arrow)
-            verplaatsVanaf(frames, activeFrame + 1, arrow.ownerId, {
+            const verzet = {
               x: nieuwEinde.x - oudEinde.x,
               y: nieuwEinde.y - oudEinde.y,
-            })
+            }
+            // A throw aimed at the end of this cut keeps aiming at it.
+            const huidig = frames[activeFrame]
+            if (huidig) volgWorpenNaar(huidig, arrow.ownerId, [oudEinde], verzet)
+            verplaatsVanaf(frames, activeFrame + 1, arrow.ownerId, verzet)
           }
           return
         }

@@ -101,6 +101,54 @@ export function synchroniseerArrowMetVorigFrame(
   laatste.y += delta.y
 }
 
+/**
+ * How close a throw endpoint has to sit to the point it was aimed at before we
+ * treat the two as the same point, in metres.
+ */
+const AANGEHECHT_M = 0.05
+
+/**
+ * A throw aimed at somebody follows him. Move a receiver, or the end of the cut
+ * he was throwing to, and the throw that was aimed there keeps pointing at him
+ * instead of at the empty grass he left behind.
+ */
+export function volgWorpenNaar(
+  content: FrameContent,
+  spelerId: string,
+  ankers: readonly Point[],
+  delta: Point,
+): void {
+  if (nulDelta(delta) || ankers.length === 0) return
+
+  for (const entity of content.entities) {
+    if (!isArrow(entity) || entity.kind !== 'throw') continue
+    if (entity.targetId !== spelerId) continue
+
+    const eind = entity.path.points[entity.path.points.length - 1]
+    if (!eind) continue
+    const raakt = ankers.some(
+      (anker) => Math.hypot(eind.x - anker.x, eind.y - anker.y) <= AANGEHECHT_M,
+    )
+    if (!raakt) continue
+
+    eind.x += delta.x
+    eind.y += delta.y
+  }
+}
+
+/**
+ * The two points a throw can be aimed at when it is aimed at somebody: where he
+ * stands, and where his cut takes him.
+ */
+export function worpAnkers(content: FrameContent, spelerId: string): Point[] {
+  const ankers: Point[] = []
+  const entity = content.entities.find((e) => e.id === spelerId)
+  if (entity && hasPosition(entity)) ankers.push({ ...entity.pos })
+  const beweging = bewegingsArrowVan(content, spelerId)
+  if (beweging) ankers.push({ ...arrowEnd(beweging) })
+  return ankers
+}
+
 /** The move that a movement arrow describes: from its owner to its end. */
 export function arrowVerplaatsing(content: FrameContent, arrow: Arrow): Point | null {
   if (!isBeweging(arrow)) return null

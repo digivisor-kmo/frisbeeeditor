@@ -101,31 +101,65 @@ export interface SchijfOnderweg {
 }
 
 /**
+ * The throw that is actually in the air this frame: one that has a receiver and
+ * leaves the hand that holds the disc. Anything else is a throw into open
+ * space, which has not arrived anywhere and so never flies.
+ */
+function actieveWorp(vorig: FrameContent): Arrow | undefined {
+  const drager = vorig.entities.filter(isPlayer).find((p) => p.hasDisc)?.id
+  if (!drager) return undefined
+  return vorig.entities
+    .filter(isArrow)
+    .find((arrow) => arrow.kind === 'throw' && arrow.targetId && arrow.ownerId === drager)
+}
+
+/**
  * The disc, while it is between two players. Returns null outside the flight,
  * so it is simply drawn on whoever holds it.
+ *
+ * Both ends of the flight are pinned to living people rather than to the curve
+ * the trainer drew: a handler who throws and cuts still lets go with his hand,
+ * and a cutter still catches it in his. The correction runs from nothing at the
+ * release to the full offset at the catch, so the shape of the throw survives.
  */
-export function schijfOpTijd(vorig: FrameContent, t: number): SchijfOnderweg | null {
-  const worp = vorig.entities
-    .filter(isArrow)
-    .find((arrow) => arrow.kind === 'throw' && arrow.targetId)
-  if (!worp) return null
+export function schijfOpTijd(
+  vorig: FrameContent,
+  volgend: FrameContent,
+  t: number,
+): SchijfOnderweg | null {
+  const worp = actieveWorp(vorig)
+  if (!worp?.targetId) return null
   if (t < WORP_START || t > WORP_AANKOMST) return null
 
   const deel = (t - WORP_START) / (WORP_AANKOMST - WORP_START)
   const table = buildLengthTable(worp.path.points)
   if (table.total === 0) return null
 
+  const eased = easeInOut(deel)
+  const punt = pointAtDistance(table, table.total * eased).point
+
+  const start = worp.path.points[0]
+  const eind = worp.path.points[worp.path.points.length - 1]
+  const werper = positieOpTijd(vorig, volgend, worp.ownerId, t)
+  const ontvanger = positieOpTijd(vorig, volgend, worp.targetId, t)
+
+  const vanaf =
+    werper && start ? { x: werper.x - start.x, y: werper.y - start.y } : { x: 0, y: 0 }
+  const naar =
+    ontvanger && eind ? { x: ontvanger.x - eind.x, y: ontvanger.y - eind.y } : { x: 0, y: 0 }
+
   return {
-    point: pointAtDistance(table, table.total * easeInOut(deel)).point,
+    point: {
+      x: punt.x + vanaf.x * (1 - eased) + naar.x * eased,
+      y: punt.y + vanaf.y * (1 - eased) + naar.y * eased,
+    },
     vanId: worp.ownerId,
   }
 }
 
 /** Who already holds the disc at this point in time, if the throw has landed. */
 export function schijfDragerOpTijd(vorig: FrameContent, t: number): string | null {
-  const worp = vorig.entities
-    .filter(isArrow)
-    .find((arrow) => arrow.kind === 'throw' && arrow.targetId)
+  const worp = actieveWorp(vorig)
   if (!worp?.targetId) return null
   return t >= WORP_AANKOMST ? worp.targetId : worp.ownerId
 }

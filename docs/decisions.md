@@ -196,3 +196,34 @@ meebewegen.
 **Waar het inzit.** `src/lib/diagram/propagatie.ts`, met 22 tests. Aangesloten
 op alle plekken waar je iets kan wijzigen: plaatsen en slepen op het canvas, de
 punt van een arrow, het contextmenu, het bulkpaneel en de Delete-toets.
+
+## 2026-09-04 — Een worp gaat naar de cut, niet naar de plek
+
+**Gekozen.** Het eindpunt van een worp klikt vast op twee punten per speler: waar
+hij staat, en waar zijn cut of juke hem brengt. Beide zetten `targetId`.
+
+**Waarom.** Zonder het tweede punt is de gewone situatie in ultimate niet te
+tekenen: handler heeft de schijf, cutter loopt deep, de worp gaat naar waar de
+cutter aankomt. Die worp kreeg geen ontvanger, dus de schijf werd niet
+doorgegeven, het volgende frame liet de worp staan, en in de animatie vloog er
+niets. Je kon alleen naar iemand gooien die stilstond.
+
+**Meegenomen.** Een worp die op iemand gericht is volgt hem. Versleep je de
+ontvanger of het eind van zijn cut, dan schuift het eindpunt van die worp mee in
+plaats van naar het lege gras te blijven wijzen.
+
+## 2026-09-04 — De schijf vertrekt en landt in een hand
+
+**Gekozen.** Tijdens de vlucht wordt de positie van de schijf gecorrigeerd naar
+de levende positie van werper en ontvanger: bij het vertrek volledig naar de
+werper, bij de aankomst volledig naar de ontvanger, daartussen naar rato.
+
+**Waarom.** De curve van de worp ligt vast bij het begin van het frame, maar
+beide spelers bewegen tijdens dat frame. Een handler die geeft-en-gaat liet de
+schijf los uit lege ruimte, en een cutter die verder liep dan het eindpunt van de
+worp zag de schijf achter zich landen. De correctie loopt van nul bij het
+vertrek tot volledig bij de aankomst, dus de vorm van de worp blijft staan.
+
+**Ook aangescherpt.** De vliegende worp is nu die van de speler die de schijf
+werkelijk heeft. Voordien werd de eerste worp met een ontvanger genomen, wie hem
+ook getekend had.
