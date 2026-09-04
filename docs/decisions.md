@@ -2,6 +2,34 @@
 
 Wat gekozen is, welk alternatief er was, en waarom. Nieuwste bovenaan.
 
+## 2026-09-04 — Het contextmenu is HTML boven de SVG, geen SVG erin
+
+**Gekozen.** De boog met knoppen wordt getekend als HTML in een laag boven het
+veld, met de knoppen op een vaste 44 px.
+
+**Alternatief.** De knoppen als `<g>` in dezelfde SVG als het veld.
+
+**Waarom.** In de SVG schaalt alles mee met de viewBox, dus een knop van 44 px
+zou op de ene zoomstand een andere maat hebben dan op de andere, en tekst zou
+mee vervormen. Bovendien zijn dit echte knoppen: bereikbaar met het toetsenbord,
+met een `aria-label`, en met een tooltip die niet over naburige tokens valt.
+Dat laatste doet de referentietool ook zo.
+
+## 2026-09-04 — Instellingen openen een paneel, geen tweede boog
+
+**Gekozen.** Het tandwiel klapt één paneel uit met kant, positie, eigen label en
+kleur zichtbaar naast elkaar.
+
+**Alternatief.** Een tweede boog van vier ronde knoppen, zoals in de
+projectinstructie staat, waarbij elke knop zijn eigen keuze opent.
+
+**Waarom.** De hoofdlus blijft precies dezelfde: je tikt op een ding, er
+verschijnt een menu bij dat ding, je kiest een actie. Maar met een tweede boog
+kost een kleur veranderen drie tikken en zie je nooit meer dan één instelling
+tegelijk. Met één paneel is het één tik en zie je meteen wat er allemaal aan die
+speler vastzit. Zeg het als je toch de tweede boog wil, het is een kleine
+wijziging.
+
 ## 2026-09-04 — Tokengrootte volgt de zoom, met grenzen aan beide kanten
 
 **Gekozen.** De straal van een token is `13 px omgerekend naar meter`, geklemd

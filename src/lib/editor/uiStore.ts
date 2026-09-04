@@ -21,10 +21,17 @@ interface UiStore {
   activeFrame: number
   /** Grid snapping, temporarily suspended while alt is held. */
   snap: boolean
+  /**
+   * Whether the context menu is showing for the current selection. A tap opens
+   * it; a drag does not, because during a drag the arc would sit in the way of
+   * the thing you are moving.
+   */
+  menuOpen: boolean
 
   setMode: (mode: EditorMode) => void
   setTool: (tool: Tool) => void
   setSnap: (snap: boolean) => void
+  setMenuOpen: (open: boolean) => void
   setActiveFrame: (index: number) => void
 
   select: (ids: string[]) => void
@@ -45,11 +52,14 @@ export const useUiStore = create<UiStore>((set, get) => ({
   selection: new Set<string>(),
   activeFrame: 0,
   snap: true,
+  menuOpen: false,
 
   setMode: (mode) => set({ mode }),
-  setTool: (tool) => set({ tool, mode: 'idle' }),
+  setTool: (tool) => set({ tool, mode: 'idle', menuOpen: false }),
   setSnap: (snap) => set({ snap }),
-  setActiveFrame: (activeFrame) => set({ activeFrame, selection: new Set<string>() }),
+  setMenuOpen: (menuOpen) => set({ menuOpen }),
+  setActiveFrame: (activeFrame) =>
+    set({ activeFrame, selection: new Set<string>(), menuOpen: false }),
 
   select: (ids) => set({ selection: new Set(ids) }),
   toggle: (id) =>
@@ -59,13 +69,13 @@ export const useUiStore = create<UiStore>((set, get) => ({
       else next.add(id)
       return { selection: next }
     }),
-  clearSelection: () => set({ selection: new Set<string>() }),
+  clearSelection: () => set({ selection: new Set<string>(), menuOpen: false }),
   isSelected: (id) => get().selection.has(id),
   pruneSelection: (bestaandeIds) =>
     set((state) => {
       const next = new Set<string>()
       for (const id of state.selection) if (bestaandeIds.has(id)) next.add(id)
       if (next.size === state.selection.size) return state
-      return { selection: next }
+      return { selection: next, menuOpen: next.size === 1 ? state.menuOpen : false }
     }),
 }))

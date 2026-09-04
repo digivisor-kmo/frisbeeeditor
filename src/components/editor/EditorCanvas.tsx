@@ -6,12 +6,13 @@ import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
 import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
 import { isPlayer, type Point, type Side } from '@/lib/diagram/schema'
-import { createView, snapToGrid, toField } from '@/lib/field/geometry'
+import { createView, snapToGrid, toField, toScreenPx, UNITS_PER_METRE } from '@/lib/field/geometry'
 import { clientToSvg } from '@/lib/field/pointer'
 import { hitRadiusM, tokenRadiusM } from '@/lib/field/scale'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
+import { SelectedEntityMenu } from './SelectedEntityMenu'
 import { useMetresPerPixel } from './useMetresPerPixel'
 
 interface DragState {
@@ -39,6 +40,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const clearSelection = useUiStore((s) => s.clearSelection)
   const setMode = useUiStore((s) => s.setMode)
   const pruneSelection = useUiStore((s) => s.pruneSelection)
+  const menuOpen = useUiStore((s) => s.menuOpen)
+  const setMenuOpen = useUiStore((s) => s.setMenuOpen)
 
   const view = useMemo(() => createView(doc.meta.weergave), [doc.meta.weergave])
   const metresPerPixel = useMetresPerPixel(svgRef, view)
@@ -86,6 +89,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         moved: false,
       }
       svgRef.current?.setPointerCapture(event.pointerId)
+      setMenuOpen(!event.shiftKey)
       setMode('dragging')
       return
     }
@@ -103,6 +107,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         )
       })
       select([id])
+      setMenuOpen(true)
       return
     }
 
@@ -119,7 +124,10 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       event.altKey,
     )
 
-    state.moved = true
+    if (!state.moved) {
+      state.moved = true
+      setMenuOpen(false)
+    }
     change(
       'Verplaatsen',
       (draft) => {
@@ -144,7 +152,15 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const cones = entities.filter((e) => e.type === 'cone')
   const players = entities.filter(isPlayer)
 
+  const geselecteerd =
+    selection.size === 1 ? entities.find((e) => selection.has(e.id)) : undefined
+  const anchor =
+    geselecteerd && (geselecteerd.type === 'player' || geselecteerd.type === 'cone')
+      ? toScreenPx(geselecteerd.pos, view, metresPerPixel)
+      : null
+
   return (
+    <div style={{ position: 'relative' }}>
     <svg
       ref={svgRef}
       viewBox={view.viewBox}
@@ -191,5 +207,15 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           ))}
       </g>
     </svg>
+
+      {menuOpen && geselecteerd && anchor && (
+        <SelectedEntityMenu
+          key={geselecteerd.id}
+          entity={geselecteerd}
+          anchor={anchor}
+          tokenRadiusPx={(radiusM * UNITS_PER_METRE) / (UNITS_PER_METRE * metresPerPixel)}
+        />
+      )}
+    </div>
   )
 }

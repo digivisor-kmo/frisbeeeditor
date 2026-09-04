@@ -58,6 +58,8 @@ export interface FieldView {
   showLines: boolean
   /** viewBox attribute for the SVG root, including the margin. */
   viewBox: string
+  /** Top-left corner of the viewBox, in SVG units. */
+  origin: Point
   /** Size of the viewBox in SVG units. */
   width: number
   height: number
@@ -86,6 +88,7 @@ export function createView(kind: ViewKind): FieldView {
     rotated,
     showLines: kind !== 'vrij',
     viewBox: `${origin} ${origin} ${width} ${height}`,
+    origin: { x: origin, y: origin },
     width,
     height,
   }
@@ -116,6 +119,20 @@ export function toField(p: Point, view: FieldView): Point {
   return {
     x: p.x / UNITS_PER_METRE + view.area.minX,
     y: view.area.maxY - p.y / UNITS_PER_METRE,
+  }
+}
+
+/**
+ * Where a field position lands inside the rendered element, in CSS pixels
+ * relative to its top-left corner. Used to anchor HTML overlays -- the context
+ * menu -- to an entity on the field.
+ */
+export function toScreenPx(p: Point, view: FieldView, metresPerPixel: number): Point {
+  const svg = toSvg(p, view)
+  const pxPerUnit = 1 / (UNITS_PER_METRE * metresPerPixel)
+  return {
+    x: (svg.x - view.origin.x) * pxPerUnit,
+    y: (svg.y - view.origin.y) * pxPerUnit,
   }
 }
 

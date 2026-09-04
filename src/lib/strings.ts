@@ -49,6 +49,24 @@ export const nl = {
     hulp:
       'Kies een gereedschap en tik op het veld om te plaatsen. Slepen verplaatst meteen. Shift-klik selecteert er een bij, alt schakelt het raster tijdelijk uit.',
   },
+  menu: {
+    schijf: 'Schijf',
+    instellingen: 'Instellingen',
+    verwijderen: 'Verwijderen',
+    kant: 'Kant',
+    kantWisselen: 'Kant wisselen',
+    positie: 'Positie',
+    eigenLabel: 'Eigen label',
+    eigenLabelLeeg: 'Positie',
+    kleur: 'Kleur',
+  },
+  kleuren: {
+    standaard: 'Standaard',
+    geel: 'Geel',
+    paars: 'Paars',
+    wit: 'Wit',
+    grijs: 'Grijs',
+  },
   bouw: {
     stap: 'In aanbouw.',
     toelichting:

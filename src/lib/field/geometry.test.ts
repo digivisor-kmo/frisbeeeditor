@@ -7,6 +7,7 @@ import {
   GOAL_LINES_M,
   snapToGrid,
   toField,
+  toScreenPx,
   toSvg,
   UNITS_PER_METRE,
 } from './geometry'
@@ -106,5 +107,23 @@ describe('snapToGrid', () => {
 
   it('accepts a different step', () => {
     expect(snapToGrid({ x: 12.4, y: 3.3 }, 1)).toEqual({ x: 12, y: 3 })
+  })
+})
+
+describe('toScreenPx', () => {
+  it('zet de linkerbovenhoek van de viewBox op nul', () => {
+    const view = createView('volledig')
+    // De viewBox begint 3 meter links van en boven het veld.
+    const metresPerPixel = 106 / 1060 // precies 1 pixel per SVG-eenheid
+    const hoek = toScreenPx({ x: -3, y: 40 }, view, metresPerPixel)
+    expect(hoek.x).toBeCloseTo(0, 6)
+    expect(hoek.y).toBeCloseTo(0, 6)
+  })
+
+  it('schaalt mee met de gerenderde breedte', () => {
+    const view = createView('volledig')
+    const smal = toScreenPx({ x: 50, y: 18.5 }, view, 106 / 400)
+    const breed = toScreenPx({ x: 50, y: 18.5 }, view, 106 / 800)
+    expect(breed.x).toBeCloseTo(smal.x * 2, 6)
   })
 })
