@@ -42,11 +42,21 @@ export function TrashIcon({ size = 20 }: IconProps) {
   )
 }
 
-/** The star of a favourite. Filled when it is on, outline when it is off. */
+/**
+ * The star of a favourite. Filled when it is on, outline when it is off.
+ *
+ * The filled one drops almost all of its stroke: a 1.9 pixel outline around a
+ * filled star rounds its points away and the whole thing reads as a blob.
+ */
 export function SterIcon({ size = 20, gevuld = false }: IconProps & { gevuld?: boolean }) {
   return (
-    <svg {...base(size)} fill={gevuld ? 'currentColor' : 'none'}>
-      <path d="M12 3.6l2.6 5.3 5.8.85-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.85z" />
+    <svg
+      {...base(size)}
+      fill={gevuld ? 'currentColor' : 'none'}
+      strokeWidth={gevuld ? 0.7 : 1.75}
+      strokeLinejoin="round"
+    >
+      <path d="M12 3.4l2.65 5.37 5.93.86-4.29 4.18 1.01 5.9L12 16.92l-5.3 2.79 1.01-5.9-4.29-4.18 5.93-.86z" />
     </svg>
   )
 }
