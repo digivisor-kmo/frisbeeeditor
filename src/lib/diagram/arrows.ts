@@ -3,8 +3,14 @@ import type { Point } from '@/lib/field/geometry'
 import { nextZ } from './entities'
 import { isPlayer, type Arrow, type ArrowKind, type Entity, type ThrowType, type Weergave } from './schema'
 
-/** Length of a freshly drawn arrow, in metres. */
-export const NIEUWE_ARROW_LENGTE_M = 7
+/**
+ * Length of a freshly drawn arrow, in metres.
+ *
+ * Long enough that the point sits clear of the token and is easy to grab, and
+ * short enough that it does not shoot across the field before you aim it. A
+ * real cut is ten to twenty metres, so this is also a plausible starting shape.
+ */
+export const NIEUWE_ARROW_LENGTE_M = 12
 
 /** A throw endpoint within this distance of a player locks onto him. */
 export const THROW_SNAP_M = 1.5

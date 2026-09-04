@@ -89,6 +89,11 @@ describe('createArrow', () => {
     expect(Math.abs(THROW_KROMMING.hammer)).toBeGreaterThan(Math.abs(THROW_KROMMING.blade))
   })
 
+  it('is lang genoeg om de punt naast het token te krijgen', () => {
+    // Een token is hooguit 1,6 meter straal; de punt moet daar ruim buiten vallen.
+    expect(NIEUWE_ARROW_LENGTE_M).toBeGreaterThan(4)
+  })
+
   it('blijft binnen het veld, ook vlak bij de zijlijn', () => {
     const arrow = createArrow({
       id: 'a1',
