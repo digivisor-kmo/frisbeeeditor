@@ -459,3 +459,50 @@ Kom je terug, dan gebeurt er nu niets zichtbaars in plaats van een rode melding.
 **Nog niet getest.** De melding "iemand anders is hier bezig" zelf. Er bestaat
 maar één account, en een tweede aanmaken om mijn eigen code te testen zou een
 spookgebruiker in de echte database zetten. Dat moet met een tweede persoon.
+
+## 2026-09-04 — De anon-rol kon alles lezen
+
+**Gevonden.** De rollen `anon` en `authenticated` krijgen in Supabase standaard
+rechten op elke tabel in `public`. Samen met de policies betekende dat: elk
+niet-concept diagram, elk profiel inclusief e-mailadres, elk playbook en elk
+deel-token was op te vragen zonder in te loggen. De publishable key zit in de
+clientbundel en is dus openbaar; RLS was de enige poort en die stond open.
+
+**Gedaan.** Alle rechten op de publieke tabellen ingetrokken voor `anon`, en de
+select-policies noemen nu expliciet `to authenticated`, zodat de bedoeling in de
+policy zelf staat en niet alleen in de grants. De tokenlijst is bovendien alleen
+zichtbaar voor wie mag bewerken: een lijst die iedereen kan opvragen maakt het
+token zinloos.
+
+**Nagemeten.** Als `anon` geeft `select from diagrams` nu `permission denied`,
+terwijl `diagram_via_token` met een geldig token wel het diagram teruggeeft.
+
+## 2026-09-04 — Spelersweergave en deellinks
+
+**Gekozen.** Spelers hebben een eigen route met een lijst en een leesscherm. Wie
+geen bewerkrechten heeft wordt vanaf `/` en vanaf een editor-URL automatisch
+daarnaartoe gestuurd.
+
+**Het canvas is een eigen component**, niet de editor met zijn handlers uitgezet.
+Een token dat twee pixels met je vinger meegaat en dan weigert is precies het
+soort half werkend scherm dat de projectinstructie verbiedt. De afspeellogica
+wordt wél gedeeld: de animatie is waar deze hele applicatie om draait, en twee
+kopieën daarvan zijn binnen de maand twee verschillende animaties.
+
+**Deellink.** Eén functie maakt de link of geeft de bestaande geldige terug, want
+twee links naar hetzelfde diagram in dezelfde groepschat is verwarrend en wie
+twee keer op delen drukt bedoelt niet twee links. Negentig dagen geldig. De
+publieke route haalt alles uit één security definer functie, dus het token is de
+enige sleutel: er staat geen id in een URL waarmee je kan raden.
+
+De link komt op het klembord én voluit in beeld. Een klembord is onzichtbaar:
+zonder de tekst op het scherm weet je niet of die druk iets gedaan heeft, en op
+een telefoon kan je hem anders ook niet met de hand in een chat plakken.
+
+## 2026-09-04 — De bovenbalk op een telefoon
+
+De merknaam en twee knoppen pasten niet naast elkaar op een toestel van vierhonderd
+pixels breed; de knoppen landden boven op de naam. Op een telefoon staat er nu
+één icoon dat naar het accountscherm leidt, en afmelden heeft daar zijn eigen
+plek gekregen. De primaire knop op een paginakop loopt daar ook over de volle
+breedte, binnen duimbereik.
