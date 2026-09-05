@@ -576,3 +576,50 @@ de observers vangen de veranderingen zelf op.
 **Niet gemeten.** Ik heb geen betrouwbare voor-en-na in de browser kunnen halen:
 via deze weg staat het tabblad op de achtergrond en dan bevriest de browser zijn
 tekenlus. De diagnose staat in de code, niet in een grafiek.
+
+## 2026-09-05 — De editor op een telefoon is één veld
+
+**Gekozen.** Op een telefoon vult het veld het scherm en zweeft de bediening
+erboven in pillen. Linksonder de gereedschappen met ongedaan en opnieuw,
+rechtsonder de framenavigator met de afspeelknop, bovenaan terug, de teller nog
+te doen, de opslaanstatus en een schuifknop die een blad opent met alles wat je
+één keer instelt. Op een tablet of desktop blijft de gewone opmaak met een vaste
+kop, balk en strip: daar bestaat de ruimte, en permanente bediening verslaat
+bediening die je moet oproepen.
+
+Wat wordt beoordeeld is de korte zijde van het scherm, niet de breedte. Een
+telefoon die je omdraait blijft een telefoon en een tablet rechtop blijft een
+tablet; op breedte alleen zou een liggende telefoon de desktopopmaak krijgen en
+een staande tablet de telefoonopmaak, precies verkeerd om.
+
+**Uit de weg blijven.** De pillen doen zelf een stap opzij zolang je iets
+versleept, en een tabje aan de onderrand vouwt ze helemaal weg. Bediening waar je
+omheen moet werken is erger dan geen bediening.
+
+## 2026-09-05 — Oriëntatie afdwingen kan niet, dus we vragen het
+
+**De beperking.** Een browser kan een telefoon niet draaien. iOS heeft er geen
+enkele API voor, en Android honoreert `orientation` in het manifest alleen voor
+een geïnstalleerde app, en dan voor de hele app in plaats van per diagram. De
+`screen.orientation.lock()`-API bestaat wel maar vereist fullscreen en werkt niet
+op iOS.
+
+**Gekozen.** Wat elke app doet die één richting nodig heeft: een scherm dat het
+veld afdekt, zegt welke kant op, en wacht. Een volledig veld van 100 bij 37 meter
+vraagt liggend, een half veld vraagt rechtop. Alleen op een telefoon; een tablet
+heeft in beide richtingen ruimte genoeg en zou zich terecht beledigd voelen.
+
+Het toestel in dat scherm draait. Dat is de enige animatie in de hele interface,
+en ze is de boodschap in plaats van versiering: een tekening van een telefoon die
+niet draait zegt niets. Ze staat stil voor wie systeembreed minder beweging vraagt.
+
+## 2026-09-05 — Het clubblauw
+
+`#3452fe`, rechtstreeks uit het clubembleem. Tegen wit meet dat 5,55 op 1, dus het
+draagt witte tekst als knopkleur zonder hulp. Blijft uitsluitend interfacekleur:
+de ploegen zijn bijna zwart tegenover oranje, en zodra blauw ook een teamkleur
+wordt betekent het niet langer "dit is het ding om op te drukken".
+
+De app-iconen zijn de eend uit het embleem in wit op dat blauw. De volledige
+lockup met "Dendermondse Ultimate Club" en "est 2017" is onleesbaar op dertig
+pixels; de eend alleen is op elk formaat herkenbaar.

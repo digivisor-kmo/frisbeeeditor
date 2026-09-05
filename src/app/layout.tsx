@@ -36,8 +36,11 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: nl.app.naam, statusBarStyle: 'default' },
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: [{ url: '/icoon.svg', type: 'image/svg+xml' }],
-    apple: [{ url: '/icoon.svg' }],
+    icon: [
+      { url: '/icoon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icoon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
   },
 }
 
@@ -46,7 +49,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   viewportFit: 'cover',
-  themeColor: '#f6f7f9',
+  themeColor: '#3452fe',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

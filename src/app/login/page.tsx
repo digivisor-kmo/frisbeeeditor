@@ -14,7 +14,7 @@ export default async function LoginPage({
       <div className="inlog__kolom">
         <div className="merk inlog__merk">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icoon.svg" alt="" width={36} height={36} className="merk__teken" />
+          <img src="/icoon-192.png" alt="" width={36} height={36} className="merk__teken" />
           <span className="merk__naam" style={{ fontSize: 'var(--tekst-xl)' }}>
             {nl.app.naam}
           </span>

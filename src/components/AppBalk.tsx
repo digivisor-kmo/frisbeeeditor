@@ -29,7 +29,7 @@ export async function AppBalk() {
       <div className="topbalk__binnen">
         <Link href="/" className="merk">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icoon.svg" alt="" width={30} height={30} className="merk__teken" />
+          <img src="/icoon-192.png" alt="" width={30} height={30} className="merk__teken" />
           <span className="merk__naam">{nl.app.naam}</span>
         </Link>
 

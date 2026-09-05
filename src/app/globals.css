@@ -42,14 +42,20 @@
   --hover: #f3f5f8;
   --pressed: #e8ecf1;
 
-  /* Placeholder blue. Replace with the DUC club blue from the brand file. */
-  --accent: #1a56db;
-  --accent-hover: #1749c0;
-  --accent-pressed: #1440a8;
+  /*
+   * The DUC club blue, straight from the badge. Against white it measures 5.55
+   * to one, so it carries white text as a button colour without help.
+   *
+   * Interface only. The teams are near-black against orange; the moment blue
+   * also becomes a team colour it stops meaning "this is the thing to press".
+   */
+  --accent: #3452fe;
+  --accent-hover: #2a45e0;
+  --accent-pressed: #2139c4;
   --accent-contrast: #ffffff;
-  --accent-zacht: #eef3fd;
-  --accent-rand: #c2d5f7;
-  --ring: rgb(26 86 219 / 0.24);
+  --accent-zacht: #eef1ff;
+  --accent-rand: #c3ccfb;
+  --ring: rgb(52 82 254 / 0.26);
 
   --waarschuwing: #b0431a;
   --waarschuwing-zacht: #fdf3ec;
@@ -241,7 +247,7 @@ h3,
 
 .btn[aria-pressed='true']:hover:not(:disabled),
 .btn.is-actief:hover:not(:disabled) {
-  background: #e5eefb;
+  background: #e3e8ff;
   border-color: var(--accent-rand);
 }
 
@@ -255,7 +261,7 @@ h3,
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.14),
     0 1px 2px rgb(16 24 40 / 0.12),
-    0 6px 16px -8px rgb(26 86 219 / 0.5);
+    0 6px 16px -8px rgb(52 82 254 / 0.5);
 }
 
 .btn--primair:hover:not(:disabled) {
@@ -624,7 +630,7 @@ h3,
 }
 
 .menu-knop[data-actief='ja']:hover {
-  background: #e5eefb;
+  background: #e3e8ff;
 }
 
 .menu-knop[data-gevaar='ja'] {
@@ -1712,7 +1718,7 @@ body:has(.frame-strip) .editor-hoofd {
   /* One very soft wash behind the card, so the page has a centre. Not a
      gradient on a surface: a hint of light under everything. */
   background:
-    radial-gradient(60rem 34rem at 50% -12rem, rgb(26 86 219 / 0.07), transparent 70%),
+    radial-gradient(60rem 34rem at 50% -12rem, rgb(52 82 254 / 0.08), transparent 70%),
     var(--surface);
 }
 
