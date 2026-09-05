@@ -14,6 +14,9 @@ import {
 } from '@/lib/diagram/propagatie'
 import { BewaarStatusLabel } from '@/components/editor/BewaarStatus'
 import { DeelKnop } from '@/components/editor/DeelKnop'
+import { DraaiScherm } from '@/components/editor/DraaiScherm'
+import { MobieleChrome } from '@/components/editor/MobieleChrome'
+import { useScherm } from '@/components/editor/useScherm'
 import { TerugIcon } from '@/components/editor/icons'
 import { OccupancyCounter } from '@/components/editor/OccupancyCounter'
 import { ValidatieIndicator } from '@/components/editor/ValidatieIndicator'
@@ -50,6 +53,12 @@ export function EditorScherm({
   )
   const doc = useDiagramStore((s) => s.doc)
   const ontbreekt = useMemo(() => watOntbreekt(doc), [doc])
+
+  const scherm = useScherm()
+  // A full field is 100 by 37 metres and wants the long side of the screen; a
+  // half field is 32 by 37 and wants the short one.
+  const wilLiggend = geladen.meta.weergave !== 'half'
+  const verkeerdeKant = scherm.telefoon && scherm.liggend !== wilLiggend
 
   const [kant, setKant] = useState<Side>('offense')
   const { status, fout } = useAutosave(magBewerken)
@@ -113,6 +122,34 @@ export function EditorScherm({
   }, [undo, redo, change])
 
   if (geladenId !== geladen.id) return null
+
+  /*
+   * On a phone the editor becomes one full-screen field with the controls
+   * floating on top of it. On anything larger the page keeps its header, its
+   * toolbar and its strip: there the room exists, and permanent controls beat
+   * controls you have to summon.
+   */
+  if (scherm.telefoon) {
+    return (
+      <main className="editor-hoofd editor-hoofd--vol">
+        <div className="veld-vol">
+          <EditorCanvas nieuweSpelerKant={kant} />
+        </div>
+
+        <MobieleChrome
+          kant={kant}
+          setKant={setKant}
+          status={status}
+          fout={fout}
+          diagramId={geladen.id}
+        />
+
+        <BulkPaneel key={selectieSleutel} entities={entities} />
+
+        {verkeerdeKant && <DraaiScherm naarLiggend={wilLiggend} />}
+      </main>
+    )
+  }
 
   return (
     <main className="editor-hoofd">

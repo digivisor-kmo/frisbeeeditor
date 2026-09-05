@@ -63,6 +63,19 @@ export const nl = {
     halfUitleg: 'Staand, één endzone plus 32 meter. Voor endzone-sets en drills.',
     vrijUitleg: 'Geen lijnen. Voor drills zonder veldreferentie.',
   },
+  zweef: {
+    verbergen: 'Gereedschap verbergen',
+    tonen: 'Gereedschap tonen',
+    sluiten: 'Sluiten',
+  },
+  draai: {
+    naarLiggend: 'Draai je toestel',
+    liggendUitleg:
+      'Een volledig veld is 100 bij 37 meter. Liggend past het op je scherm; rechtop wordt het een strookje.',
+    naarStaand: 'Zet je toestel rechtop',
+    staandUitleg:
+      'Een half veld staat rechtop, met de endzone bovenaan. Zo zie je het zoals je erbij staat.',
+  },
   slot: {
     bezet: 'Iemand is hier al bezig',
     bezetUitleg: (naam: string) =>

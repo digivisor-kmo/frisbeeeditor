@@ -104,6 +104,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const toggle = useUiStore((s) => s.toggle)
   const clearSelection = useUiStore((s) => s.clearSelection)
   const setMode = useUiStore((s) => s.setMode)
+  const setSleept = useUiStore((s) => s.setSleept)
   const pruneSelection = useUiStore((s) => s.pruneSelection)
   const menuOpen = useUiStore((s) => s.menuOpen)
   const setMenuOpen = useUiStore((s) => s.setMenuOpen)
@@ -181,6 +182,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     setSnapDoel(null)
     setKader(null)
     setMode('idle')
+    setSleept(false)
   }
 
   function onPointerDown(event: React.PointerEvent<SVGSVGElement>) {
@@ -339,6 +341,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       if (afstand < SLEEP_DREMPEL_PX) return
       state.moved = true
       setMenuOpen(false)
+      // The floating controls on a phone step aside while you move something.
+      setSleept(true)
       if (state.doel.soort === 'tip') setTipInSleep(state.doel.id)
       if (state.doel.soort === 'kader') setMode('marquee')
     }
@@ -510,7 +514,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const toonScrim = menuOpen && geselecteerd !== undefined && !animeert
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div className="canvas-wrap">
       <svg
         ref={svgRef}
         viewBox={camera.viewBox}

@@ -1007,6 +1007,11 @@ h3,
   }
 }
 
+/* In the full-screen editor there is no dock to sit above, only the pills. */
+.editor-hoofd--vol .bulk {
+  bottom: calc(env(safe-area-inset-bottom) + 74px);
+}
+
 .bulk__kop {
   display: flex;
   flex-wrap: wrap;
@@ -1050,6 +1055,272 @@ h3,
   display: flex;
   gap: var(--ruimte-2);
   flex-wrap: wrap;
+}
+
+/* --------------------------------------------------- full-screen editor */
+
+/*
+ * On a phone the editor is one field and nothing else. The controls float on
+ * top of it, fold away when you ask, and step aside on their own while you are
+ * dragging something.
+ */
+.editor-hoofd--vol {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.canvas-wrap {
+  position: relative;
+}
+
+.veld-vol {
+  position: absolute;
+  inset: 0;
+}
+
+.veld-vol .canvas-wrap,
+.editor-hoofd--vol .veld-vol .veld-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.zweef {
+  position: absolute;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  pointer-events: none;
+  transition:
+    opacity var(--overgang),
+    transform var(--overgang);
+}
+
+.zweef > * {
+  pointer-events: auto;
+}
+
+.zweef--boven {
+  top: calc(env(safe-area-inset-top) + 8px);
+  left: calc(env(safe-area-inset-left) + 8px);
+  right: calc(env(safe-area-inset-right) + 8px);
+  justify-content: space-between;
+}
+
+.zweef--onder {
+  bottom: calc(env(safe-area-inset-bottom) + 14px);
+  left: calc(env(safe-area-inset-left) + 8px);
+  right: calc(env(safe-area-inset-right) + 8px);
+  justify-content: space-between;
+  gap: var(--ruimte-3);
+}
+
+.zweef--stil,
+.zweef--stil > * {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.zweef--stil {
+  transform: translateY(8px);
+}
+
+.zweef__groep {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-2);
+  pointer-events: auto;
+}
+
+/* Still to do, in the corner, as short as it can be said. */
+.zweef__nog {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: var(--radius-vol);
+  background: var(--waarschuwing-zacht);
+  border: 1px solid var(--waarschuwing-rand);
+  color: var(--waarschuwing);
+  font-size: var(--tekst-sm);
+  font-weight: 650;
+}
+
+/* A row of controls carried on one raised surface, so it reads as one object
+   floating over the pitch instead of five loose buttons. */
+.zweefpil {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  background: rgb(255 255 255 / 0.93);
+  backdrop-filter: saturate(1.6) blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-vol);
+  box-shadow: var(--schaduw-2);
+}
+
+.zweefpil .btn {
+  box-shadow: none;
+  border-color: transparent;
+  background: transparent;
+}
+
+.zweefpil .btn.is-actief {
+  background: var(--accent-zacht);
+  border-color: var(--accent-rand);
+}
+
+.zweefpil .btn--primair {
+  border-color: var(--accent);
+}
+
+.zweefpil__scheiding {
+  width: 1px;
+  height: 22px;
+  background: var(--border);
+  margin: 0 3px;
+}
+
+.zweefknop {
+  background: rgb(255 255 255 / 0.93);
+  backdrop-filter: saturate(1.6) blur(12px);
+}
+
+/* The tab that folds the controls away. It sits between the two pills, on the
+   edge, where it is reachable with a thumb and covers nothing. */
+.zweeftab {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 7;
+  width: 60px;
+  height: 24px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: rgb(255 255 255 / 0.93);
+  backdrop-filter: saturate(1.6) blur(12px);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zweeftab--in {
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------ sheet */
+
+.blad-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgb(16 24 32 / 0.38);
+  display: flex;
+  align-items: flex-end;
+}
+
+.blad {
+  width: 100%;
+  max-height: 84dvh;
+  overflow-y: auto;
+  background: var(--surface-raised);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  padding: var(--ruimte-3) var(--ruimte-4) calc(var(--ruimte-5) + env(safe-area-inset-bottom));
+  box-shadow: var(--schaduw-3);
+  display: grid;
+  gap: var(--ruimte-3);
+}
+
+.blad__greep {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  margin: 0 auto var(--ruimte-1);
+}
+
+.blad__rij {
+  display: flex;
+  gap: var(--ruimte-2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.blad__velden {
+  display: grid;
+  gap: var(--ruimte-4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--ruimte-4);
+}
+
+.melding--waarschuwing {
+  background: var(--waarschuwing-zacht);
+  color: var(--waarschuwing);
+  border: 1px solid var(--waarschuwing-rand);
+}
+
+/* --------------------------------------------------------- rotate prompt */
+
+.draaischerm {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: var(--ruimte-6);
+  text-align: center;
+  background: var(--surface);
+}
+
+.draaischerm__binnen {
+  display: grid;
+  gap: var(--ruimte-3);
+  justify-items: center;
+  max-width: 22rem;
+}
+
+.draaischerm__toestel {
+  width: 76px;
+  height: 104px;
+  color: var(--accent);
+}
+
+/* The only animation in the interface, and it is the message rather than
+   decoration: a picture of a phone that never turns says nothing. */
+.draaischerm__toestel--draai {
+  animation: draaien 2.6s ease-in-out infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes draaien {
+  0%,
+  22% {
+    transform: rotate(0deg);
+  }
+  50%,
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draaischerm__toestel--draai {
+    animation: none;
+    transform: rotate(90deg);
+  }
 }
 
 /* ------------------------------------------------------------ frame strip */

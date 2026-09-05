@@ -16,6 +16,8 @@ export type Tool = 'select' | 'player' | 'cone' | 'draw' | 'text'
 
 interface UiStore {
   mode: EditorMode
+  /** True while something on the field is being dragged, so overlays can step aside. */
+  sleept: boolean
   tool: Tool
   selection: Set<string>
   activeFrame: number
@@ -47,6 +49,7 @@ interface UiStore {
   focus: 'offense' | 'defense' | 'beide'
 
   setMode: (mode: EditorMode) => void
+  setSleept: (sleept: boolean) => void
   setTool: (tool: Tool) => void
   setSnap: (snap: boolean) => void
   setMenuOpen: (open: boolean) => void
@@ -76,6 +79,7 @@ interface UiStore {
 
 export const useUiStore = create<UiStore>((set, get) => ({
   mode: 'idle',
+  sleept: false,
   tool: 'select',
   selection: new Set<string>(),
   activeFrame: 0,
@@ -92,6 +96,7 @@ export const useUiStore = create<UiStore>((set, get) => ({
   focus: 'beide',
 
   setMode: (mode) => set({ mode }),
+  setSleept: (sleept) => set({ sleept }),
   setTool: (tool) => set({ tool, mode: 'idle', menuOpen: false }),
   setSnap: (snap) => set({ snap }),
   setMenuOpen: (menuOpen) => set({ menuOpen }),
