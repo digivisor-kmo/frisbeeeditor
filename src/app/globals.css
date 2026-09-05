@@ -1126,6 +1126,19 @@ h3,
   gap: var(--ruimte-3);
 }
 
+/* Upright, the two pills together are wider than a phone. Rather than shrink
+   the buttons below a thumb, they stack: the tools on the bottom line where
+   the thumb lands, the frames above them. There is room for it, because a half
+   pitch upright never fills the height anyway. */
+@media (orientation: portrait) and (max-width: 470px) {
+  .zweef--onder {
+    flex-wrap: wrap-reverse;
+    justify-content: center;
+    gap: var(--ruimte-2);
+    bottom: calc(env(safe-area-inset-bottom) + 30px);
+  }
+}
+
 .zweef--stil,
 .zweef--stil > * {
   opacity: 0;
