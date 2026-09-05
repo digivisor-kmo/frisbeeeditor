@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { Cone } from '@/lib/diagram/schema'
 import { metresToUnits, toSvg, type FieldView } from '@/lib/field/geometry'
 import { coneFill } from './colors'
@@ -17,7 +18,7 @@ interface Props {
  * A triangle, not a cross. The brick marks on the field are already crosses, so
  * a cross-shaped cone standing next to one is unreadable.
  */
-export function ConeToken({ cone, view, radiusM, hitRadiusM, selected }: Props) {
+function ConeTokenBasis({ cone, view, radiusM, hitRadiusM, selected }: Props) {
   const { x, y } = toSvg(cone.pos, view)
   const r = metresToUnits(radiusM) * 0.78
   const hit = metresToUnits(hitRadiusM)
@@ -96,3 +97,13 @@ export function ConeToken({ cone, view, radiusM, hitRadiusM, selected }: Props) 
     </g>
   )
 }
+
+/**
+ * Memoised on purpose.
+ *
+ * Immer gives the document structural sharing, so during a drag only the entity
+ * that moved gets a new identity. Without this wrapper React redrew every token,
+ * every arrow and every thumbnail on every single pointer move; with it, it
+ * redraws the one that changed.
+ */
+export const ConeToken = memo(ConeTokenBasis)

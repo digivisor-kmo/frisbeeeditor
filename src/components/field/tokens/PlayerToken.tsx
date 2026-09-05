@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { tokenText } from '@/lib/diagram/entities'
 import type { Player, Tokenstijl } from '@/lib/diagram/schema'
 import { metresToUnits, toSvg, type FieldView } from '@/lib/field/geometry'
@@ -14,7 +15,7 @@ interface Props {
   selected: boolean
 }
 
-export function PlayerToken({ player, view, radiusM, hitRadiusM, stijl, selected }: Props) {
+function PlayerTokenBasis({ player, view, radiusM, hitRadiusM, stijl, selected }: Props) {
   const { x, y } = toSvg(player.pos, view)
   const r = metresToUnits(radiusM)
   const hit = metresToUnits(hitRadiusM)
@@ -119,3 +120,13 @@ export function PlayerToken({ player, view, radiusM, hitRadiusM, stijl, selected
     </g>
   )
 }
+
+/**
+ * Memoised on purpose.
+ *
+ * Immer gives the document structural sharing, so during a drag only the entity
+ * that moved gets a new identity. Without this wrapper React redrew every token,
+ * every arrow and every thumbnail on every single pointer move; with it, it
+ * redraws the one that changed.
+ */
+export const PlayerToken = memo(PlayerTokenBasis)

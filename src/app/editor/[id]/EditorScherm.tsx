@@ -53,7 +53,7 @@ export function EditorScherm({
 
   const [kant, setKant] = useState<Side>('offense')
   const { status, fout } = useAutosave(magBewerken)
-  useDockHoogte()
+  useDockHoogte(frames.length)
 
   useEffect(() => {
     load(geladen)

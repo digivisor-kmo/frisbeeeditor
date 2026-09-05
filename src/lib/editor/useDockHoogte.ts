@@ -15,7 +15,7 @@ import { useEffect } from 'react'
  * the bottom, and `--veld-ruimte` is what remains between the card's top edge
  * and that furniture.
  */
-export function useDockHoogte(): void {
+export function useDockHoogte(sleutel: unknown = null): void {
   useEffect(() => {
     const meet = () => {
       const wortel = document.documentElement
@@ -51,5 +51,13 @@ export function useDockHoogte(): void {
       document.documentElement.style.removeProperty('--dock-hoogte')
       document.documentElement.style.removeProperty('--veld-ruimte')
     }
-  })
+    /*
+     * Deliberately not on every render. Without a dependency list this tore
+     * down and rebuilt two observers on every single pointer move of a drag,
+     * which is the opposite of what a measuring hook is for. The observers
+     * catch every size change by themselves; the key is only here to re-attach
+     * them when the furniture itself appears or disappears, such as the frame
+     * strip showing up once there is a second frame.
+     */
+  }, [sleutel])
 }

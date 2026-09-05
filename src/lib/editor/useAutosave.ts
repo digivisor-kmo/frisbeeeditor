@@ -36,8 +36,9 @@ export function useAutosave(magBewerken = true) {
     const timer = window.setTimeout(async () => {
       setBezig(true)
       try {
-        await bewaarDiagram(doc)
-        markSaved()
+        // What was written last time, so the save can send only the difference.
+        await bewaarDiagram(doc, useDiagramStore.getState().bewaard)
+        markSaved(doc)
         setFout(null)
         setOoitBewaard(true)
       } catch (error) {

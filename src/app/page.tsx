@@ -47,6 +47,10 @@ export default async function Home() {
     .select(
       'id, naam, type, categorie, tags, weergave, draft, favoriet, gewijzigd_op, frames(volgorde, content)',
     )
+    // Alleen het eerste frame: een thumbnail toont frame 1, en de rest van de
+    // frames van elk diagram meesturen is een payload die met de bibliotheek
+    // meegroeit zonder dat er iets mee gebeurt.
+    .eq('frames.volgorde', 0)
     .order('gewijzigd_op', { ascending: false })
     .returns<Rij[]>()
 

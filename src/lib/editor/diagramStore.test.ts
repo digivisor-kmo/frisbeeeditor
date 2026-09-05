@@ -51,7 +51,7 @@ describe('diagramStore', () => {
     useDiagramStore.getState().change('naam', (d) => {
       d.meta.naam = 'x'
     })
-    useDiagramStore.getState().markSaved()
+    useDiagramStore.getState().markSaved(useDiagramStore.getState().doc)
     expect(useDiagramStore.getState().dirty).toBe(false)
   })
 })

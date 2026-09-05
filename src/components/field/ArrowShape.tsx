@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import {
   buildLengthTable,
   pointAtDistance,
@@ -23,7 +24,7 @@ interface Props {
 const JUKE_AMPLITUDE_M = 0.5
 const JUKE_CYCLI = 3
 
-export function ArrowShape({
+function ArrowShapeBasis({
   arrow,
   view,
   tokenRadiusM,
@@ -152,3 +153,13 @@ function kortPad(
   const behouden = punten.slice(0, punten.length - 1)
   return [...behouden, eindpunt]
 }
+
+/**
+ * Memoised on purpose.
+ *
+ * Immer gives the document structural sharing, so during a drag only the entity
+ * that moved gets a new identity. Without this wrapper React redrew every token,
+ * every arrow and every thumbnail on every single pointer move; with it, it
+ * redraws the one that changed.
+ */
+export const ArrowShape = memo(ArrowShapeBasis)

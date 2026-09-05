@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { toPathD, trimStart } from '@/lib/diagram/curve'
 import { isArrow, isPlayer, type FrameContent, type Weergave } from '@/lib/diagram/schema'
 import { createView, metresToUnits, toSvg } from '@/lib/field/geometry'
@@ -8,7 +9,7 @@ import { createView, metresToUnits, toSvg } from '@/lib/field/geometry'
  * No letters: at this size a position label is mush. You recognise a variant by
  * its shape, which is exactly how a trainer looks for one.
  */
-export function DiagramThumbnail({
+function DiagramThumbnailBasis({
   content,
   weergave,
 }: {
@@ -80,3 +81,13 @@ export function DiagramThumbnail({
     </svg>
   )
 }
+
+/**
+ * Memoised on purpose.
+ *
+ * Immer gives the document structural sharing, so during a drag only the entity
+ * that moved gets a new identity. Without this wrapper React redrew every token,
+ * every arrow and every thumbnail on every single pointer move; with it, it
+ * redraws the one that changed.
+ */
+export const DiagramThumbnail = memo(DiagramThumbnailBasis)

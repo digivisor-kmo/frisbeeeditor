@@ -116,44 +116,77 @@ export async function laadDiagram(id: string): Promise<EditorDoc> {
   }
 }
 
-export async function bewaarDiagram(doc: EditorDoc): Promise<void> {
+/**
+ * Writes a diagram, and only the parts of it that actually changed.
+ *
+ * A frame carries the whole field as jsonb. Sending all ten of them every two
+ * seconds of drawing is a payload that grows with the diagram and a database
+ * that rewrites rows nobody touched. Immer's structural sharing makes the
+ * comparison exact and free: a frame that was not edited is literally the same
+ * object it was at the last save.
+ */
+export async function bewaarDiagram(doc: EditorDoc, vorige?: EditorDoc | null): Promise<void> {
   if (!doc.id) throw new Error('Diagram heeft nog geen id.')
   const supabase = createClient()
 
+  const zelfdeDiagram = vorige?.id === doc.id ? vorige : null
   const spelers = occupancy(doc.frames[0]?.content.entities ?? [])
 
-  const { error } = await supabase
-    .from('diagrams')
-    .update({
-      naam: doc.meta.naam,
-      type: doc.meta.type,
-      categorie: doc.meta.categorie,
-      niveau: doc.meta.niveau,
-      tags: doc.meta.tags,
-      weergave: doc.meta.weergave,
-      tokenstijl: doc.meta.tokenstijl,
-      draft: doc.meta.draft,
-      aantal_spelers: spelers.offense,
-    })
-    .eq('id', doc.id)
-  if (error) throw new Error(error.message)
+  const metaGewijzigd =
+    !zelfdeDiagram ||
+    zelfdeDiagram.meta !== doc.meta ||
+    zelfdeDiagram.frames[0]?.content !== doc.frames[0]?.content
+
+  if (metaGewijzigd) {
+    const { error } = await supabase
+      .from('diagrams')
+      .update({
+        naam: doc.meta.naam,
+        type: doc.meta.type,
+        categorie: doc.meta.categorie,
+        niveau: doc.meta.niveau,
+        tags: doc.meta.tags,
+        weergave: doc.meta.weergave,
+        tokenstijl: doc.meta.tokenstijl,
+        draft: doc.meta.draft,
+        aantal_spelers: spelers.offense,
+      })
+      .eq('id', doc.id)
+    if (error) throw new Error(error.message)
+  }
+
+  const vorigeFrames = new Map(zelfdeDiagram?.frames.map((f, i) => [f.id, { frame: f, index: i }]))
 
   // Validate before writing: the frame invariants are the last line of defence
   // before a broken diagram lands in the database.
-  const rijen = doc.frames.map((frame, index) => ({
-    id: frame.id,
-    diagram_id: doc.id!,
-    volgorde: index,
-    duur_ms: frame.duurMs,
-    toelichting: frame.toelichting,
-    content: frameContentSchema.parse(frame.content),
-    schema_version: SCHEMA_VERSION,
-  }))
+  const rijen = doc.frames
+    .map((frame, index) => ({ frame, index }))
+    .filter(({ frame, index }) => {
+      const vorig = vorigeFrames.get(frame.id)
+      if (!vorig) return true
+      return (
+        vorig.index !== index ||
+        vorig.frame.content !== frame.content ||
+        vorig.frame.duurMs !== frame.duurMs ||
+        vorig.frame.toelichting !== frame.toelichting
+      )
+    })
+    .map(({ frame, index }) => ({
+      id: frame.id,
+      diagram_id: doc.id!,
+      volgorde: index,
+      duur_ms: frame.duurMs,
+      toelichting: frame.toelichting,
+      content: frameContentSchema.parse(frame.content),
+      schema_version: SCHEMA_VERSION,
+    }))
 
   // One statement, so the deferred unique constraint on (diagram_id, volgorde)
   // is only checked once every row has moved. Reordering frames would trip it
   // halfway otherwise.
-  let { error: frameError } = await supabase.from('frames').upsert(rijen)
+  let { error: frameError } = rijen.length > 0
+    ? await supabase.from('frames').upsert(rijen)
+    : { error: null as { message: string } | null }
 
   /*
    * A frame write needs a valid lock, and a tab that sat in a pocket for two
@@ -171,13 +204,20 @@ export async function bewaarDiagram(doc: EditorDoc): Promise<void> {
 
   if (frameError) throw new Error(frameError.message)
 
+  // Only when a frame actually disappeared. Otherwise this is a delete that
+  // scans the diagram's frames on every keystroke and never removes anything.
   const behouden = doc.frames.map((frame) => frame.id)
-  const { error: opruimError } = await supabase
-    .from('frames')
-    .delete()
-    .eq('diagram_id', doc.id)
-    .not('id', 'in', `(${behouden.join(',')})`)
-  if (opruimError) throw new Error(opruimError.message)
+  const verdwenen =
+    !zelfdeDiagram || zelfdeDiagram.frames.some((f) => !behouden.includes(f.id))
+
+  if (verdwenen) {
+    const { error: opruimError } = await supabase
+      .from('frames')
+      .delete()
+      .eq('diagram_id', doc.id)
+      .not('id', 'in', `(${behouden.join(',')})`)
+    if (opruimError) throw new Error(opruimError.message)
+  }
 }
 
 export async function verwijderDiagram(id: string): Promise<void> {

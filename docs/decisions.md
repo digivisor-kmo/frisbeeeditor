@@ -542,3 +542,37 @@ regel van vierhonderd pixels. Ze werden afgekapt aan de rechterkant en het
 naamveld verdween volledig. De kop loopt nu over twee rijen: de naam met de
 terugknop, en daaronder de statusstrip. Alles blijft bereikbaar; niets verdwijnt
 achter een rand.
+
+## 2026-09-05 — Vlotheid: minder tekenen en minder wegschrijven
+
+Drie oorzaken, alle drie zichtbaar in de code.
+
+**Alles werd opnieuw getekend bij elke pointermove.** Er stond nergens
+memoïsatie, dus één sleepbeweging hertekende elk token, elke arrow én elke
+framethumbnail, veertig keer per seconde. Immer geeft het document structurele
+deling: bij een sleep krijgt alleen de verplaatste entiteit een nieuwe
+identiteit. Met `memo` op de tokens, de arrows en de thumbnails hertekent React
+nu wat veranderde en de rest niet. Er staat een test op die eigenschap, want de
+hele optimalisatie leunt erop: een frame dat je niet bewerkte moet letterlijk
+hetzelfde object blijven.
+
+**Elke save schreef het hele document.** Een frame draagt het volledige veld als
+jsonb; alle tien de frames om de twee seconden versturen is een payload die met
+het diagram meegroeit en een database die rijen herschrijft die niemand heeft
+aangeraakt. De store onthoudt nu wat er als laatste in ging, en een save vergelijkt
+frame per frame op identiteit en stuurt alleen het verschil. De update op de
+diagramrij en de opruimdelete gebeuren alleen nog als er werkelijk iets aan de
+meta veranderde of een frame verdween.
+
+**De bibliotheek haalde alle frames van alle diagrammen op** om per diagram één
+thumbnail te tekenen. Nu alleen frame 1.
+
+**En één die ik zelf veroorzaakt had.** De hook die de dockhoogte meet stond
+zonder dependencies, dus hij brak twee observers af en bouwde ze opnieuw op bij
+élke render — dus veertig keer per seconde tijdens een sleep. Dat is het
+tegenovergestelde van wat een meethook hoort te doen. Hij draait nu één keer, en
+de observers vangen de veranderingen zelf op.
+
+**Niet gemeten.** Ik heb geen betrouwbare voor-en-na in de browser kunnen halen:
+via deze weg staat het tabblad op de achtergrond en dan bevriest de browser zijn
+tekenlus. De diagnose staat in de code, niet in een grafiek.

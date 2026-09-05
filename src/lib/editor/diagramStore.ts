@@ -15,6 +15,14 @@ interface DiagramStore {
   history: History
   /** True when the document differs from what is stored in Supabase. */
   dirty: boolean
+  /**
+   * The document as it last went into the database.
+   *
+   * Immer gives structural sharing, so comparing this frame by frame against
+   * the current one says exactly which frames changed — and a save then writes
+   * those and nothing else.
+   */
+  bewaard: EditorDoc | null
 
   /** Replaces the document, for example after loading one from the database. */
   load: (doc: EditorDoc) => void
@@ -28,7 +36,7 @@ interface DiagramStore {
 
   undo: () => void
   redo: () => void
-  markSaved: () => void
+  markSaved: (doc: EditorDoc) => void
 
   /** Adds the continuation of frame `index` right after it, and returns its position. */
   voegFrameToe: (index: number) => number
@@ -42,8 +50,9 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
   doc: newDoc({ frameId: newId() }),
   history: emptyHistory(),
   dirty: false,
+  bewaard: null,
 
-  load: (doc) => set({ doc, history: emptyHistory(), dirty: false }),
+  load: (doc) => set({ doc, history: emptyHistory(), dirty: false, bewaard: doc }),
 
   change: (label, recipe, groupId) =>
     set((state) => {
@@ -66,7 +75,9 @@ export const useDiagramStore = create<DiagramStore>((set, get) => ({
       return { doc: result.state, history: result.history, dirty: true }
     }),
 
-  markSaved: () => set({ dirty: false }),
+  // What went in is what we compare against next time. Anything the trainer
+  // changed while the save was in flight keeps the document dirty.
+  markSaved: (doc) => set((state) => ({ dirty: state.doc !== doc, bewaard: doc })),
 
   voegFrameToe: (index) => {
     const bron = get().doc.frames[index]
