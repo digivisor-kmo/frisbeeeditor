@@ -24,29 +24,34 @@ from PIL import Image, ImageDraw
 BLAUW = (0x34, 0x52, 0xFE)
 WIT = (255, 255, 255)
 
-# The duck sits in the middle of the badge; the ring of lettering around it is
-# a separate shape. Keep only the blob that covers the centre of the image.
-DREMPEL = 128
+# The duck sits in the middle of the badge. Whatever surrounds it — a ring of
+# lettering, or nothing at all — is judged against the colour of the border.
+AFSTAND = 60.0
 
 
 def inktmasker(bron: Image.Image) -> np.ndarray:
-    """True where there is ink: dark pixels, or opaque ones on a clear ground."""
+    """True where the drawing is, whichever way round the colours run.
+
+    A badge can be black on white, white on blue, or a shape on nothing. So the
+    ground is read from the border of the image and everything far enough from
+    that colour counts as drawing. That way the same code cuts out a dark duck
+    and a light one.
+    """
     rgba = bron.convert("RGBA")
-    arr = np.asarray(rgba).astype(np.int16)
+    arr = np.asarray(rgba).astype(np.float64)
     alpha = arr[:, :, 3]
-    grijs = arr[:, :, :3].mean(axis=2)
     if (alpha < 250).mean() > 0.05:
         return alpha > 128
-    return grijs < DREMPEL
+    rand = np.concatenate([arr[0, :, :3], arr[-1, :, :3], arr[:, 0, :3], arr[:, -1, :3]])
+    grond = np.median(rand, axis=0)
+    return np.linalg.norm(arr[:, :, :3] - grond, axis=2) > AFSTAND
 
 
-def grootste_blob_bij_midden(masker: np.ndarray) -> np.ndarray:
-    """The connected component nearest the centre, grown with a flood fill."""
+def _componenten(masker: np.ndarray) -> list[np.ndarray]:
+    """Every connected run of drawing, biggest first."""
     h, w = masker.shape
     bezocht = np.zeros_like(masker, dtype=bool)
-    beste: np.ndarray | None = None
-    beste_score = -1.0
-    mid = np.array([h / 2, w / 2])
+    gevonden: list[np.ndarray] = []
     ys, xs = np.nonzero(masker)
     for y0, x0 in zip(ys, xs):
         if bezocht[y0, x0]:
@@ -63,16 +68,41 @@ def grootste_blob_bij_midden(masker: np.ndarray) -> np.ndarray:
                     bezocht[ny, nx] = True
                     blob[ny, nx] = True
                     stapel.append((ny, nx))
-        oppervlak = blob.sum()
-        by, bx = np.nonzero(blob)
-        zwaartepunt = np.array([by.mean(), bx.mean()])
-        afstand = np.linalg.norm(zwaartepunt - mid) / max(h, w)
-        score = oppervlak * (1.0 - min(afstand, 0.99))
-        if score > beste_score:
-            beste_score, beste = score, blob
-    if beste is None:
-        raise SystemExit("geen inkt gevonden in de bron")
-    return beste
+        gevonden.append(blob)
+    gevonden.sort(key=lambda b: int(b.sum()), reverse=True)
+    return gevonden
+
+
+def _kader(blob: np.ndarray) -> tuple[int, int, int, int]:
+    ys, xs = np.nonzero(blob)
+    return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+
+
+def eendmasker(masker: np.ndarray) -> np.ndarray:
+    """The bird: the biggest shape, plus the loose bits that lie inside it.
+
+    A beak tip or a crest feather can be cut off from the body by a hairline of
+    background. Dropping those would eat the bird piece by piece, so anything
+    whose box falls inside the body's box comes along.
+    """
+    delen = _componenten(masker)
+    if not delen:
+        raise SystemExit("geen tekening gevonden in de bron")
+    romp = delen[0]
+    x0, y0, x1, y1 = _kader(romp)
+    marge_x, marge_y = (x1 - x0) * 0.04, (y1 - y0) * 0.04
+    samen = romp.copy()
+    for deel in delen[1:]:
+        dx0, dy0, dx1, dy1 = _kader(deel)
+        binnen = (
+            dx0 >= x0 - marge_x
+            and dy0 >= y0 - marge_y
+            and dx1 <= x1 + marge_x
+            and dy1 <= y1 + marge_y
+        )
+        if binnen:
+            samen |= deel
+    return samen
 
 
 def vierkant_met_marge(kader: tuple[int, int, int, int], marge: float) -> tuple[int, int, int, int]:
@@ -114,9 +144,8 @@ def main() -> None:
     uit = Path("public")
     bron = Image.open(bron_pad)
     masker = inktmasker(bron)
-    blob = grootste_blob_bij_midden(masker)
-    ys, xs = np.nonzero(blob)
-    kader = (int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1)
+    blob = eendmasker(masker)
+    kader = _kader(blob)
     raakt = [
         naam
         for naam, waar in (
@@ -143,11 +172,12 @@ def main() -> None:
     print("controlebeeld", controle_pad)
 
     for naam, maat, radius, vulling in (
-        ("icoon-192.png", 192, 0.22, 0.66),
-        ("icoon-512.png", 512, 0.22, 0.66),
-        ("apple-touch-icon.png", 180, 0.0, 0.66),
+        ("icoon-192.png", 192, 0.22, 0.76),
+        ("icoon-512.png", 512, 0.22, 0.76),
+        # iOS rounds the corners itself, so leave it a little more room.
+        ("apple-touch-icon.png", 180, 0.0, 0.70),
         # Maskable: everything outside the middle 80% can be cropped away.
-        ("icoon-maskable-512.png", 512, 0.0, 0.52),
+        ("icoon-maskable-512.png", 512, 0.0, 0.60),
     ):
         teken(silhouet, maat, radius, vulling).save(uit / naam)
         print("geschreven", uit / naam)

@@ -638,3 +638,17 @@ mobiele weergave bestaat.
 de frames erboven. Dat kost hoogte, en die is er: een half veld rechtop is
 breedtegebonden en vult de hoogte toch nooit helemaal. Liggend blijft alles op
 één regel, want daar past het.
+
+## 2026-09-05 — De eend opnieuw, nu uit haar eigen omtrek
+
+De eerste iconen waren onderaan vlak afgesneden: ik had het kader met de hand
+ingetypt en het resultaat niet bekeken. Nu snijdt `scripts/maak-iconen.py` de
+vorm uit haar eigen omtrek, waarschuwt het als die omtrek de rand van de bron
+raakt, en legt het een controlebeeld neer met het gevonden kader erop.
+
+De bron staat in `scripts/bron-embleem.png`. Ze hoort in de repo: de vorige is
+zoekgeraakt toen de werkomgeving opnieuw startte, en het clublogo staat nergens
+online in bruikbare resolutie — op de clubsite is het zeventig pixels breed.
+
+De eend vult 76 procent van de tegel bij de gewone iconen en 60 bij de
+maskable, waar alles buiten de middelste tachtig procent weggesneden kan worden.
