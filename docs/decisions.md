@@ -652,3 +652,36 @@ online in bruikbare resolutie — op de clubsite is het zeventig pixels breed.
 
 De eend vult 76 procent van de tegel bij de gewone iconen en 60 bij de
 maskable, waar alles buiten de middelste tachtig procent weggesneden kan worden.
+
+## 2026-09-05 — Een service worker, en wat hij wel en niet bewaart
+
+De browser biedt een app pas aan om te installeren als er een service worker is
+met een `fetch`-handler. Chrome liet die eis vallen voor installeren via het
+menu, maar niet voor de popup die vanzelf verschijnt. Daarom staat hij er nu.
+
+**Alternatief.** Een lege `fetch`-handler, alleen om aan de regel te voldoen.
+Afgewezen, en het Chrome-team raadt het zelf af: je krijgt de popup en een
+tragere app, want elk verzoek loopt dan om.
+
+**Gekozen.** Een die iets doet, en alleen wat hij eerlijk kan.
+
+Gehasht bouwsel onder `_next/static` wordt voorgoed bewaard: die bestanden
+veranderen nooit onder dezelfde naam.
+
+Pagina's komen altijd van het netwerk en worden niet bewaard. Twee redenen. Een
+deploy moet aankomen, en een playbook dat de stack van vorige week toont omdat
+hij uit een blik kwam vind je pas terwijl je op het veld staat. En elke pagina
+hier is als iemand ingelogd: een bewaarde kopie ligt na het afmelden nog in de
+browser, op een telefoon die aan de kant van het veld rondgaat.
+
+De payloads van React voor een navigatie binnen de app en alles onder `/auth`
+blijven er helemaal buiten.
+
+Zonder netwerk is er dus één eerlijk antwoord, en dat is `/offline`: er is niets
+kwijt, de app kan de server niet bereiken. Je diagrammen offline kunnen lezen is
+een aparte klus, want dat vraagt dat je weet hoe oud wat je ziet is.
+
+De installatieknop bestaat alleen wanneer de browser zegt dat het kan, en
+verdwijnt zodra de app geïnstalleerd is. Op een iPhone verschijnt hij nooit,
+want daar bestaat die gebeurtenis niet; installeren gaat er via Deel, Zet op
+beginscherm.

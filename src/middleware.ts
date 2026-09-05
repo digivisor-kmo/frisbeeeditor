@@ -6,5 +6,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  // sw.js and the manifest are asked for by the browser itself, sometimes
+  // without a session. Sending them through the session check turns them into a
+  // redirect to the login page, and then the app can never be installed.
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

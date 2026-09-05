@@ -254,3 +254,13 @@ export function ThrowIcon({ size = 20 }: IconProps) {
     </svg>
   )
 }
+
+/** Onto the device: an arrow into a tray. */
+export function InstalleerIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M12 3.6v10.2M8.2 10.4 12 14.2l3.8-3.8" />
+      <path d="M4.6 16.2v2.4a1.8 1.8 0 0 0 1.8 1.8h11.2a1.8 1.8 0 0 0 1.8-1.8v-2.4" />
+    </svg>
+  )
+}

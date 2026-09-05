@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/supabase/database.types'
 import { PersoonIcon } from '@/components/editor/icons'
+import { InstallKnop } from '@/components/InstallKnop'
 import { nl } from '@/lib/strings'
 
 /**
@@ -46,6 +47,8 @@ export async function AppBalk() {
             name of the app, and they were landing on top of it. One icon leads
             to the account page, and signing out lives there.
           */}
+          <InstallKnop />
+
           <Link
             href="/account"
             className="btn btn--klein btn--icoon topbalk__account"

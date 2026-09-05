@@ -25,6 +25,14 @@ export const nl = {
     linkVerlopen: 'Die link werkt niet meer. Vraag hieronder een nieuwe aan.',
     afmelden: 'Afmelden',
   },
+  installeren: {
+    knop: 'Installeren',
+  },
+  offline: {
+    titel: 'Geen verbinding',
+    uitleg:
+      'De app kan de server niet bereiken. Er is niets kwijt: zodra je weer bereik hebt, werkt alles verder. Je diagrammen staan nog niet offline klaar.',
+  },
   account: {
     titel: 'Je account',
     terug: 'Terug naar de diagrammen',
