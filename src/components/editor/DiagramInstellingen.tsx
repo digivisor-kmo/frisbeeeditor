@@ -67,17 +67,15 @@ export function DiagramInstellingen() {
         </Keuze>
       </VeldRij>
 
-      <div style={{ alignSelf: 'end' }}>
-        <Aanvink
-          label={nl.instellingen.conceptUitleg}
-          checked={meta.draft}
-          onChange={(waarde) =>
-            change(nl.instellingen.concept, (draft) => {
-              draft.meta.draft = waarde
-            })
-          }
-        />
-      </div>
+      <Aanvink
+        label={nl.instellingen.conceptUitleg}
+        checked={meta.draft}
+        onChange={(waarde) =>
+          change(nl.instellingen.concept, (draft) => {
+            draft.meta.draft = waarde
+          })
+        }
+      />
     </>
   )
 }

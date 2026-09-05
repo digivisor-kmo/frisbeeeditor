@@ -141,6 +141,9 @@ export const nl = {
       'Bepaalt hoe de curve standaard buigt. Heb je de bocht zelf al versleept, dan blijft die staan.',
   },
   instellingen: {
+    groepDiagram: 'Diagram',
+    groepTekenen: 'Tekenen',
+    groepAfspelen: 'Afspelen',
     type: 'Type',
     categorie: 'Categorie',
     tokenstijl: 'Tokenstijl',
@@ -182,6 +185,7 @@ export const nl = {
     lussen: 'Lussen',
     snelheid: 'Snelheid',
     focus: 'Focus tijdens het afspelen',
+    focusKort: 'Focus',
     beide: 'Beide',
   },
   opslaan: {

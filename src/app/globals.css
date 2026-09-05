@@ -775,10 +775,69 @@ h3,
   flex-wrap: wrap;
 }
 
+/* The panel behind the toolbar: three groups, not a bag of controls.
+   It used to be one grid of equal columns with every control loose in it, so
+   the order was whatever fitted and a long label pushed its neighbour over.
+   Each group now keeps its own contents, and the groups sit side by side only
+   while there is room for them. */
 .editor-paneel {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--ruimte-5);
+  padding: var(--ruimte-5);
+}
+
+.paneel-groep {
+  display: grid;
+  align-content: start;
   gap: var(--ruimte-3);
+  min-width: 0;
+}
+
+/* A hairline between the groups rather than a box around each: the panel stays
+   one surface, and the eye still gets the seam. */
+.paneel-groep + .paneel-groep {
+  padding-left: var(--ruimte-5);
+  border-left: 1px solid var(--border);
+}
+
+@media (max-width: 800px) {
+  .paneel-groep + .paneel-groep {
+    padding-left: 0;
+    padding-top: var(--ruimte-4);
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
+.paneel-groep__kop {
+  font-size: var(--tekst-sm);
+  font-weight: 650;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Inside a group the fields sit closer together than the groups do. */
+.paneel-veld {
+  display: grid;
+  gap: var(--ruimte-2);
+  min-width: 0;
+}
+
+.paneel-veld .veld-label {
+  margin-bottom: 0;
+}
+
+/* A row of choices in the panel fills its column and shares it evenly, so the
+   three groups line up instead of each ending wherever its longest word does. */
+.paneel-veld .btn-groep {
+  display: flex;
+  width: 100%;
+}
+
+.paneel-veld .btn-groep > .btn {
+  flex: 1;
+  min-width: 0;
 }
 
 .naam-invoer {

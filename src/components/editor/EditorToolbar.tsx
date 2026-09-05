@@ -62,25 +62,34 @@ export function EditorToolbar({ kant, setKant }: Props) {
     <div className="editor-chrome" style={{ display: 'grid', gap: 'var(--ruimte-2)' }}>
       {paneelOpen && (
         <div className="paneel editor-paneel">
-          <DiagramInstellingen />
+          {/* Three groups, each with everything that belongs to it: what the
+              diagram is, how you draw on it, how it plays back. Loose in one
+              grid these ran into each other and the order was whatever fitted. */}
+          <section className="paneel-groep">
+            <h3 className="paneel-groep__kop">{nl.instellingen.groepDiagram}</h3>
+            <DiagramInstellingen />
+          </section>
 
-          <div>
-            <span className="veld-label">{nl.instellingen.nieuweSpeler}</span>
-            <div className="btn-groep" style={{ width: '100%' }}>
-              <Knop klein actief={kant === 'offense'} onClick={() => setKant('offense')} style={{ flex: 1 }}>
-                {nl.editor.aanval}
-              </Knop>
-              <Knop klein actief={kant === 'defense'} onClick={() => setKant('defense')} style={{ flex: 1 }}>
-                {nl.editor.verdediging}
-              </Knop>
+          <section className="paneel-groep">
+            <h3 className="paneel-groep__kop">{nl.instellingen.groepTekenen}</h3>
+            <div className="paneel-veld">
+              <span className="veld-label">{nl.instellingen.nieuweSpeler}</span>
+              <div className="btn-groep">
+                <Knop klein actief={kant === 'offense'} onClick={() => setKant('offense')}>
+                  {nl.editor.aanval}
+                </Knop>
+                <Knop klein actief={kant === 'defense'} onClick={() => setKant('defense')}>
+                  {nl.editor.verdediging}
+                </Knop>
+              </div>
             </div>
-          </div>
-
-          <Afspeelinstellingen />
-
-          <div style={{ alignSelf: 'end' }}>
             <Aanvink label={nl.editor.rasterUitleg} checked={snap} onChange={setSnap} />
-          </div>
+          </section>
+
+          <section className="paneel-groep">
+            <h3 className="paneel-groep__kop">{nl.instellingen.groepAfspelen}</h3>
+            <Afspeelinstellingen kort />
+          </section>
         </div>
       )}
 
