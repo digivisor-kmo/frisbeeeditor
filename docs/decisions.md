@@ -623,3 +623,18 @@ wordt betekent het niet langer "dit is het ding om op te drukken".
 De app-iconen zijn de eend uit het embleem in wit op dat blauw. De volledige
 lockup met "Dendermondse Ultimate Club" en "est 2017" is onleesbaar op dertig
 pixels; de eend alleen is op elk formaat herkenbaar.
+
+## 2026-09-05 — Rechtop stapelen de zwevende pillen
+
+Op een telefoon rechtop zijn de twee pillen samen breder dan het scherm: 217 en
+195 pixels naast elkaar in 410, dus de rechtse liep er tot zestig pixels buiten
+en de afspeelknop stond half naast het scherm.
+
+**Alternatief.** De knoppen smaller maken. Afgewezen: dan zakken ze onder de 44
+pixels die een duim nodig heeft, en dat is precies de maat waarvoor deze hele
+mobiele weergave bestaat.
+
+**Gekozen.** Twee regels. De gereedschappen onderaan waar de duim vanzelf komt,
+de frames erboven. Dat kost hoogte, en die is er: een half veld rechtop is
+breedtegebonden en vult de hoogte toch nooit helemaal. Liggend blijft alles op
+één regel, want daar past het.
