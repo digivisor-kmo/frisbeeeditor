@@ -11,6 +11,7 @@ interface Props {
   selected: boolean
   hitRadiusM: number
   slotWijst?: boolean
+  toonSlot?: boolean
 }
 
 /** Roughly how many characters fit on a line before it gets hard to place. */
@@ -43,7 +44,14 @@ export function regelsVan(tekst: string): string[] {
 
 const ANKER = { links: 'start', midden: 'middle', rechts: 'end' } as const
 
-function TextShapeBasis({ blok, view, selected, hitRadiusM, slotWijst = false }: Props) {
+function TextShapeBasis({
+  blok,
+  view,
+  selected,
+  hitRadiusM,
+  slotWijst = false,
+  toonSlot = true,
+}: Props) {
   const p = toSvg(blok.pos, view)
   const hoogte = metresToUnits(TEXT_SIZES_M[blok.size])
   const regels = regelsVan(blok.content)
@@ -95,7 +103,7 @@ function TextShapeBasis({ blok, view, selected, hitRadiusM, slotWijst = false }:
         ))}
       </text>
 
-      {blok.vergrendeld && (
+      {blok.vergrendeld && toonSlot && (
         <Slotje
           x={x + breedte + hoogte * 0.75}
           y={eerste - hoogte * 0.72}

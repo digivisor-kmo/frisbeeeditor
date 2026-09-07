@@ -4,11 +4,21 @@ import { useMemo, useRef } from 'react'
 import { AnimatieLaag } from '@/components/field/AnimatieLaag'
 import { ArrowShape } from '@/components/field/ArrowShape'
 import { FieldSurface } from '@/components/field/FieldSurface'
+import { TextShape } from '@/components/field/TextShape'
+import { ZoneShape } from '@/components/field/ZoneShape'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
 import { useMetresPerPixel, useStaandScherm } from '@/components/editor/useMetresPerPixel'
 import { frameOpTijd } from '@/lib/diagram/animation'
-import { isArrow, isPlayer, type Entity, type Tokenstijl, type Weergave } from '@/lib/diagram/schema'
+import {
+  isArrow,
+  isPlayer,
+  isText,
+  isZone,
+  type Entity,
+  type Tokenstijl,
+  type Weergave,
+} from '@/lib/diagram/schema'
 import type { EditorFrame } from '@/lib/editor/document'
 import { createView, maakCamera } from '@/lib/field/geometry'
 import { hitRadiusM, tokenRadiusM } from '@/lib/field/scale'
@@ -62,6 +72,14 @@ export function LeesCanvas({
   const arrows = entities.filter(isArrow)
   const pionnen = entities.filter((e) => e.type === 'cone')
 
+  // Zones and notes are scenery: never interpolated, so they come from whichever
+  // frame is on screen, playing or not. They are drawn here as well as in the
+  // editor because a zone a player never sees is a zone that was drawn for
+  // nobody.
+  const statisch = frames[animeert ? moment.index : activeFrame]?.content.entities ?? entities
+  const zones = statisch.filter(isZone)
+  const teksten = statisch.filter(isText)
+
   return (
     <svg
       ref={svgRef}
@@ -71,6 +89,20 @@ export function LeesCanvas({
       className="veld-svg"
     >
       <FieldSurface view={view} />
+
+      {/* Nothing here answers a finger: this is a drawing, not an editor. */}
+      <g pointerEvents="none">
+        {opZ(zones).map((zone) => (
+          <ZoneShape
+            key={zone.id}
+            zone={zone}
+            view={view}
+            hitRadiusM={hitM}
+            selected={false}
+            toonSlot={false}
+          />
+        ))}
+      </g>
 
       {animeert && (
         <AnimatieLaag
@@ -122,6 +154,19 @@ export function LeesCanvas({
             hitRadiusM={hitM}
             stijl={stijl}
             selected={false}
+          />
+        ))}
+      </g>
+
+      <g pointerEvents="none">
+        {opZ(teksten).map((blok) => (
+          <TextShape
+            key={blok.id}
+            blok={blok}
+            view={view}
+            hitRadiusM={hitM}
+            selected={false}
+            toonSlot={false}
           />
         ))}
       </g>

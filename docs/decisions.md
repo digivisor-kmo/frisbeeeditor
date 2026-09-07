@@ -808,3 +808,23 @@ Daarbovenop zijn zone en tekst eenmalig geworden: na één zone of één notitie
 staat het gereedschap weer op Selecteren. Je tekent er zelden twee na elkaar, en
 met het gereedschap nog gespannen schreef elke tik die je bedoelde als
 "deselecteren" er een nieuwe.
+
+## 2026-09-07 — Zones en tekst horen ook bij de spelers
+
+Ze werden alleen in de editor getekend. De spelersweergave en de deellink
+tekenen het veld met een eigen component, en dat had de nieuwe soorten nooit
+gekregen: een trainer tekende een zone met een label en geen enkele speler zag
+ze ooit.
+
+Nu staan ze er, uit hetzelfde frame dat op dat moment op het scherm staat, en
+ook tijdens het afspelen — decor beweegt niet mee, dus er valt niets te
+interpoleren. De hele laag staat op `pointerEvents: none`: dit is een tekening,
+geen editor, en niets erin mag op een vinger antwoorden.
+
+Het slotje van een vastgezette zone blijft weg bij de spelers. Het is
+editormeubilair: het zegt "dit verschuift niet per ongeluk", en waar niets
+versleept kan worden, zegt het niets.
+
+De thumbnails in de bibliotheek tonen ze bewust nog altijd niet. Op honderdvijftig
+pixels is een zone een vlek en een notitie onleesbaar; de kaart moet in één
+oogopslag zeggen wélk diagram het is, niet wat erin staat.

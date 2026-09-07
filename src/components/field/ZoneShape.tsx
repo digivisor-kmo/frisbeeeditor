@@ -13,6 +13,8 @@ interface Props {
   hitRadiusM: number
   /** A tap landed on it while it was locked, so the padlock says so. */
   slotWijst?: boolean
+  /** The padlock is editor furniture: it means nothing where nothing can be dragged. */
+  toonSlot?: boolean
 }
 
 /**
@@ -24,7 +26,14 @@ interface Props {
  * meant for the players inside it. That is what the lock is for. A locked zone
  * still answers a tap, but a drag goes straight through it to the pitch.
  */
-function ZoneShapeBasis({ zone, view, selected, hitRadiusM, slotWijst = false }: Props) {
+function ZoneShapeBasis({
+  zone,
+  view,
+  selected,
+  hitRadiusM,
+  slotWijst = false,
+  toonSlot = true,
+}: Props) {
   const kader = zoneKader(zone)
   const a = toSvg({ x: kader.minX, y: kader.minY }, view)
   const b = toSvg({ x: kader.maxX, y: kader.maxY }, view)
@@ -106,7 +115,7 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM, slotWijst = false }:
         />
       )}
 
-      {zone.vergrendeld && (
+      {zone.vergrendeld && toonSlot && (
         <Slotje
           x={x + breedte - labelHoogte * 0.9}
           y={y + labelHoogte * 0.5}
