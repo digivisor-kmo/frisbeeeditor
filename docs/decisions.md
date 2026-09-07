@@ -875,3 +875,25 @@ Er twee schermen later opnieuw naar vragen is iemand vragen zichzelf te
 herhalen. Het diagram krijgt dus meteen type speelvariant en de bijhorende
 categorie, en van de drie dingen die de validatieteller vraagt zijn er nog maar
 één over: een naam. Een leeg veld zegt nog niets en laat de vraag open.
+
+## 2026-09-07 — Meer startopstellingen, en niet allemaal overal
+
+Er waren er drie: vertical stack, horizontal stack, leeg veld. Er zijn er nu
+zeven. Erbij: side stack (de stack langs één zijlijn, met één cutter alleen in
+de lege helft — die lege helft ís de opstelling), endzone-set (de schijf net
+buiten de endzone, de stack erin, zodat elke cut naar de werper toe komt),
+zoneverdediging als 3-2-2 met een cup van drie rond de schijf, twee wings, een
+short deep en een deep deep, met de aanval ertegenover zoals je ertegen staat —
+drie handlers, twee poppers in de gaten, twee wings breed — en pull play, waar
+de schijf nog in de lucht is en dus niemand hem vasthoudt.
+
+**Niet elke opstelling wordt overal aangeboden.** Een half veld toont één
+endzone plus ongeveer 32 meter, en een cup rond een schijf op 52 meter staat
+daar buiten de tekening. Zoneverdediging en pull play verschijnen daarom alleen
+bij een heel veld. Ze aanbieden en dan half buiten beeld tekenen is erger dan ze
+niet aanbieden. Wissel je van veld terwijl zo'n opstelling gekozen staat, dan
+valt de keuze terug op vertical stack, want die past overal.
+
+Elke opstelling heeft een test: komt door het schema, zet zeven tegen zeven
+neer, houdt iedereen binnen de lijnen, en geeft hoogstens één iemand de schijf.
+Dat zijn precies de fouten die je anders pas op het veld ziet.

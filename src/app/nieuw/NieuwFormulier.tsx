@@ -7,6 +7,8 @@ import {
   buildPreset,
   CATEGORIE_VAN_OPSTELLING,
   OPSTELLING_LABELS,
+  opstellingenVoor,
+  opstellingPast,
   type Opstelling,
 } from '@/lib/diagram/presets'
 import type { Weergave } from '@/lib/diagram/schema'
@@ -21,8 +23,6 @@ const WEERGAVEN: { id: Weergave; naam: string; uitleg: string }[] = [
   { id: 'half', naam: nl.veld.half, uitleg: nl.veld.halfUitleg },
   { id: 'vrij', naam: nl.veld.vrij, uitleg: nl.veld.vrijUitleg },
 ]
-
-const OPSTELLINGEN: Opstelling[] = ['vertical-stack', 'horizontal-stack', 'leeg']
 
 export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   const router = useRouter()
@@ -42,6 +42,10 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
    */
   function kiesWeergave(id: Weergave) {
     setWeergave(id)
+    // A cup around a disc at fifty metres has nowhere to stand on a half field.
+    // Rather than draw it off the edge, those formations are not offered there,
+    // and a choice that just disappeared falls back to the one that always fits.
+    if (!opstellingPast(opstelling, id)) setOpstelling('vertical-stack')
     const doel = stapTwee.current
     if (!doel) return
 
@@ -132,7 +136,7 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
           {nl.nieuw.opstelling}
         </h2>
         <div className="btn-groep keuzerij">
-          {OPSTELLINGEN.map((o) => (
+          {opstellingenVoor(weergave).map((o) => (
             <Knop key={o} actief={opstelling === o} onClick={() => setOpstelling(o)}>
               {OPSTELLING_LABELS[o]}
             </Knop>

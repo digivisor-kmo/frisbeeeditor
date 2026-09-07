@@ -1788,7 +1788,7 @@ body:has(.frame-strip) .editor-hoofd {
    wider than the screen: the footer button hung over the right edge. */
 .keuzerij {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   width: 100%;
 }
 
