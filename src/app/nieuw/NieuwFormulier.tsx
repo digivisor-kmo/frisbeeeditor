@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import { buildPreset, OPSTELLING_LABELS, type Opstelling } from '@/lib/diagram/presets'
@@ -22,9 +22,24 @@ const OPSTELLINGEN: Opstelling[] = ['vertical-stack', 'horizontal-stack', 'leeg'
 export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   const router = useRouter()
   const [weergave, setWeergave] = useState<Weergave>('volledig')
+  const stapTwee = useRef<HTMLElement>(null)
   const [opstelling, setOpstelling] = useState<Opstelling>('vertical-stack')
   const [bezig, setBezig] = useState(false)
   const [fout, setFout] = useState<string | null>(null)
+
+  /**
+   * Picking a field scrolls the second question into view.
+   *
+   * On a phone the two steps do not fit on one screen, and the second one sits
+   * below the fold with nothing to suggest it is there. People chose a field,
+   * saw nothing happen, and pressed on. The page moving is the answer: it shows
+   * that the choice landed and what is left to decide.
+   */
+  function kiesWeergave(id: Weergave) {
+    setWeergave(id)
+    const zacht = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    stapTwee.current?.scrollIntoView({ behavior: zacht ? 'smooth' : 'auto', block: 'start' })
+  }
 
   async function aanmaken() {
     setBezig(true)
@@ -53,9 +68,10 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   }
 
   return (
-    <div style={{ display: 'grid', gap: 'var(--ruimte-6)' }}>
-      <section>
+    <div style={{ display: 'grid', gap: 'var(--ruimte-6)', minWidth: 0 }}>
+      <section className="stap">
         <h2 className="kop" style={{ marginBottom: 'var(--ruimte-3)' }}>
+          <span className="stap__nummer">1</span>
           {nl.nieuw.veldtype}
         </h2>
         <div className="keuzeraster">
@@ -63,7 +79,7 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
             <button
               key={w.id}
               type="button"
-              onClick={() => setWeergave(w.id)}
+              onClick={() => kiesWeergave(w.id)}
               aria-pressed={weergave === w.id}
               className={`kaart keuzekaart ${weergave === w.id ? 'keuzekaart--aan' : ''}`}
             >
@@ -84,11 +100,12 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
         </div>
       </section>
 
-      <section>
+      <section className="stap" ref={stapTwee}>
         <h2 className="kop" style={{ marginBottom: 'var(--ruimte-3)' }}>
+          <span className="stap__nummer">2</span>
           {nl.nieuw.opstelling}
         </h2>
-        <div className="btn-groep">
+        <div className="btn-groep keuzerij">
           {OPSTELLINGEN.map((o) => (
             <Knop key={o} actief={opstelling === o} onClick={() => setOpstelling(o)}>
               {OPSTELLING_LABELS[o]}

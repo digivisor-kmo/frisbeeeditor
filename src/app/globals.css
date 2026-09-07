@@ -1739,6 +1739,9 @@ body:has(.frame-strip) .editor-hoofd {
   display: grid;
   place-items: center;
   height: 104px;
+  /* The preview is drawn to fit; this is the guarantee that it cannot spill
+     over the name of the card underneath it whatever the screen does. */
+  overflow: hidden;
   margin-bottom: var(--ruimte-2);
   padding: var(--ruimte-2);
   background: var(--surface-mute);
@@ -1753,8 +1756,12 @@ body:has(.frame-strip) .editor-hoofd {
   transition: filter var(--overgang);
 }
 
+/* A max-height on the wrapper does not clamp an SVG child: it keeps its own
+   height from its aspect ratio and simply runs over the edge. The limit has to
+   sit on the drawing itself, and then it letterboxes inside the well instead. */
 .keuzekaart__veld svg {
   display: block;
+  max-height: 88px;
   border-radius: 4px;
 }
 
@@ -1776,6 +1783,35 @@ body:has(.frame-strip) .editor-hoofd {
 }
 
 /* The row a form ends on: a hairline above it, the one primary action on it. */
+/* A row of choices that fills its width and shares it evenly. A plain button
+   group is sized by its longest label, and on a phone that made the whole page
+   wider than the screen: the footer button hung over the right edge. */
+.keuzerij {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 100%;
+}
+
+.keuzerij .btn {
+  min-width: 0;
+  padding-inline: var(--ruimte-2);
+  white-space: normal;
+  line-height: 1.25;
+}
+
+/* The step that a choice above it scrolls into view; this keeps its heading
+   clear of the sticky bar. */
+.stap {
+  scroll-margin-top: 5rem;
+  min-width: 0;
+}
+
+.stap__nummer {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  margin-right: 6px;
+}
+
 .voetrij {
   display: flex;
   justify-content: flex-end;
