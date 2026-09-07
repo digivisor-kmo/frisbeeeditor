@@ -101,6 +101,10 @@ interface DragState {
  */
 const SLEEP_DREMPEL_PX = 4
 
+/** How close together, in time and in pixels, two taps have to be to count as one. */
+const DUBBELTIK_MS = 450
+const DUBBELTIK_PX = 24
+
 export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<DragState | null>(null)
@@ -130,6 +134,17 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
    * not do before.
    */
   const tikPlaatst = useRef(true)
+  /**
+   * The last tap on a locked thing: what it was and when.
+   *
+   * A locked zone ignores a single tap entirely — that is the point of the
+   * lock — so the only way back in is a second tap right after the first. This
+   * is what tells them apart. Two taps rather than a dblclick event, because on
+   * a phone there is no such event to rely on.
+   */
+  const slotTik = useRef<{ id: string; tijd: number; x: number; y: number } | null>(null)
+  /** The locked thing whose padlock is flashing, so a tap that did nothing says why. */
+  const [slotWijst, setSlotWijst] = useState<string | null>(null)
   const knijp = useRef<KnijpState | null>(null)
 
   const doc = useDiagramStore((s) => s.doc)
@@ -315,12 +330,34 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       const anker = ankerVan(entity)
       if (!anker) return
 
-      // Pinned down. Selecting still works, so you can unlock it; a drag goes
-      // through to the pitch and becomes a selection box.
+      // Pinned down. One tap does nothing at all: it goes straight through to
+      // the pitch, so a selection box still works over it and nothing gets
+      // grabbed by accident. Two taps in a row open it, and from there the menu
+      // has the lock.
       if (isVergrendeld(entity)) {
-        if (event.shiftKey) toggle(entityId)
-        else select([entityId])
-        setMenuOpen(!event.shiftKey)
+        const vorige = slotTik.current
+        const dubbel =
+          vorige !== null &&
+          vorige.id === entityId &&
+          event.timeStamp - vorige.tijd < DUBBELTIK_MS &&
+          Math.hypot(event.clientX - vorige.x, event.clientY - vorige.y) < DUBBELTIK_PX
+
+        if (dubbel) {
+          slotTik.current = null
+          setSlotWijst(null)
+          select([entityId])
+          setMenuOpen(true)
+          return
+        }
+
+        slotTik.current = { id: entityId, tijd: event.timeStamp, x: event.clientX, y: event.clientY }
+        // The padlock blinks, so a tap that deliberately did nothing still says
+        // why it did nothing.
+        setSlotWijst(entityId)
+        window.setTimeout(() => setSlotWijst((huidig) => (huidig === entityId ? null : huidig)), 700)
+
+        tikPlaatst.current = false
+        clearSelection()
         drag.current = {
           doel: { soort: 'kader', startPunt: point },
           pointerId: event.pointerId,
@@ -816,6 +853,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
               view={view}
               hitRadiusM={hitM}
               selected={!animeert && selection.has(zone.id)}
+              slotWijst={slotWijst === zone.id}
             />
           ))}
         </g>
@@ -882,6 +920,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
               view={view}
               hitRadiusM={hitM}
               selected={!animeert && selection.has(blok.id)}
+              slotWijst={slotWijst === blok.id}
             />
           ))}
         </g>

@@ -766,11 +766,23 @@ trekken. Op een telefoon met een natte vinger is een streepjesrand van twee
 pixels alleen echter geen doel.
 
 **Nu is het hele vlak aanklikbaar, en lost een slotje het kader op.** Een zone
-of een tekstblok kan vastgezet worden. Vastgezet blijft hij selecteerbaar — dat
-is hoe je hem weer losmaakt — maar hij verschuift niet meer, en een sleep die op
-hem begint valt door naar het veld en wordt een sleepkader. Een vastgezette zone
-draagt een klein slotje in de hoek, altijd zichtbaar, want anders lijkt een zone
-die niet meebeweegt kapot in plaats van vastgezet.
+of een tekstblok kan vastgezet worden. Een vastgezette zone draagt een klein
+slotje in de hoek, altijd zichtbaar, want anders lijkt een zone die niet
+meebeweegt kapot in plaats van vastgezet.
+
+**Vastgezet betekent: één tik doet niets.** Niet selecteren, geen menu. De tik
+gaat door naar het veld, dus een sleepkader over de spelers eronder werkt gewoon
+en een sleepkader pikt hem ook niet op. Twee tikken snel na elkaar openen hem
+weer, en vanaf daar zit het slot in zijn menu.
+
+Dat is strenger dan een eerste versie waarin één tik hem nog selecteerde, en het
+is beter: half vastgezet is niet vastgezet. Twee tikken in plaats van een
+dblclick-gebeurtenis, want op een telefoon bestaat die niet betrouwbaar; het is
+twee pointerdowns binnen 450 ms en 24 pixels van elkaar.
+
+Een tik die niets doet moet wel zeggen waarom, anders lijkt de app stuk. Het
+slotje knippert daarom één keer. Dat is het enige stukje interface dat beweegt,
+en het beweegt alleen als antwoord op een tik.
 
 ## 2026-09-07 — Een tik op het gras betekent niet altijd "zet er nog een"
 

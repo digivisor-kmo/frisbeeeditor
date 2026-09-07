@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { Slotje } from './Slotje'
 import { coneFill } from './tokens/colors'
 import { zoneKader } from '@/lib/diagram/zones'
 import type { Annotation } from '@/lib/diagram/schema'
@@ -10,6 +11,8 @@ interface Props {
   selected: boolean
   /** Roughly a fingertip, in metres, for the invisible grab areas. */
   hitRadiusM: number
+  /** A tap landed on it while it was locked, so the padlock says so. */
+  slotWijst?: boolean
 }
 
 /**
@@ -21,7 +24,7 @@ interface Props {
  * meant for the players inside it. That is what the lock is for. A locked zone
  * still answers a tap, but a drag goes straight through it to the pitch.
  */
-function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
+function ZoneShapeBasis({ zone, view, selected, hitRadiusM, slotWijst = false }: Props) {
   const kader = zoneKader(zone)
   const a = toSvg({ x: kader.minX, y: kader.minY }, view)
   const b = toSvg({ x: kader.maxX, y: kader.maxY }, view)
@@ -109,6 +112,7 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
           y={y + labelHoogte * 0.5}
           maat={labelHoogte * 0.85}
           kleur={verf}
+          wijst={slotWijst}
         />
       )}
 
@@ -129,35 +133,6 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
           {zone.label}
         </text>
       )}
-    </g>
-  )
-}
-
-/**
- * The little padlock in the corner of a pinned zone.
- *
- * Always drawn, not only while it is selected: without it, a zone that refuses
- * to move looks broken rather than locked.
- */
-function Slotje({ x, y, maat, kleur }: { x: number; y: number; maat: number; kleur: string }) {
-  const b = maat * 0.78
-  return (
-    <g pointerEvents="none" opacity={0.85}>
-      <path
-        d={`M ${x - b / 2 + b * 0.22} ${y} v ${-maat * 0.24} a ${b * 0.28} ${b * 0.28} 0 0 1 ${b * 0.56} 0 v ${maat * 0.24}`}
-        fill="none"
-        stroke={kleur}
-        strokeWidth={maat * 0.14}
-        strokeLinecap="round"
-      />
-      <rect
-        x={x - b / 2}
-        y={y}
-        width={b}
-        height={maat * 0.52}
-        rx={maat * 0.12}
-        fill={kleur}
-      />
     </g>
   )
 }

@@ -1303,6 +1303,33 @@ h3,
   color: var(--accent);
 }
 
+/* The padlock on pinned scenery. It blinks once when you tap what it guards:
+   a tap that deliberately does nothing still has to say why. This is the one
+   piece of interface that moves, and it moves only in answer to a tap. */
+.slotje {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.slotje--wijst {
+  animation: slotje-wijst 620ms ease-out;
+}
+
+@keyframes slotje-wijst {
+  0% { transform: scale(1); opacity: 0.85; }
+  22% { transform: scale(1.45); opacity: 1; }
+  55% { transform: scale(1); opacity: 0.85; }
+  74% { transform: scale(1.28); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.85; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slotje--wijst {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* Two rows of settings under an arc menu, for the things that need more than
    a strip of colours. */
 .menu-paneel {

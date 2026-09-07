@@ -1,5 +1,5 @@
 import { buildLengthTable, pointAtDistance } from '@/lib/diagram/curve'
-import type { Padvorm } from '@/lib/diagram/schema'
+import { isVergrendeld, type Padvorm } from '@/lib/diagram/schema'
 import type { Entity } from '@/lib/diagram/schema'
 import type { Point } from '@/lib/field/geometry'
 
@@ -90,5 +90,9 @@ export function entiteitenInKader(
   k: Kader,
   tokenStraal: number,
 ): string[] {
-  return entities.filter((e) => entiteitRaaktKader(e, k, tokenStraal)).map((e) => e.id)
+  // Pinned scenery stays out of it. A lock that still let a selection box pick
+  // the thing up would only postpone the accident by one step.
+  return entities
+    .filter((e) => !isVergrendeld(e) && entiteitRaaktKader(e, k, tokenStraal))
+    .map((e) => e.id)
 }

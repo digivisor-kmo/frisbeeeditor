@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { Slotje } from './Slotje'
 import { coneFill } from './tokens/colors'
 import { TEXT_SIZES_M } from '@/lib/diagram/zones'
 import type { TextBlock } from '@/lib/diagram/schema'
@@ -9,6 +10,7 @@ interface Props {
   view: FieldView
   selected: boolean
   hitRadiusM: number
+  slotWijst?: boolean
 }
 
 /** Roughly how many characters fit on a line before it gets hard to place. */
@@ -41,7 +43,7 @@ export function regelsVan(tekst: string): string[] {
 
 const ANKER = { links: 'start', midden: 'middle', rechts: 'end' } as const
 
-function TextShapeBasis({ blok, view, selected, hitRadiusM }: Props) {
+function TextShapeBasis({ blok, view, selected, hitRadiusM, slotWijst = false }: Props) {
   const p = toSvg(blok.pos, view)
   const hoogte = metresToUnits(TEXT_SIZES_M[blok.size])
   const regels = regelsVan(blok.content)
@@ -92,6 +94,16 @@ function TextShapeBasis({ blok, view, selected, hitRadiusM }: Props) {
           </tspan>
         ))}
       </text>
+
+      {blok.vergrendeld && (
+        <Slotje
+          x={x + breedte + hoogte * 0.75}
+          y={eerste - hoogte * 0.72}
+          maat={hoogte * 0.7}
+          kleur={verf}
+          wijst={slotWijst}
+        />
+      )}
 
       <rect
         data-part="tekst"
