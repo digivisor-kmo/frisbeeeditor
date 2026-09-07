@@ -148,14 +148,19 @@ export function SelectedEntityMenu({
     label: vast ? nl.decor.losmaken : nl.decor.vastzetten,
     icon: vast ? <SlotIcon /> : <SlotOpenIcon />,
     actief: vast,
-    onClick: () =>
+    onClick: () => {
       wijzigFrames(vast ? nl.decor.losmaken : nl.decor.vastzetten, (frames) => {
         pasStatischAanVanaf(frames, activeFrame, entity.id, (target) => {
           if (target.type === 'annotation' || target.type === 'text') {
             target.vergrendeld = vast ? undefined : true
           }
         })
-      }),
+      })
+      // Locking is the last thing you do to a zone, so the arc steps out of
+      // the way at once. Leaving it hanging over something that no longer
+      // answers a tap only invites you to keep poking at it.
+      if (!vast) clearSelection()
+    },
   })
 
   const acties: MenuActie[] = []

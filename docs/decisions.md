@@ -772,8 +772,11 @@ meebeweegt kapot in plaats van vastgezet.
 
 **Vastgezet betekent: één tik doet niets.** Niet selecteren, geen menu. De tik
 gaat door naar het veld, dus een sleepkader over de spelers eronder werkt gewoon
-en een sleepkader pikt hem ook niet op. Twee tikken snel na elkaar openen hem
-weer, en vanaf daar zit het slot in zijn menu.
+en een sleepkader pikt hem ook niet op. Twee tikken snel na elkaar maken hem
+meteen weer los — naar binnen gaan om daar een knop te zoeken die hetzelfde
+zegt, is een stap die niemand nodig heeft. En op slot zetten sluit de boog
+onmiddellijk: die laten hangen boven iets dat niet meer op een tik antwoordt,
+nodigt alleen uit om te blijven porren.
 
 Dat is strenger dan een eerste versie waarin één tik hem nog selecteerde, en het
 is beter: half vastgezet is niet vastgezet. Twee tikken in plaats van een

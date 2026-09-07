@@ -332,8 +332,9 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
       // Pinned down. One tap does nothing at all: it goes straight through to
       // the pitch, so a selection box still works over it and nothing gets
-      // grabbed by accident. Two taps in a row open it, and from there the menu
-      // has the lock.
+      // grabbed by accident. Two taps in a row are the way back in, and they
+      // undo the lock on the spot — going in only to reach for a button that
+      // says the same thing is a step nobody needs.
       if (isVergrendeld(entity)) {
         const vorige = slotTik.current
         const dubbel =
@@ -345,6 +346,13 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         if (dubbel) {
           slotTik.current = null
           setSlotWijst(null)
+          wijzigFrames(nl.decor.losmaken, (frames) => {
+            pasStatischAanVanaf(frames, activeFrame, entityId, (target) => {
+              if (target.type === 'annotation' || target.type === 'text') {
+                target.vergrendeld = undefined
+              }
+            })
+          })
           select([entityId])
           setMenuOpen(true)
           return
