@@ -897,3 +897,8 @@ valt de keuze terug op vertical stack, want die past overal.
 Elke opstelling heeft een test: komt door het schema, zet zeven tegen zeven
 neer, houdt iedereen binnen de lijnen, en geeft hoogstens één iemand de schijf.
 Dat zijn precies de fouten die je anders pas op het veld ziet.
+
+Bij het nakijken bleek de eerste zone fout: de poppers stonden bovenop de cup in
+plaats van erachter. Ik heb elke opstelling als tekstkaartje uitgetekend en zo
+gecontroleerd — dat is de enige manier om zeven opstellingen na te kijken zonder
+zeven diagrammen in de bibliotheek achter te laten.
