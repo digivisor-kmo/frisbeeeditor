@@ -102,7 +102,7 @@ export function AccountMenu({ naam, email, magBewerken }: Props) {
             <span className="accountmenu__wie">{naam}</span>
             <span className="accountmenu__mail">{email}</span>
             <span className="rolchip">
-              {magBewerken ? nl.rechten.trainer : nl.rechten.speler}
+              {magBewerken ? nl.rechten.trainerKort : nl.rechten.spelerKort}
             </span>
           </div>
 
@@ -119,7 +119,7 @@ export function AccountMenu({ naam, email, magBewerken }: Props) {
           {install && (
             <button type="button" role="menuitem" className="accountmenu__item" onClick={installeer}>
               <InstalleerIcon />
-              {nl.installeren.knop}
+              {nl.installeren.menu}
             </button>
           )}
 

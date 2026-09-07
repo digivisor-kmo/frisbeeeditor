@@ -27,6 +27,7 @@ export const nl = {
   },
   installeren: {
     knop: 'Installeren',
+    menu: 'App installeren',
   },
   offline: {
     titel: 'Geen verbinding',
@@ -60,6 +61,9 @@ export const nl = {
   rechten: {
     trainer: 'Trainer, mag bewerken',
     speler: 'Speler, alleen lezen',
+    // Short enough for a chip. What the rights mean staat op de accountpagina.
+    trainerKort: 'Trainer',
+    spelerKort: 'Speler',
     spelerUitleg:
       'Je account heeft nog geen bewerkrechten. Vraag Daan om je als trainer aan te zetten.',
   },
