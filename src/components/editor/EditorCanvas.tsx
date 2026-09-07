@@ -62,7 +62,7 @@ import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 import { SelectedEntityMenu } from './SelectedEntityMenu'
 import { TekstInvoer } from './TekstInvoer'
-import { useMetresPerPixel, useStaandScherm } from './useMetresPerPixel'
+import { useElementGrootte, useMetresPerPixel, useStaandScherm } from './useMetresPerPixel'
 import { useScherm } from './useScherm'
 
 interface KnijpState {
@@ -182,6 +182,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const view = useMemo(() => createView(doc.meta.weergave, staand), [doc.meta.weergave, staand])
   const camera = useMemo(() => maakCamera(view, zoom, pan), [view, zoom, pan])
   const metresPerPixel = useMetresPerPixel(svgRef, camera)
+  const doekGrootte = useElementGrootte(svgRef)
   const radiusM = tokenRadiusM(metresPerPixel)
   const hitM = hitRadiusM(metresPerPixel)
 
@@ -818,8 +819,10 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
   const opZ = <T extends { z: number }>(list: T[]) => list.slice().sort((a, b) => a.z - b.z)
 
-  const canvasBreedte = camera.width / UNITS_PER_METRE / metresPerPixel
-  const canvasHoogte = camera.height / UNITS_PER_METRE / metresPerPixel
+  // The box the menu is positioned in, not the pitch drawn inside it: an SVG
+  // letterboxes, and a menu placed against the pitch loses the bands above and
+  // below it — exactly the room a panel needs on a phone held sideways.
+  const { breedte: canvasBreedte, hoogte: canvasHoogte } = doekGrootte
 
   /*
    * What else is floating over the field. On a phone the editor is the whole
