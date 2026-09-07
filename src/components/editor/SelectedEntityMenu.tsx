@@ -42,6 +42,8 @@ import {
   GearIcon,
   CurveIcon,
   PaletteIcon,
+  SlotIcon,
+  SlotOpenIcon,
   TekstIcon,
   ThrowIcon,
   TrashIcon,
@@ -133,6 +135,28 @@ export function SelectedEntityMenu({
     })
     clearSelection()
   }
+
+  /**
+   * Pinning a piece of scenery down.
+   *
+   * A locked zone or note can still be selected — that is how you unlock it —
+   * but it cannot be dragged, and a drag that starts on it falls through to the
+   * pitch so a selection box still works over it.
+   */
+  const slotActie = (vast: boolean): MenuActie => ({
+    id: 'slot',
+    label: vast ? nl.decor.losmaken : nl.decor.vastzetten,
+    icon: vast ? <SlotIcon /> : <SlotOpenIcon />,
+    actief: vast,
+    onClick: () =>
+      wijzigFrames(vast ? nl.decor.losmaken : nl.decor.vastzetten, (frames) => {
+        pasStatischAanVanaf(frames, activeFrame, entity.id, (target) => {
+          if (target.type === 'annotation' || target.type === 'text') {
+            target.vergrendeld = vast ? undefined : true
+          }
+        })
+      }),
+  })
 
   const acties: MenuActie[] = []
   let paneel: React.ReactNode = null
@@ -366,6 +390,8 @@ export function SelectedEntityMenu({
       onClick: () => setPaneelOpen((open) => !open),
     })
 
+    acties.push(slotActie(zone.vergrendeld === true))
+
     acties.push({
       id: 'delete',
       label: nl.menu.verwijderen,
@@ -420,6 +446,8 @@ export function SelectedEntityMenu({
       actief: paneelOpen,
       onClick: () => setPaneelOpen((open) => !open),
     })
+
+    acties.push(slotActie(blok.vergrendeld === true))
 
     acties.push({
       id: 'delete',

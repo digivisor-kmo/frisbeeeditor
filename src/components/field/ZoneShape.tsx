@@ -15,10 +15,11 @@ interface Props {
 /**
  * A region of the pitch: a dashed outline with a wash of colour inside.
  *
- * Only the outline and the label can be grabbed, not the fill. A zone is often
- * twenty metres across, and one that swallows every click inside it would make
- * it impossible to drag a selection box over the players standing in it — which
- * is precisely what you do with a zone drawn on the field.
+ * The whole shape can be tapped, fill included — hunting for a two-pixel dashed
+ * edge is not something anybody should have to do with a wet finger. What that
+ * costs is the selection box: a zone lying over the stack would swallow a drag
+ * meant for the players inside it. That is what the lock is for. A locked zone
+ * still answers a tap, but a drag goes straight through it to the pitch.
  */
 function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
   const kader = zoneKader(zone)
@@ -54,13 +55,15 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
           {...gemeen}
           pointerEvents="none"
         />
+        {/* The grab area: the shape itself, plus a band around its edge so the
+            outline is still catchable from just outside. */}
         <ellipse
-          data-part="rand"
+          data-part="vlak"
           cx={x + breedte / 2}
           cy={y + hoogte / 2}
           rx={breedte / 2}
           ry={hoogte / 2}
-          fill="none"
+          fill="transparent"
           stroke="transparent"
           strokeWidth={hit}
         />
@@ -69,12 +72,12 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
       <>
         <rect x={x} y={y} width={breedte} height={hoogte} {...gemeen} pointerEvents="none" />
         <rect
-          data-part="rand"
+          data-part="vlak"
           x={x}
           y={y}
           width={breedte}
           height={hoogte}
-          fill="none"
+          fill="transparent"
           stroke="transparent"
           strokeWidth={hit}
         />
@@ -100,6 +103,15 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
         />
       )}
 
+      {zone.vergrendeld && (
+        <Slotje
+          x={x + breedte - labelHoogte * 0.9}
+          y={y + labelHoogte * 0.5}
+          maat={labelHoogte * 0.85}
+          kleur={verf}
+        />
+      )}
+
       {zone.label && (
         <text
           data-part="label"
@@ -117,6 +129,35 @@ function ZoneShapeBasis({ zone, view, selected, hitRadiusM }: Props) {
           {zone.label}
         </text>
       )}
+    </g>
+  )
+}
+
+/**
+ * The little padlock in the corner of a pinned zone.
+ *
+ * Always drawn, not only while it is selected: without it, a zone that refuses
+ * to move looks broken rather than locked.
+ */
+function Slotje({ x, y, maat, kleur }: { x: number; y: number; maat: number; kleur: string }) {
+  const b = maat * 0.78
+  return (
+    <g pointerEvents="none" opacity={0.85}>
+      <path
+        d={`M ${x - b / 2 + b * 0.22} ${y} v ${-maat * 0.24} a ${b * 0.28} ${b * 0.28} 0 0 1 ${b * 0.56} 0 v ${maat * 0.24}`}
+        fill="none"
+        stroke={kleur}
+        strokeWidth={maat * 0.14}
+        strokeLinecap="round"
+      />
+      <rect
+        x={x - b / 2}
+        y={y}
+        width={b}
+        height={maat * 0.52}
+        rx={maat * 0.12}
+        fill={kleur}
+      />
     </g>
   )
 }

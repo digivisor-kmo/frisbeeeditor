@@ -152,6 +152,8 @@ export const annotationSchema = z.object({
   points: z.array(pointSchema).min(2),
   /** What the region is called, drawn along its top edge. */
   label: z.string().max(40).optional(),
+  /** Pinned down: it can still be selected, but not dragged out of place. */
+  vergrendeld: z.boolean().optional(),
   style: z.object({
     stroke: colorSchema,
     /** Stroke width in metres, so it scales with the field. */
@@ -169,6 +171,7 @@ export const textSchema = z.object({
   ...entityBase,
   type: z.literal('text'),
   pos: pointSchema,
+  vergrendeld: z.boolean().optional(),
   content: z.string().min(1).max(280),
   size: z.enum(['sm', 'md', 'lg']),
   weight: z.enum(['normaal', 'halfvet']),
@@ -217,6 +220,11 @@ export function isText(entity: Entity): entity is TextBlock {
  */
 export function isStatisch(entity: Entity): entity is Annotation | TextBlock {
   return entity.type === 'annotation' || entity.type === 'text'
+}
+
+/** Pinned down. Selecting still works — that is how you unlock it again. */
+export function isVergrendeld(entity: Entity): boolean {
+  return isStatisch(entity) && entity.vergrendeld === true
 }
 
 /* ------------------------------------------------------------------- frame */

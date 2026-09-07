@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createZone, inZone, MIN_ZONE_M, zoneKader, zoneMidden } from './zones'
 import { verwijderSelectie } from './propagatie'
 import { createPlayer } from './entities'
-import type { FrameContent } from './schema'
+import { entitySchema, isVergrendeld, type FrameContent } from './schema'
 
 const zone = () =>
   createZone({
@@ -74,5 +74,27 @@ describe('verwijderen in een diagram met meerdere frames', () => {
     expect(f[0]!.entities.some((e) => e.id === 'p1')).toBe(true)
     expect(f[1]!.entities.some((e) => e.id === 'p1')).toBe(false)
     expect(f[2]!.entities.some((e) => e.id === 'p1')).toBe(false)
+  })
+})
+
+describe('vastzetten', () => {
+  it('is uit tot je het aanzet en dan alleen op decor', () => {
+    const los = zone()
+    expect(isVergrendeld(los)).toBe(false)
+    expect(isVergrendeld({ ...los, vergrendeld: true })).toBe(true)
+
+    const speler = createPlayer({
+      id: 'p9',
+      pos: { x: 5, y: 5 },
+      side: 'defense',
+      entities: [],
+    })
+    expect(isVergrendeld(speler)).toBe(false)
+  })
+
+  it('overleeft het schema, want het staat in de database', () => {
+    const vast = { ...zone(), vergrendeld: true }
+    const terug = entitySchema.parse(JSON.parse(JSON.stringify(vast)))
+    expect(terug.type === 'annotation' && terug.vergrendeld).toBe(true)
   })
 })

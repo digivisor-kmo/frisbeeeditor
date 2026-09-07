@@ -33,6 +33,7 @@ import {
   isArrow,
   isPlayer,
   isText,
+  isVergrendeld,
   isZone,
   type Point,
   type Side,
@@ -119,6 +120,16 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     { soort: 'tekst' | 'zoneLabel'; id: string | null; pos: Point; waarde: string } | null
   >(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
+  /**
+   * Whether the next tap on empty grass should put something down.
+   *
+   * True right after you pick a tool, and after each thing you place: you are
+   * placing players, so the next tap places the next one. False the moment you
+   * tap something to select it — then a tap on the grass means "never mind" and
+   * only clears the selection, which is what everybody expects and what it did
+   * not do before.
+   */
+  const tikPlaatst = useRef(true)
   const knijp = useRef<KnijpState | null>(null)
 
   const doc = useDiagramStore((s) => s.doc)
@@ -132,6 +143,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const toggle = useUiStore((s) => s.toggle)
   const clearSelection = useUiStore((s) => s.clearSelection)
   const setMode = useUiStore((s) => s.setMode)
+  const setTool = useUiStore((s) => s.setTool)
   const setSleept = useUiStore((s) => s.setSleept)
   const pruneSelection = useUiStore((s) => s.pruneSelection)
   const menuOpen = useUiStore((s) => s.menuOpen)
@@ -165,6 +177,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   useEffect(() => {
     pruneSelection(new Set(entities.map((e) => e.id)))
   }, [entities, pruneSelection])
+
+  // Choosing a tool arms it: the first tap does what the tool says instead of
+  // being spent dismissing whatever was still selected.
+  useEffect(() => {
+    tikPlaatst.current = true
+  }, [tool])
 
   const pointOf = (clientX: number, clientY: number): Point => {
     const svg = svgRef.current
@@ -245,6 +263,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     if (entityId) {
       const entity = entities.find((e) => e.id === entityId)
       if (!entity) return
+      tikPlaatst.current = false
 
       const beginSleep = (doel: DragDoel) => {
         drag.current = {
@@ -296,6 +315,23 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       const anker = ankerVan(entity)
       if (!anker) return
 
+      // Pinned down. Selecting still works, so you can unlock it; a drag goes
+      // through to the pitch and becomes a selection box.
+      if (isVergrendeld(entity)) {
+        if (event.shiftKey) toggle(entityId)
+        else select([entityId])
+        setMenuOpen(!event.shiftKey)
+        drag.current = {
+          doel: { soort: 'kader', startPunt: point },
+          pointerId: event.pointerId,
+          groupId: newId(),
+          start: { x: event.clientX, y: event.clientY },
+          moved: false,
+        }
+        svgRef.current?.setPointerCapture(event.pointerId)
+        return
+      }
+
       // Grabbing something that is already part of a multiple selection drags
       // the whole selection, and does not throw that selection away.
       const hoortBijSelectie = selection.has(entityId) && selection.size > 1
@@ -332,6 +368,14 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     }
 
     if (tool === 'player' || tool === 'cone') {
+      // Something you picked by hand is still selected: this tap lets it go and
+      // puts nothing down.
+      if (selection.size > 0 && !tikPlaatst.current) {
+        clearSelection()
+        // Cleared. The tap after this one puts something down again.
+        tikPlaatst.current = true
+        return
+      }
       const pos = maybeSnap(point, event.altKey)
       const id = newId()
       wijzigFrames(tool === 'player' ? 'Speler plaatsen' : 'Pion plaatsen', (frames) => {
@@ -344,6 +388,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         // Somebody you put on the field does not vanish in the next frame.
         voegToeVanaf(frames, activeFrame, nieuw)
       })
+      tikPlaatst.current = true
       select([id])
       setMenuOpen(true)
       return
@@ -394,6 +439,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     }
 
     // Empty space with the select tool: drag a frame over the field.
+    tikPlaatst.current = false
     clearSelection()
     drag.current = {
       doel: { soort: 'kader', startPunt: point },
@@ -577,7 +623,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     const doel = state.doel
     if (doel.soort === 'zoneTekenen' || doel.soort === 'zoneHoek') {
       rondZoneAf(doel.id, doel.soort === 'zoneTekenen' && !state.moved, state.groupId)
-      if (doel.soort === 'zoneTekenen') setMenuOpen(true)
+      if (doel.soort === 'zoneTekenen') {
+        // One zone per press of the button. You draw one and then work on it;
+        // leaving the tool armed meant every tap meant to deselect drew another.
+        setMenuOpen(true)
+        setTool('select')
+      }
     }
 
     stopSleep()
@@ -713,6 +764,9 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     })
     select([id])
     setMenuOpen(true)
+    // One note per press of the button, for the same reason a zone is: with the
+    // tool still armed, every tap meant to deselect wrote a new note.
+    setTool('select')
   }
 
   const opZ = <T extends { z: number }>(list: T[]) => list.slice().sort((a, b) => a.z - b.z)
@@ -868,7 +922,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         <g>
           {!animeert &&
             zones
-              .filter((z) => selection.has(z.id))
+              .filter((z) => selection.has(z.id) && !z.vergrendeld)
               .map((zone) => (
                 <ZoneHandles
                   key={zone.id}

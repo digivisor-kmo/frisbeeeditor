@@ -127,6 +127,10 @@ export const nl = {
     hulp:
       'Tik een speler aan voor zijn menu; daar teken je zijn cut of zijn worp. Slepen verplaatst meteen.',
   },
+  decor: {
+    vastzetten: 'Vastzetten',
+    losmaken: 'Losmaken',
+  },
   zone: {
     titel: 'Zone',
     rechthoek: 'Rechthoek',

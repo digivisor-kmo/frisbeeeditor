@@ -291,3 +291,23 @@ export function EllipsIcon({ size = 18 }: IconProps) {
     </svg>
   )
 }
+
+/** Locked: a closed padlock. */
+export function SlotIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <rect x="5" y="10.6" width="14" height="9.2" rx="2" />
+      <path d="M8.4 10.6V7.8a3.6 3.6 0 0 1 7.2 0v2.8" />
+    </svg>
+  )
+}
+
+/** Unlocked: the same padlock with its shackle swung open. */
+export function SlotOpenIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <rect x="5" y="10.6" width="14" height="9.2" rx="2" />
+      <path d="M8.4 10.6V7.8a3.6 3.6 0 0 1 6.9-1.4" />
+    </svg>
+  )
+}

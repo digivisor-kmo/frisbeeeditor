@@ -756,3 +756,40 @@ te onthouden welke regel voor welk ding geldt.
 **Niet geanimeerd.** Ze worden getekend uit het frame dat op dat moment op het
 scherm staat, en nooit geïnterpoleerd. Een zone die tijdens het afspelen over
 het veld schuift zou eruitzien alsof ze iets betekent.
+
+## 2026-09-07 — Een zone aanklikken, en een slotje
+
+Een zone was alleen op haar rand aan te tikken. Dat was een keuze om het
+sleepkader te beschermen: een vlak van twintig meter breed dat elke klik
+binnenin opslokt, maakt het onmogelijk om een kader over de spelers erin te
+trekken. Op een telefoon met een natte vinger is een streepjesrand van twee
+pixels alleen echter geen doel.
+
+**Nu is het hele vlak aanklikbaar, en lost een slotje het kader op.** Een zone
+of een tekstblok kan vastgezet worden. Vastgezet blijft hij selecteerbaar — dat
+is hoe je hem weer losmaakt — maar hij verschuift niet meer, en een sleep die op
+hem begint valt door naar het veld en wordt een sleepkader. Een vastgezette zone
+draagt een klein slotje in de hoek, altijd zichtbaar, want anders lijkt een zone
+die niet meebeweegt kapot in plaats van vastgezet.
+
+## 2026-09-07 — Een tik op het gras betekent niet altijd "zet er nog een"
+
+Iets stond geselecteerd, je tikte ergens op het veld om het los te laten, en er
+verscheen een nieuwe speler of zone. De tik deed twee dingen tegelijk en je had
+er maar één bedoeld.
+
+**Alternatief.** Elke tik met een plaatsgereedschap eerst laten opruimen.
+Afgewezen: dan kost veertien spelers zetten achtentwintig tikken, en juist dat
+snelle plaatsen is waarom het gereedschap zo werkt.
+
+**Gekozen.** De editor onthoudt waaróm iets geselecteerd staat. Heb je het net
+zelf geplaatst, dan ben je aan het plaatsen en zet de volgende tik het volgende
+neer. Heb je iets aangetikt om het te selecteren, dan betekent een tik op het
+gras "laat maar" en ruimt hij alleen op; de tik daarna plaatst weer. Een
+gereedschap kiezen wapent het meteen, zodat de eerste tik na die keuze nooit
+opgaat aan iets opruimen.
+
+Daarbovenop zijn zone en tekst eenmalig geworden: na één zone of één notitie
+staat het gereedschap weer op Selecteren. Je tekent er zelden twee na elkaar, en
+met het gereedschap nog gespannen schreef elke tik die je bedoelde als
+"deselecteren" er een nieuwe.
