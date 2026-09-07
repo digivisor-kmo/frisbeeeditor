@@ -929,8 +929,13 @@ eerste byte.
 Twee oorzaken, en de eerste is banaal. Het antwoordhoofd `x-vercel-id` zei
 `cdg1::iad1`: het verzoek komt binnen in Parijs en de functie draait in
 Washington, terwijl de database in Frankfurt staat. Elke vraag aan de database
-stak dus twee keer de oceaan over. `preferredRegion` staat nu op `fra1`, zodat
-de code naast de gegevens draait.
+stak dus twee keer de oceaan over. De regio staat nu op `fra1`, zodat de code naast
+de gegevens draait.
+
+Dat gaat via `vercel.json`, niet via `preferredRegion` in de layout: die tweede
+veranderde er niets aan, het antwoordhoofd bleef `iad1` zeggen. De export staat
+er daarom niet meer in — een instelling die eruitziet alsof ze werkt en het niet
+doet, is erger dan geen instelling.
 
 De tweede: elke pagina vroeg de auth-server wie je was, las daarna je profiel,
 en de balk bovenaan deed daar allebei nog eens overheen. Vier heen-en-weers voor
@@ -942,3 +947,18 @@ antwoord van iemand anders — en de balk deelt hem met de pagina.
 En wat niet op elkaar wacht, wacht niet meer op elkaar. Wie je bent bepaalt niet
 wat er in de kast ligt (dat doet RLS), dus die twee vragen vertrekken samen. Op
 de spelerspagina van één diagram zijn dat er zelfs drie tegelijk.
+
+**Gemeten, voor en na.** Tijd tot de eerste byte, vier metingen per pagina, de
+snelste drie:
+
+| | voor | na |
+|---|---|---|
+| bibliotheek | 1215–2465 ms | 238–294 ms |
+| nieuw diagram | 575–1282 ms | 198–404 ms |
+| spelersweergave | 594–771 ms | 204–229 ms |
+| account | 677–734 ms | 172–190 ms |
+| editor | 458–738 ms | 179–206 ms |
+
+Van de twee ingrepen is de regio veruit de grootste. De gedeelde opzoeking en
+het parallel vragen halen daar nog een slag af, en ze houden het snel wanneer er
+straks meer per scherm gevraagd wordt.

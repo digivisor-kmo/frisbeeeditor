@@ -30,17 +30,6 @@ const display = Plus_Jakarta_Sans({
   variable: '--font-display',
 })
 
-/**
- * Run the server next to the database.
- *
- * Vercel puts functions in Washington by default and the database sits in
- * Frankfurt, so every question a page asked crossed the Atlantic twice. Four
- * questions per page load is most of a second spent on nothing but distance.
- * This puts the code where the data is; it applies to every route under this
- * layout.
- */
-export const preferredRegion = ['fra1']
-
 export const metadata: Metadata = {
   title: nl.app.naam,
   description: nl.app.ondertitel,
