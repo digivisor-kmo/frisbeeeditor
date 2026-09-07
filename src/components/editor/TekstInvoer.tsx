@@ -6,7 +6,11 @@ import { nl } from '@/lib/strings'
 interface Props {
   /** Where on the canvas the note sits, in CSS pixels. */
   anker: { x: number; y: number }
+  vraag: string
+  plaatshouder: string
   waarde: string
+  /** A zone keeps its name when you empty the field; a note has to say something. */
+  leegMag?: boolean
   onWijzig: (waarde: string) => void
   onBewaar: () => void
   onAnnuleer: () => void
@@ -19,7 +23,16 @@ interface Props {
  * autocorrect and the phone keyboard with it, none of which exist inside an
  * SVG. It sits above the field and points at the spot you tapped.
  */
-export function TekstInvoer({ anker, waarde, onWijzig, onBewaar, onAnnuleer }: Props) {
+export function TekstInvoer({
+  anker,
+  vraag,
+  plaatshouder,
+  waarde,
+  leegMag = false,
+  onWijzig,
+  onBewaar,
+  onAnnuleer,
+}: Props) {
   const veld = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -38,8 +51,8 @@ export function TekstInvoer({ anker, waarde, onWijzig, onBewaar, onAnnuleer }: P
         className="invoer"
         value={waarde}
         maxLength={280}
-        placeholder={nl.tekst.placeholder}
-        aria-label={nl.tekst.vraag}
+        placeholder={plaatshouder}
+        aria-label={vraag}
         onChange={(e) => onWijzig(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
@@ -59,7 +72,7 @@ export function TekstInvoer({ anker, waarde, onWijzig, onBewaar, onAnnuleer }: P
         <button
           type="button"
           className="btn btn--klein btn--primair"
-          disabled={waarde.trim().length === 0}
+          disabled={!leegMag && waarde.trim().length === 0}
           onClick={onBewaar}
         >
           {nl.tekst.bewaren}

@@ -58,6 +58,7 @@ import { hitRadiusM, tokenRadiusM } from '@/lib/field/scale'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
+import { nl } from '@/lib/strings'
 import { SelectedEntityMenu } from './SelectedEntityMenu'
 import { TekstInvoer } from './TekstInvoer'
 import { useMetresPerPixel, useStaandScherm } from './useMetresPerPixel'
@@ -115,7 +116,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
    * created once there are words, and until then it lives here.
    */
   const [tekstInvoer, setTekstInvoer] = useState<
-    { id: string | null; pos: Point; waarde: string } | null
+    { soort: 'tekst' | 'zoneLabel'; id: string | null; pos: Point; waarde: string } | null
   >(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const knijp = useRef<KnijpState | null>(null)
@@ -380,7 +381,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
     if (tool === 'text') {
       clearSelection()
-      setTekstInvoer({ id: null, pos: maybeSnap(point, event.altKey), waarde: '' })
+      setTekstInvoer({
+        soort: 'tekst',
+        id: null,
+        pos: maybeSnap(point, event.altKey),
+        waarde: '',
+      })
       return
     }
 
@@ -669,6 +675,18 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     if (!invoer) return
     const inhoud = invoer.waarde.trim()
     setTekstInvoer(null)
+
+    if (invoer.soort === 'zoneLabel') {
+      if (!invoer.id) return
+      const naam = inhoud.slice(0, 40)
+      wijzigFrames(nl.zone.label, (frames) => {
+        pasStatischAanVanaf(frames, activeFrame, invoer.id!, (entity) => {
+          if (entity.type === 'annotation') entity.label = naam || undefined
+        })
+      })
+      return
+    }
+
     if (inhoud.length === 0) return
 
     if (invoer.id) {
@@ -878,6 +896,11 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       {tekstInvoer && !animeert && (
         <TekstInvoer
           anker={toScreenPx(tekstInvoer.pos, view, metresPerPixel, camera.origin)}
+          vraag={tekstInvoer.soort === 'zoneLabel' ? nl.zone.labelVraag : nl.tekst.vraag}
+          plaatshouder={
+            tekstInvoer.soort === 'zoneLabel' ? nl.zone.labelPlaceholder : nl.tekst.placeholder
+          }
+          leegMag={tekstInvoer.soort === 'zoneLabel'}
           waarde={tekstInvoer.waarde}
           onWijzig={(waarde) => setTekstInvoer((vorig) => (vorig ? { ...vorig, waarde } : vorig))}
           onAnnuleer={() => setTekstInvoer(null)}
@@ -893,12 +916,24 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           tokenRadiusPx={radiusM / metresPerPixel}
           canvas={{ breedte: canvasBreedte, hoogte: canvasHoogte }}
           onTekstBewerken={() => {
-            if (geselecteerd.type !== 'text') return
-            setTekstInvoer({
-              id: geselecteerd.id,
-              pos: geselecteerd.pos,
-              waarde: geselecteerd.content,
-            })
+            if (geselecteerd.type === 'text') {
+              setTekstInvoer({
+                soort: 'tekst',
+                id: geselecteerd.id,
+                pos: geselecteerd.pos,
+                waarde: geselecteerd.content,
+              })
+              return
+            }
+            if (geselecteerd.type === 'annotation') {
+              const k = zoneKader(geselecteerd)
+              setTekstInvoer({
+                soort: 'zoneLabel',
+                id: geselecteerd.id,
+                pos: { x: (k.minX + k.maxX) / 2, y: k.minY },
+                waarde: geselecteerd.label ?? '',
+              })
+            }
           }}
         />
       )}

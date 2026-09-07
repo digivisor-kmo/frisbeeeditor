@@ -350,15 +350,11 @@ export function SelectedEntityMenu({
       id: 'label',
       label: nl.zone.label,
       icon: <TekstIcon />,
+      // The same little field the notes use, over the top edge of the zone.
+      // A browser prompt would block the page and look like 1998.
       onClick: () => {
-        const antwoord = window.prompt(nl.zone.labelVraag, zone.label ?? '')
-        if (antwoord === null) return
-        const schoon = antwoord.trim().slice(0, 40)
-        wijzigFrames(nl.zone.label, (frames) => {
-          pasStatischAanVanaf(frames, activeFrame, zone.id, (target) => {
-            if (target.type === 'annotation') target.label = schoon || undefined
-          })
-        })
+        setMenuOpen(false)
+        onTekstBewerken?.()
       },
     })
 
