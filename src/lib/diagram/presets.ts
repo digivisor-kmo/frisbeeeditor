@@ -4,6 +4,19 @@ import type { Cone, Entity, FrameContent, Player, PlayerRole, Weergave } from '.
 
 export type Opstelling = 'vertical-stack' | 'horizontal-stack' | 'leeg'
 
+/**
+ * The category a starting formation already answers.
+ *
+ * Choosing a vertical stack IS choosing the category; asking for it again two
+ * screens later is asking somebody to repeat themselves. An empty field says
+ * nothing yet, so it leaves the question open.
+ */
+export const CATEGORIE_VAN_OPSTELLING: Record<Opstelling, string | null> = {
+  'vertical-stack': 'vertical stack',
+  'horizontal-stack': 'horizontal stack',
+  leeg: null,
+}
+
 interface Spot {
   role: PlayerRole
   /** Distance from the attacking goal line, in metres. */

@@ -843,3 +843,35 @@ en dat is geen eigenschap waar je op wil bouwen.
 Meteen ook de knop op de telefoon gelijkgetrokken met die op de laptop: play
 begint alleen opnieuw als de speelkop aan het einde staat. Hij zette de tijd
 altijd op nul, dus pauzeren en verder spelen bestond daar niet.
+
+## 2026-09-07 — Het boogmenu plaatst zich tegen één rechthoek
+
+Op een telefoon liep het mis op twee manieren. Het woord onder een knop viel
+over de knop ernaast — precies waar je vinger heen ging. En het uitklappaneel
+zakte onder de zwevende bediening, of stond half buiten beeld.
+
+De oorzaak was dat elk onderdeel zich tegen iets anders plaatste: de boog tegen
+de breedte van het doek, het paneel tegen het venster, en het woord tegen zijn
+eigen knop.
+
+**Nu plaatst alles zich tegen één rechthoek: het doek min wat er overheen
+zweeft.** Op een laptop is dat het doek met acht pixels marge. Op een telefoon
+gaat de bovenste pil eraf en de onderste rij ook, en rechtop staan die twee
+rijen boven elkaar, dus dan gaat er meer af. De boog klapt in die rechthoek, het
+woord staat verder naar buiten op dezelfde spaak als zijn eigen knop — nooit
+tussen twee knoppen in — en het paneel gaat eronder, erboven of ernaast,
+naargelang wat past.
+
+Dat laatste is de kern. Liggend op een telefoon is de band tussen de twee rijen
+bediening amper driehonderd pixels hoog en past er onder een boog gewoon geen
+paneel. Maar er staat een scherm breed niets naast, en daar gaat het dan heen.
+Niets wordt geplaatst op schermformaat; alles wordt geplaatst op de ruimte die
+overblijft.
+
+## 2026-09-07 — Een startopstelling is al een categorie
+
+Wie bij het aanmaken een vertical stack kiest, heeft de categorie al gekozen.
+Er twee schermen later opnieuw naar vragen is iemand vragen zichzelf te
+herhalen. Het diagram krijgt dus meteen type speelvariant en de bijhorende
+categorie, en van de drie dingen die de validatieteller vraagt zijn er nog maar
+één over: een naam. Een leeg veld zegt nog niets en laat de vraag open.

@@ -3,7 +3,12 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
-import { buildPreset, OPSTELLING_LABELS, type Opstelling } from '@/lib/diagram/presets'
+import {
+  buildPreset,
+  CATEGORIE_VAN_OPSTELLING,
+  OPSTELLING_LABELS,
+  type Opstelling,
+} from '@/lib/diagram/presets'
 import type { Weergave } from '@/lib/diagram/schema'
 import { maakDiagram } from '@/lib/data/diagrams'
 import { newDoc } from '@/lib/editor/document'
@@ -61,10 +66,15 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
     setBezig(true)
     setFout(null)
     try {
+      // A stack you just picked is the category; two of the three things the
+      // validation counter asks for are already answered here.
+      const categorie = CATEGORIE_VAN_OPSTELLING[opstelling]
       const doc = newDoc({
         frameId: newId(),
         weergave,
         naam: '',
+        type: categorie ? 'speelvariant' : null,
+        categorie,
         content: buildPreset(opstelling, weergave, newId),
       })
       const id = await maakDiagram(doc)

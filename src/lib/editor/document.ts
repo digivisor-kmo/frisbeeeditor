@@ -44,14 +44,16 @@ export function newDoc(options: {
   frameId: string
   weergave?: Weergave
   naam?: string
+  type?: DiagramType | null
+  categorie?: string | null
   content?: FrameContent
 }): EditorDoc {
   return {
     id: null,
     meta: {
       naam: options.naam ?? '',
-      type: null,
-      categorie: null,
+      type: options.type ?? null,
+      categorie: options.categorie ?? null,
       niveau: null,
       tags: [],
       weergave: options.weergave ?? 'volledig',

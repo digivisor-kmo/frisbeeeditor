@@ -34,7 +34,7 @@ import { framesVan } from '@/lib/editor/document'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
-import { EntityMenu, type MenuActie } from './EntityMenu'
+import { EntityMenu, type MenuActie, type VeiligeRand } from './EntityMenu'
 import {
   CutIcon,
   DiscIcon,
@@ -57,6 +57,8 @@ interface Props {
   anchor: { x: number; y: number }
   tokenRadiusPx: number
   canvas: { breedte: number; hoogte: number }
+  /** What is floating over the canvas and must stay clear. */
+  veilig?: VeiligeRand
   /** Opens the note editor over the field; only the canvas can place that. */
   onTekstBewerken?: () => void
 }
@@ -75,6 +77,7 @@ export function SelectedEntityMenu({
   anchor,
   tokenRadiusPx,
   canvas,
+  veilig,
   onTekstBewerken,
 }: Props) {
   const change = useDiagramStore((s) => s.change)
@@ -515,6 +518,7 @@ export function SelectedEntityMenu({
       anchor={anchor}
       tokenRadiusPx={tokenRadiusPx}
       canvas={canvas}
+      veilig={veilig}
       acties={acties}
       paneel={paneel}
     />

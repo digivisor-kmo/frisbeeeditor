@@ -63,6 +63,7 @@ import { nl } from '@/lib/strings'
 import { SelectedEntityMenu } from './SelectedEntityMenu'
 import { TekstInvoer } from './TekstInvoer'
 import { useMetresPerPixel, useStaandScherm } from './useMetresPerPixel'
+import { useScherm } from './useScherm'
 
 interface KnijpState {
   /** Distance between the two fingers when the gesture started. */
@@ -177,6 +178,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const animeert = speelt || scrubt
 
   const staand = useStaandScherm()
+  const scherm = useScherm()
   const view = useMemo(() => createView(doc.meta.weergave, staand), [doc.meta.weergave, staand])
   const camera = useMemo(() => maakCamera(view, zoom, pan), [view, zoom, pan])
   const metresPerPixel = useMetresPerPixel(svgRef, camera)
@@ -818,6 +820,15 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
 
   const canvasBreedte = camera.width / UNITS_PER_METRE / metresPerPixel
   const canvasHoogte = camera.height / UNITS_PER_METRE / metresPerPixel
+
+  /*
+   * What else is floating over the field. On a phone the editor is the whole
+   * screen with two rows of controls on it, and a menu that ignores them ends
+   * up half underneath them. Upright those rows stack, so they take more.
+   */
+  const veilig = scherm.telefoon
+    ? { boven: 58, onder: scherm.liggend ? 74 : 138, links: 8, rechts: 8 }
+    : { boven: 8, onder: 8, links: 8, rechts: 8 }
   const toonScrim = menuOpen && geselecteerd !== undefined && !animeert
 
   return (
@@ -1019,6 +1030,7 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           anchor={anchor}
           tokenRadiusPx={radiusM / metresPerPixel}
           canvas={{ breedte: canvasBreedte, hoogte: canvasHoogte }}
+          veilig={veilig}
           onTekstBewerken={() => {
             if (geselecteerd.type === 'text') {
               setTekstInvoer({
