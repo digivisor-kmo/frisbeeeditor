@@ -5,36 +5,31 @@ import { Leesscherm } from '@/components/speler/Leesscherm'
 import { frameContentSchema } from '@/lib/diagram/schema'
 import type { EditorDoc } from '@/lib/editor/document'
 import { createClient } from '@/lib/supabase/server'
-import type { DiagramRow, FrameRow, Profile } from '@/lib/supabase/database.types'
+import { huidigeGebruiker } from '@/lib/supabase/gebruiker'
+import type { DiagramRow, FrameRow } from '@/lib/supabase/database.types'
 import { nl } from '@/lib/strings'
 
 export default async function SpelerDiagram({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
-  const { data: diagram } = await supabase
-    .from('diagrams')
-    .select('*')
-    .eq('id', id)
-    .single<DiagramRow>()
+  // Three questions that do not wait on each other: who you are, which diagram
+  // this is, and what is in it. Asked one after the other they were three
+  // crossings to Frankfurt for one screen.
+  const [gebruiker, { data: diagram }, { data: frames }] = await Promise.all([
+    huidigeGebruiker(),
+    supabase.from('diagrams').select('*').eq('id', id).single<DiagramRow>(),
+    supabase
+      .from('frames')
+      .select('*')
+      .eq('diagram_id', id)
+      .order('volgorde', { ascending: true })
+      .returns<FrameRow[]>(),
+  ])
+
+  if (!gebruiker) redirect('/login')
   if (!diagram) notFound()
-
-  const { data: frames } = await supabase
-    .from('frames')
-    .select('*')
-    .eq('diagram_id', id)
-    .order('volgorde', { ascending: true })
-    .returns<FrameRow[]>()
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('can_edit')
-    .eq('id', user.id)
-    .single<Pick<Profile, 'can_edit'>>()
+  const profile = gebruiker.profiel
 
   const doc: EditorDoc = {
     id: diagram.id,

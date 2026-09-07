@@ -1,7 +1,6 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
-import type { Profile } from '@/lib/supabase/database.types'
 import { AccountMenu } from '@/components/AccountMenu'
+import { huidigeGebruiker } from '@/lib/supabase/gebruiker'
 import { nl } from '@/lib/strings'
 
 /**
@@ -12,20 +11,13 @@ import { nl } from '@/lib/strings'
  * is exactly what makes an application feel homemade.
  *
  * Two things sit in it and nothing else: what this is, and who you are.
- * Everything you can do with your account is folded behind the second one.
+ * Everything you can do with your account is folded behind the second one. Who
+ * you are comes from the shared per-request lookup, so wearing this bar costs
+ * the page nothing.
  */
 export async function AppBalk() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('naam, email, can_edit')
-    .eq('id', user.id)
-    .single<Pick<Profile, 'naam' | 'email' | 'can_edit'>>()
+  const gebruiker = await huidigeGebruiker()
+  if (!gebruiker) return null
 
   return (
     <header className="topbalk">
@@ -37,9 +29,9 @@ export async function AppBalk() {
         </Link>
 
         <AccountMenu
-          naam={profile?.naam ?? profile?.email ?? user.email ?? ''}
-          email={profile?.email ?? user.email ?? ''}
-          magBewerken={profile?.can_edit ?? false}
+          naam={gebruiker.profiel?.naam ?? gebruiker.profiel?.email ?? gebruiker.email ?? ''}
+          email={gebruiker.profiel?.email ?? gebruiker.email ?? ''}
+          magBewerken={gebruiker.magBewerken}
         />
       </div>
     </header>

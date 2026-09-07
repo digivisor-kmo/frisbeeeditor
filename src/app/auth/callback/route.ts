@@ -1,6 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+/** Next to the database, like every other route. */
+export const preferredRegion = ['fra1']
+
 /**
  * Where the magic link lands. Supabase sends either a PKCE `code` or a
  * `token_hash`, depending on the mail template, so both are handled.

@@ -919,3 +919,26 @@ afbreekt.
 De tekeningen zijn minder ontkleurd dan die van de veldkaarten. Daar wijst grijs
 aan wat niet gekozen is; hier vergelijk je zeven vormen met elkaar, en een
 grijze vorm naast een grijze vorm leest niet.
+
+## 2026-09-07 — De server stond aan de verkeerde kant van de oceaan
+
+Klikken tussen schermen duurde tussen een halve en twee en een halve seconde.
+Gemeten, niet gevoeld: de bibliotheek deed er 1215 tot 2465 ms over voor de
+eerste byte.
+
+Twee oorzaken, en de eerste is banaal. Het antwoordhoofd `x-vercel-id` zei
+`cdg1::iad1`: het verzoek komt binnen in Parijs en de functie draait in
+Washington, terwijl de database in Frankfurt staat. Elke vraag aan de database
+stak dus twee keer de oceaan over. `preferredRegion` staat nu op `fra1`, zodat
+de code naast de gegevens draait.
+
+De tweede: elke pagina vroeg de auth-server wie je was, las daarna je profiel,
+en de balk bovenaan deed daar allebei nog eens overheen. Vier heen-en-weers voor
+één antwoord, netjes na elkaar, voor er één pixel verstuurd kon worden.
+`huidigeGebruiker()` doet die opzoeking nu één keer per verzoek — React's
+`cache` houdt dat binnen één verzoek, dus een tweede bezoeker krijgt nooit het
+antwoord van iemand anders — en de balk deelt hem met de pagina.
+
+En wat niet op elkaar wacht, wacht niet meer op elkaar. Wie je bent bepaalt niet
+wat er in de kast ligt (dat doet RLS), dus die twee vragen vertrekken samen. Op
+de spelerspagina van één diagram zijn dat er zelfs drie tegelijk.

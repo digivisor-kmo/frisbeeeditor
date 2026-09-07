@@ -1,22 +1,13 @@
 import { redirect } from 'next/navigation'
 import { AppBalk } from '@/components/AppBalk'
 import { WachtwoordFormulier } from './WachtwoordFormulier'
-import { createClient } from '@/lib/supabase/server'
-import type { Profile } from '@/lib/supabase/database.types'
+import { huidigeGebruiker } from '@/lib/supabase/gebruiker'
 import { nl } from '@/lib/strings'
 
 export default async function AccountPagina() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('naam, email, can_edit, heeft_wachtwoord')
-    .eq('id', user.id)
-    .single<Pick<Profile, 'naam' | 'email' | 'can_edit' | 'heeft_wachtwoord'>>()
+  const gebruiker = await huidigeGebruiker()
+  if (!gebruiker) redirect('/login')
+  const profile = gebruiker.profiel
 
   return (
     <>
@@ -26,7 +17,7 @@ export default async function AccountPagina() {
           <div>
             <h1 className="display">{nl.account.titel}</h1>
             <p className="stil paginakop__onder">
-              {profile?.naam ?? profile?.email ?? user.email} ·{' '}
+              {profile?.naam ?? profile?.email ?? gebruiker.email} ·{' '}
               {profile?.can_edit ? nl.rechten.trainer : nl.rechten.speler}
             </p>
           </div>

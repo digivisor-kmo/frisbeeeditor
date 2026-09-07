@@ -3,6 +3,7 @@ import { AppBalk } from '@/components/AppBalk'
 import { Bibliotheek, type BibliotheekItem } from '@/app/Bibliotheek'
 import { frameContentSchema, type FrameContent } from '@/lib/diagram/schema'
 import { createClient } from '@/lib/supabase/server'
+import { huidigeGebruiker } from '@/lib/supabase/gebruiker'
 import type { Json } from '@/lib/supabase/database.types'
 import { nl } from '@/lib/strings'
 
@@ -29,22 +30,24 @@ function eersteFrame(rij: Rij): FrameContent | null {
 /** The library as a player sees it: the same shelf, nothing you can change. */
 export default async function SpelerBibliotheek() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
-  const { data: diagrammen } = await supabase
-    .from('diagrams')
-    .select(
-      'id, naam, type, categorie, tags, weergave, draft, favoriet, gewijzigd_op, frames(volgorde, content)',
-    )
-    // Alleen het eerste frame: een thumbnail toont frame 1, en de rest van de
-    // frames van elk diagram meesturen is een payload die met de bibliotheek
-    // meegroeit zonder dat er iets mee gebeurt.
-    .eq('frames.volgorde', 0)
-    .order('gewijzigd_op', { ascending: false })
-    .returns<Rij[]>()
+  // Both at once: who is asking does not decide what is on the shelf, RLS does.
+  const [gebruiker, { data: diagrammen }] = await Promise.all([
+    huidigeGebruiker(),
+    supabase
+      .from('diagrams')
+      .select(
+        'id, naam, type, categorie, tags, weergave, draft, favoriet, gewijzigd_op, frames(volgorde, content)',
+      )
+      // Alleen het eerste frame: een thumbnail toont frame 1, en de rest van de
+      // frames van elk diagram meesturen is een payload die met de bibliotheek
+      // meegroeit zonder dat er iets mee gebeurt.
+      .eq('frames.volgorde', 0)
+      .order('gewijzigd_op', { ascending: false })
+      .returns<Rij[]>(),
+  ])
+
+  if (!gebruiker) redirect('/login')
 
   const lijst: BibliotheekItem[] = (diagrammen ?? []).map((rij) => ({
     id: rij.id,

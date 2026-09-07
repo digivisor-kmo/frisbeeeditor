@@ -5,7 +5,8 @@ import { Bibliotheek, type BibliotheekItem } from './Bibliotheek'
 import { WachtwoordNudge } from './WachtwoordNudge'
 import { frameContentSchema, type FrameContent } from '@/lib/diagram/schema'
 import { createClient } from '@/lib/supabase/server'
-import type { Json, Profile } from '@/lib/supabase/database.types'
+import type { Json } from '@/lib/supabase/database.types'
+import { huidigeGebruiker } from '@/lib/supabase/gebruiker'
 import { nl } from '@/lib/strings'
 
 interface Rij {
@@ -31,30 +32,28 @@ function eersteFrame(rij: Rij): FrameContent | null {
 
 export default async function Home() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('naam, email, can_edit, heeft_wachtwoord')
-    .eq('id', user.id)
-    .single<Pick<Profile, 'naam' | 'email' | 'can_edit' | 'heeft_wachtwoord'>>()
+  // Who you are and what is on the shelf do not depend on each other, so they
+  // are asked at the same time. One after the other is two crossings of the
+  // Atlantic where one will do.
+  const [gebruiker, { data: diagrammen }] = await Promise.all([
+    huidigeGebruiker(),
+    supabase
+      .from('diagrams')
+      .select(
+        'id, naam, type, categorie, tags, weergave, draft, favoriet, gewijzigd_op, frames(volgorde, content)',
+      )
+      // Alleen het eerste frame: een thumbnail toont frame 1, en de rest van de
+      // frames van elk diagram meesturen is een payload die met de bibliotheek
+      // meegroeit zonder dat er iets mee gebeurt.
+      .eq('frames.volgorde', 0)
+      .order('gewijzigd_op', { ascending: false })
+      .returns<Rij[]>(),
+  ])
 
-  const { data: diagrammen } = await supabase
-    .from('diagrams')
-    .select(
-      'id, naam, type, categorie, tags, weergave, draft, favoriet, gewijzigd_op, frames(volgorde, content)',
-    )
-    // Alleen het eerste frame: een thumbnail toont frame 1, en de rest van de
-    // frames van elk diagram meesturen is een payload die met de bibliotheek
-    // meegroeit zonder dat er iets mee gebeurt.
-    .eq('frames.volgorde', 0)
-    .order('gewijzigd_op', { ascending: false })
-    .returns<Rij[]>()
-
-  const magBewerken = profile?.can_edit ?? false
+  if (!gebruiker) redirect('/login')
+  const profile = gebruiker.profiel
+  const magBewerken = gebruiker.magBewerken
   // Players get their own shelf, not this one with the actions hidden.
   if (!magBewerken) redirect('/speler')
   const lijst: BibliotheekItem[] = (diagrammen ?? []).map((rij) => ({
