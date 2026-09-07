@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/lib/supabase/database.types'
-import { PersoonIcon } from '@/components/editor/icons'
-import { InstallKnop } from '@/components/InstallKnop'
+import { AccountMenu } from '@/components/AccountMenu'
 import { nl } from '@/lib/strings'
 
 /**
@@ -11,6 +10,9 @@ import { nl } from '@/lib/strings'
  * One component rather than three copies: the moment the header lives in three
  * places it starts drifting, and a header that is almost the same on every page
  * is exactly what makes an application feel homemade.
+ *
+ * Two things sit in it and nothing else: what this is, and who you are.
+ * Everything you can do with your account is folded behind the second one.
  */
 export async function AppBalk() {
   const supabase = await createClient()
@@ -34,39 +36,11 @@ export async function AppBalk() {
           <span className="merk__naam">{nl.app.naam}</span>
         </Link>
 
-        <div className="topbalk__rechts">
-          <span className="topbalk__wie">
-            {profile?.naam ?? profile?.email ?? user.email}
-            <span className="topbalk__rol">
-              {profile?.can_edit ? nl.rechten.trainer : nl.rechten.speler}
-            </span>
-          </span>
-
-          {/*
-            On a phone two words plus two more words do not fit next to the
-            name of the app, and they were landing on top of it. One icon leads
-            to the account page, and signing out lives there.
-          */}
-          <InstallKnop />
-
-          <Link
-            href="/account"
-            className="btn btn--klein btn--icoon topbalk__account"
-            aria-label={nl.account.titel}
-            title={nl.account.titel}
-          >
-            <PersoonIcon />
-          </Link>
-
-          <Link href="/account" className="btn btn--klein topbalk__breed">
-            {nl.account.titel}
-          </Link>
-          <form action="/auth/signout" method="post" className="topbalk__breed">
-            <button type="submit" className="btn btn--klein">
-              {nl.login.afmelden}
-            </button>
-          </form>
-        </div>
+        <AccountMenu
+          naam={profile?.naam ?? profile?.email ?? user.email ?? ''}
+          email={profile?.email ?? user.email ?? ''}
+          magBewerken={profile?.can_edit ?? false}
+        />
       </div>
     </header>
   )

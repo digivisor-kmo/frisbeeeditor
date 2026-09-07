@@ -40,6 +40,7 @@
 
   /* Interaction */
   --hover: #f3f5f8;
+  --border-sterk: #d3d9e0;
   --pressed: #e8ecf1;
 
   /*
@@ -1913,27 +1914,151 @@ body:has(.frame-strip) .editor-hoofd {
   gap: var(--ruimte-3);
 }
 
-.topbalk__rechts {
+/* Who you are, and everything you can do about it, behind one control.
+   Three buttons of equal weight side by side is no hierarchy, and the row
+   changed width whenever the browser felt like offering the install. */
+.account {
+  position: relative;
+}
+
+.accountknop {
   display: flex;
   align-items: center;
   gap: var(--ruimte-2);
-}
-
-.topbalk__wie {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.25;
-  margin-right: var(--ruimte-2);
-  text-align: right;
+  padding: 3px var(--ruimte-3) 3px 3px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-vol);
+  background: var(--surface-raised);
   color: var(--text);
+  font: inherit;
   font-size: var(--tekst-sm);
   font-weight: 550;
+  cursor: pointer;
+  transition:
+    background-color var(--overgang),
+    border-color var(--overgang);
 }
 
-.topbalk__rol {
+.accountknop:hover,
+.accountknop[aria-expanded='true'] {
+  background: var(--hover);
+  border-color: var(--border-sterk);
+}
+
+.accountknop__disc {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--text);
+  color: var(--surface-raised);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.accountknop svg {
   color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.accountmenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 238px;
+  padding: 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--schaduw-3);
+  z-index: 20;
+}
+
+.accountmenu__kop {
+  display: grid;
+  gap: 2px;
+  padding: var(--ruimte-2) var(--ruimte-3) var(--ruimte-3);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+
+.accountmenu__wie {
+  font-size: var(--tekst-sm);
+  font-weight: 650;
+  color: var(--text);
+}
+
+.accountmenu__mail {
   font-size: var(--tekst-xs);
-  font-weight: 400;
+  color: var(--text-faint);
+  overflow-wrap: anywhere;
+}
+
+.rolchip {
+  justify-self: start;
+  margin-top: 6px;
+  padding: 2px var(--ruimte-2);
+  border-radius: var(--radius-vol);
+  background: var(--accent-zacht);
+  border: 1px solid var(--accent-rand);
+  color: var(--accent);
+  font-size: var(--tekst-xs);
+  font-weight: 600;
+}
+
+.accountmenu form {
+  margin: 0;
+}
+
+.accountmenu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ruimte-3);
+  width: 100%;
+  padding: 9px var(--ruimte-3);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--tekst-sm);
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.accountmenu__item:hover {
+  background: var(--hover);
+}
+
+.accountmenu__item svg {
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+
+/* The only one you would rather not hit while reaching for the one above it. */
+.accountmenu__item--uit,
+.accountmenu__item--uit svg {
+  color: var(--waarschuwing);
+}
+
+.accountmenu__item--uit:hover {
+  background: var(--waarschuwing-zacht);
+}
+
+.accountmenu__scheiding {
+  height: 1px;
+  margin: 6px 4px;
+  background: var(--border);
+}
+
+@media (pointer: coarse) {
+  .accountmenu__item {
+    min-height: var(--raakvlak);
+  }
 }
 
 .merk {
@@ -1981,23 +2106,20 @@ body:has(.frame-strip) .editor-hoofd {
   margin-top: 6px;
 }
 
-/* One of the two is shown, never both. */
-.topbalk__account {
-  display: none;
-}
-
 @media (max-width: 720px) {
   .topbalk__binnen {
     padding: var(--ruimte-2) var(--ruimte-4);
   }
 
-  .topbalk__wie,
-  .topbalk__breed {
-    display: none;
+  /* On a phone the disc alone says whose account it is; the name is in the
+     panel underneath anyway. */
+  .accountknop {
+    padding: 3px;
   }
 
-  .topbalk__account {
-    display: inline-flex;
+  .accountknop__naam,
+  .accountknop svg {
+    display: none;
   }
 
   .merk__naam {

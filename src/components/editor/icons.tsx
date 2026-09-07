@@ -311,3 +311,12 @@ export function SlotOpenIcon({ size = 18 }: IconProps) {
     </svg>
   )
 }
+
+/** The little arrow that says: there is more under this. */
+export function ChevronOmlaagIcon({ size = 14 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="m6.4 9.6 5.6 5.4 5.6-5.4" />
+    </svg>
+  )
+}
