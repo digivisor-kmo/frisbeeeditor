@@ -902,3 +902,20 @@ Bij het nakijken bleek de eerste zone fout: de poppers stonden bovenop de cup in
 plaats van erachter. Ik heb elke opstelling als tekstkaartje uitgetekend en zo
 gecontroleerd — dat is de enige manier om zeven opstellingen na te kijken zonder
 zeven diagrammen in de bibliotheek achter te laten.
+
+## 2026-09-07 — De opstellingen worden kaartjes met een tekening
+
+Zeven namen in één segmented control brak in een tweede rij die links begon en
+er half af hing. En "side stack" zegt alleen iets tegen wie al weet hoe het
+eruitziet.
+
+Het zijn nu kaartjes van dezelfde soort als de veldkeuze erboven, elk met een
+kleine tekening van precies wat je krijgt. Ze worden hertekend zodra je van veld
+wisselt, want dezelfde opstelling staat anders op een half veld. Een raster van
+kaartjes herschikt zich bovendien vanzelf op elke breedte: vier of vijf naast
+elkaar op een laptop, twee op een telefoon, zonder een rij die halverwege
+afbreekt.
+
+De tekeningen zijn minder ontkleurd dan die van de veldkaarten. Daar wijst grijs
+aan wat niet gekozen is; hier vergelijk je zeven vormen met elkaar, en een
+grijze vorm naast een grijze vorm leest niet.

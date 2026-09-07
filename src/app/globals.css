@@ -1783,20 +1783,42 @@ body:has(.frame-strip) .editor-hoofd {
 }
 
 /* The row a form ends on: a hairline above it, the one primary action on it. */
-/* A row of choices that fills its width and shares it evenly. A plain button
-   group is sized by its longest label, and on a phone that made the whole page
-   wider than the screen: the footer button hung over the right edge. */
-.keuzerij {
+/* The formations, as pictures.
+   Seven of them in a segmented control wrapped into a broken second row, and a
+   word like "side stack" only means something to somebody who already knows
+   what it looks like. Cards of the same kind as the field above them, each one
+   showing exactly what you will get, and they reflow at any width. */
+.opstellingraster {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-  width: 100%;
+  grid-template-columns: repeat(auto-fit, minmax(146px, 1fr));
+  gap: var(--ruimte-3);
 }
 
-.keuzerij .btn {
-  min-width: 0;
-  padding-inline: var(--ruimte-2);
-  white-space: normal;
-  line-height: 1.25;
+.keuzekaart--klein {
+  padding: var(--ruimte-2);
+  gap: 2px;
+}
+
+.keuzekaart--klein .keuzekaart__put {
+  height: 86px;
+  margin-bottom: 6px;
+  padding: 6px;
+}
+
+.keuzekaart--klein .keuzekaart__veld {
+  /* Less washed out than the field cards: with seven of them you are comparing
+     shapes, and a grey shape is hard to read against another grey shape. */
+  filter: saturate(0.5) opacity(0.85);
+}
+
+.keuzekaart--klein .keuzekaart__veld svg {
+  max-height: 74px;
+}
+
+.keuzekaart--klein .keuzekaart__naam {
+  font-size: var(--tekst-sm);
+  font-weight: 650;
+  text-align: center;
 }
 
 /* The step that a choice above it scrolls into view; this keeps its heading

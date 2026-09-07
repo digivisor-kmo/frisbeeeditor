@@ -1,7 +1,8 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { DiagramThumbnail } from '@/components/field/DiagramThumbnail'
 import { FieldCanvas } from '@/components/field/FieldCanvas'
 import {
   buildPreset,
@@ -11,7 +12,7 @@ import {
   opstellingPast,
   type Opstelling,
 } from '@/lib/diagram/presets'
-import type { Weergave } from '@/lib/diagram/schema'
+import type { FrameContent, Weergave } from '@/lib/diagram/schema'
 import { maakDiagram } from '@/lib/data/diagrams'
 import { newDoc } from '@/lib/editor/document'
 import { newId } from '@/lib/editor/ids'
@@ -28,6 +29,22 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
   const router = useRouter()
   const [weergave, setWeergave] = useState<Weergave>('volledig')
   const stapTwee = useRef<HTMLElement>(null)
+
+  /**
+   * A small drawing of each formation, on the field you just picked.
+   *
+   * "Side stack" only means something to somebody who already knows what it
+   * looks like; the picture is the explanation. They are rebuilt when the field
+   * changes, because the same formation stands differently on a half pitch.
+   */
+  const beschikbaar = useMemo(() => opstellingenVoor(weergave), [weergave])
+  const voorbeelden = useMemo(() => {
+    let n = 0
+    const id = () => `voorbeeld-${n++}`
+    const kaartjes = {} as Record<Opstelling, FrameContent>
+    for (const o of opstellingenVoor(weergave)) kaartjes[o] = buildPreset(o, weergave, id)
+    return kaartjes
+  }, [weergave])
   const [opstelling, setOpstelling] = useState<Opstelling>('vertical-stack')
   const [bezig, setBezig] = useState(false)
   const [fout, setFout] = useState<string | null>(null)
@@ -135,11 +152,24 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
           <span className="stap__nummer">2</span>
           {nl.nieuw.opstelling}
         </h2>
-        <div className="btn-groep keuzerij">
-          {opstellingenVoor(weergave).map((o) => (
-            <Knop key={o} actief={opstelling === o} onClick={() => setOpstelling(o)}>
-              {OPSTELLING_LABELS[o]}
-            </Knop>
+        <div className="opstellingraster">
+          {beschikbaar.map((o) => (
+            <button
+              key={o}
+              type="button"
+              onClick={() => setOpstelling(o)}
+              aria-pressed={opstelling === o}
+              className={`kaart keuzekaart keuzekaart--klein ${
+                opstelling === o ? 'keuzekaart--aan' : ''
+              }`}
+            >
+              <span className="keuzekaart__put">
+                <span className="keuzekaart__veld">
+                  <DiagramThumbnail content={voorbeelden[o]} weergave={weergave} />
+                </span>
+              </span>
+              <span className="keuzekaart__naam">{OPSTELLING_LABELS[o]}</span>
+            </button>
           ))}
         </div>
       </section>
