@@ -1,4 +1,5 @@
 import { buildLengthTable, pointAtDistance } from '@/lib/diagram/curve'
+import type { Padvorm } from '@/lib/diagram/schema'
 import type { Entity } from '@/lib/diagram/schema'
 import type { Point } from '@/lib/field/geometry'
 
@@ -42,9 +43,13 @@ export function cirkelRaaktKader(midden: Point, straal: number, k: Kader): boole
 /** How finely a curve is checked against the marquee. */
 const ARROW_SAMPLES = 60
 
-export function arrowRaaktKader(punten: readonly Point[], k: Kader): boolean {
+export function arrowRaaktKader(
+  punten: readonly Point[],
+  k: Kader,
+  vorm: Padvorm = 'vloeiend',
+): boolean {
   if (punten.some((p) => puntInKader(p, k))) return true
-  const table = buildLengthTable(punten)
+  const table = buildLengthTable(punten, vorm)
   if (table.total === 0) return false
   for (let i = 0; i <= ARROW_SAMPLES; i++) {
     const { point } = pointAtDistance(table, (table.total * i) / ARROW_SAMPLES)

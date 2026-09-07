@@ -1,6 +1,6 @@
 import { segmentMidpoints } from '@/lib/diagram/curve'
 import { arrowBochten, arrowEnd, MAX_BOCHTEN } from '@/lib/diagram/arrows'
-import type { Arrow } from '@/lib/diagram/schema'
+import { padvormVan, type Arrow } from '@/lib/diagram/schema'
 import { metresToUnits, toSvg, type FieldView } from '@/lib/field/geometry'
 
 interface Props {
@@ -29,7 +29,7 @@ export function ArrowHandles({ arrow, view, tokenRadiusM, hitRadiusM, actieveBoc
 
   const bochten = arrowBochten(arrow)
   const vol = bochten.length >= MAX_BOCHTEN
-  const midden = segmentMidpoints(punten)
+  const midden = segmentMidpoints(punten, padvormVan(arrow.kind))
   const eind = toSvg(arrowEnd(arrow), view)
 
   return (

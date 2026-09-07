@@ -166,9 +166,9 @@ export const nl = {
     toevoegenKort: 'Frame toevoegen',
     volgende: 'Volgend frame',
     toevoegen:
-      'Voegt het volgende frame toe: iedereen met een cut of juke staat daar al op zijn eindpunt, en een aangekomen worp is doorgegeven.',
+      'Voegt het volgende frame toe: iedereen met een cut of curve staat daar al op zijn eindpunt, en een aangekomen worp is doorgegeven.',
     geenBeweging:
-      'Zet eerst een cut, een juke of een worp naar een ontvanger in dit frame. Zonder beweging zou het volgende frame een identieke kopie zijn.',
+      'Zet eerst een cut, een curve of een worp naar een ontvanger in dit frame. Zonder beweging zou het volgende frame een identieke kopie zijn.',
     maximum: 'Tien frames is het maximum.',
     duur: 'Duur',
     dupliceren: 'Dupliceren',

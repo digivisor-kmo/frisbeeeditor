@@ -685,3 +685,35 @@ De installatieknop bestaat alleen wanneer de browser zegt dat het kan, en
 verdwijnt zodra de app geïnstalleerd is. Op een iPhone verschijnt hij nooit,
 want daar bestaat die gebeurtenis niet; installeren gaat er via Deel, Zet op
 beginscherm.
+
+## 2026-09-07 — Cut wordt hoekig, curve komt erbij, juke verdwijnt
+
+Er waren drie bewegingspijlen: cut, juke en de worp. De cut was een vloeiende
+curve, de juke dezelfde lijn met een golf eroverheen. Dat klopte niet met wat
+een trainer bedoelt. Een cut is een harde richtingsverandering, en die tekende
+je vroeger als een ronde bocht.
+
+**Nu.** `cut` draait op zijn bochtpunten: rechte stukken, echte hoeken. `curve`
+is dezelfde beweging vloeiend, met Catmull-Rom door de punten heen. `juke` is
+weg — een golf die je overal even breed over een lijn legt zegt niets wat een
+bochtpunt op de juiste plek niet beter zegt. De worp is en blijft vloeiend, met
+de standaardbocht die uit het worptype volgt.
+
+**Hoe het hoekige gebouwd is.** Niet als een apart polylinepad met eigen
+lengtecode ernaast. Een recht stuk *is* een cubic: zet de twee controlepunten op
+een derde en twee derde, en de curve is precies het segment, met een constante
+snelheid. Daardoor blijven de booglengtetabel, de raaklijnen, het inkorten en
+het middelpunt ongewijzigd werken voor allebei, en is er geen tweede
+implementatie die uit elkaar kan lopen.
+
+**Wat dit betekent voor een verse pijl.** Een cut en een curve zonder bochtpunt
+zijn allebei een rechte lijn, en zien er dus hetzelfde uit. Dat is juist: er
+valt nog niets hoekig of rond aan te zien. Het verschil ontstaat zodra je een
+bochtpunt zet, en dan is het meteen duidelijk.
+
+**Oude diagrammen.** `schema_version` gaat van 1 naar 2, en `leesFrameContent`
+maakt bij het lezen van een frame van versie 1 van elke juke een curve — zelfde
+pad, zelfde eindpunt. Dat gebeurt vóór de validatie, want een onbekende soort
+zou door het schema geweigerd worden en dan opent een trainer een diagram van
+vorige maand en is het leeg. In de database stond geen enkele juke, maar het
+veld staat er sinds dag één voor precies dit moment.

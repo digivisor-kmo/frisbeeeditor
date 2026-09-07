@@ -1,13 +1,6 @@
 import { memo } from 'react'
-import {
-  buildLengthTable,
-  pointAtDistance,
-  toPathD,
-  toPolylineD,
-  trimStart,
-  wavyPoints,
-} from '@/lib/diagram/curve'
-import type { Arrow } from '@/lib/diagram/schema'
+import { buildLengthTable, pointAtDistance, toPathD, trimStart } from '@/lib/diagram/curve'
+import { padvormVan, type Arrow } from '@/lib/diagram/schema'
 import { metresToUnits, toSvg, type FieldView, type Point } from '@/lib/field/geometry'
 
 interface Props {
@@ -21,9 +14,6 @@ interface Props {
   tipVerborgen: boolean
 }
 
-const JUKE_AMPLITUDE_M = 0.5
-const JUKE_CYCLI = 3
-
 function ArrowShapeBasis({
   arrow,
   view,
@@ -32,26 +22,24 @@ function ArrowShapeBasis({
   selected,
   tipVerborgen,
 }: Props) {
+  const vorm = padvormVan(arrow.kind)
   const punten = arrow.path.points.map((p) => toSvg(p, view))
-  const lijn = trimStart(punten, metresToUnits(tokenRadiusM + 0.25))
+  const lijn = trimStart(punten, metresToUnits(tokenRadiusM + 0.25), vorm)
   if (lijn.length < 2) return null
 
   const dikte = metresToUnits(tokenRadiusM * 0.19)
   const kop = metresToUnits(tokenRadiusM * 0.95)
   const hit = metresToUnits(hitRadiusM)
 
-  const table = buildLengthTable(lijn)
+  const table = buildLengthTable(lijn, vorm)
   const eind = pointAtDistance(table, table.total)
   const richting = eind.tangent
 
   // Leave room for the head so the line does not stick out through its point.
-  const lijnEinde = arrow.kind === 'juke' ? table.total : Math.max(0, table.total - kop * 0.75)
+  const lijnEinde = Math.max(0, table.total - kop * 0.75)
   const zichtbaar = pointAtDistance(table, lijnEinde).point
 
-  const d =
-    arrow.kind === 'juke'
-      ? toPolylineD(wavyPoints(lijn, metresToUnits(JUKE_AMPLITUDE_M), JUKE_CYCLI))
-      : toPathD(kortPad(lijn, table.total, lijnEinde, zichtbaar))
+  const d = toPathD(kortPad(lijn, table.total, lijnEinde, zichtbaar), vorm)
 
   const gestreept = arrow.kind === 'throw'
   const gevuldeKop = arrow.kind !== 'throw'

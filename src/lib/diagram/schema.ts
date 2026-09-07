@@ -7,7 +7,7 @@ import { z } from 'zod'
  * validated with these schemas on every save. `SCHEMA_VERSION` is written
  * alongside so a future migration has something to branch on.
  */
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 /* ------------------------------------------------------------------ shared */
 
@@ -97,14 +97,34 @@ export type ConeLine = z.infer<typeof coneLineSchema>
 
 /* ------------------------------------------------------------------- arrow */
 
-export const arrowKindSchema = z.enum(['cut', 'throw', 'juke', 'sight'])
+/**
+ * The four kinds of arrow.
+ *
+ * `cut` and `curve` are the same movement drawn two ways, and the difference is
+ * the whole point: a cut turns on its bend points, a curve runs through them.
+ * A trainer who means "hard in, then out" draws a cut; one who means a rounded
+ * run around a defender draws a curve. With no bend points at all the two are
+ * the same straight line, which is correct — there is nothing to be sharp or
+ * round about yet.
+ *
+ * `juke` was here until version 2 and is gone: a wobble drawn on top of a line
+ * said nothing a bend point does not say better.
+ */
+export const arrowKindSchema = z.enum(['cut', 'curve', 'throw', 'sight'])
 export type ArrowKind = z.infer<typeof arrowKindSchema>
+
+/** How a path is drawn between its points, which follows from the kind. */
+export type Padvorm = 'hoekig' | 'vloeiend'
+
+export function padvormVan(kind: ArrowKind): Padvorm {
+  return kind === 'cut' ? 'hoekig' : 'vloeiend'
+}
 
 export const throwTypeSchema = z.enum(['backhand', 'forehand', 'hammer', 'scoober', 'blade'])
 export type ThrowType = z.infer<typeof throwTypeSchema>
 
 /** Arrows that move the player who owns them to a new position. */
-export const MOVEMENT_KINDS = ['cut', 'juke'] as const
+export const MOVEMENT_KINDS = ['cut', 'curve'] as const
 
 export const arrowSchema = z.object({
   ...entityBase,

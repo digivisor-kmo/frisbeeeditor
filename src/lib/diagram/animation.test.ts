@@ -108,21 +108,34 @@ describe('positie tussen twee frames', () => {
     expect(midden).toBeGreaterThan(afstanden[stappen - 1]!)
   })
 
-  it('laat een juke aan begin en eind precies op de lijn vertrekken en aankomen', () => {
+  it('laat een cut over zijn hoekpunt lopen, niet erlangs', () => {
     const { vorig, volgend } = metCut([
       { x: 20, y: 10 },
+      { x: 30, y: 20 },
+      { x: 40, y: 10 },
+    ])
+
+    // Ergens onderweg staat hij precies op de hoek. Een vloeiende curve zou de
+    // hoek afsnijden en er nooit helemaal komen.
+    const raak = Array.from({ length: 101 }, (_, i) => positieOpTijd(vorig, volgend, 'p1', i / 100)!)
+    const dichtst = Math.min(...raak.map((p) => Math.hypot(p.x - 30, p.y - 20)))
+    expect(dichtst).toBeLessThan(0.2)
+  })
+
+  it('snijdt bij een curve de bocht af in plaats van er een hoek van te maken', () => {
+    const { vorig, volgend } = metCut([
+      { x: 20, y: 10 },
+      { x: 30, y: 20 },
       { x: 40, y: 10 },
     ])
     const arrow = vorig.entities.find((e) => e.type === 'arrow')!
-    if (arrow.type === 'arrow') arrow.kind = 'juke'
+    if (arrow.type === 'arrow') arrow.kind = 'curve'
 
-    expect(positieOpTijd(vorig, volgend, 'p1', 0)!.y).toBeCloseTo(10, 6)
-    expect(positieOpTijd(vorig, volgend, 'p1', 1)!.y).toBeCloseTo(10, 6)
-    // Ergens onderweg wijkt hij wel af.
-    const afwijkingen = [0.15, 0.3, 0.45, 0.6, 0.75].map(
-      (t) => Math.abs(positieOpTijd(vorig, volgend, 'p1', t)!.y - 10),
-    )
-    expect(Math.max(...afwijkingen)).toBeGreaterThan(0.2)
+    // Catmull-Rom loopt door zijn punten heen, dus de curve raakt de bocht ook.
+    // Het verschil zit in de aanloop: halverwege ligt hij verder van de rechte
+    // hoek af dan de hoekige variant.
+    const halfweg = positieOpTijd(vorig, volgend, 'p1', 0.25)!
+    expect(halfweg.y).toBeGreaterThan(10)
   })
 
   it('geeft null voor iemand die in geen van beide frames staat', () => {

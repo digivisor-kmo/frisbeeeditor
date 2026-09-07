@@ -38,7 +38,7 @@ import {
   CutIcon,
   DiscIcon,
   GearIcon,
-  JukeIcon,
+  CurveIcon,
   PaletteIcon,
   ThrowIcon,
   TrashIcon,
@@ -55,9 +55,9 @@ interface Props {
 
 const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
   cut: <CutIcon />,
-  juke: <JukeIcon />,
+  curve: <CurveIcon />,
   throw: <ThrowIcon />,
-  sight: <CutIcon />,
+  sight: <CurveIcon />,
 }
 
 const negatief = (p: { x: number; y: number }) => ({ x: -p.x, y: -p.y })
@@ -201,7 +201,7 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
       (e) => e.id === arrow.ownerId && e.type === 'player' && e.hasDisc,
     )
 
-    for (const kind of ['cut', 'juke', 'throw'] as const) {
+    for (const kind of ['cut', 'curve', 'throw'] as const) {
       // A throw can only exist while its owner holds the disc, but if he does,
       // turning a cut into a throw has to be possible: the same button appears
       // in his own menu, so hiding it here would be inconsistent.

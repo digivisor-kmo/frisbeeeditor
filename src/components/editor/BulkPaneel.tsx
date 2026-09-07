@@ -212,7 +212,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
               value={gedeeldType ?? GEMENGD}
               onChange={(e) => {
                 const kind = e.target.value as ArrowKind
-                if (kind !== 'cut' && kind !== 'juke') return
+                if (kind !== 'cut' && kind !== 'curve') return
                 wijzigDoelen(nl.menu.typeWisselen, (entity) => {
                   if (entity.type !== 'arrow' || entity.kind === 'throw') return
                   entity.kind = kind
@@ -221,7 +221,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
             >
               {gedeeldType === null && <option value={GEMENGD}>{nl.bulk.gemengd}</option>}
               <option value="cut">{ARROW_LABELS.cut}</option>
-              <option value="juke">{ARROW_LABELS.juke}</option>
+              <option value="curve">{ARROW_LABELS.curve}</option>
             </Keuze>
           </VeldRij>
         )}

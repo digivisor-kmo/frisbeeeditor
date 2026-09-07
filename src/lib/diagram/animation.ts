@@ -1,5 +1,12 @@
 import { buildLengthTable, pointAtDistance } from './curve'
-import { isArrow, isPlayer, MOVEMENT_KINDS, type Arrow, type FrameContent } from './schema'
+import {
+  isArrow,
+  isPlayer,
+  MOVEMENT_KINDS,
+  padvormVan,
+  type Arrow,
+  type FrameContent,
+} from './schema'
 import type { Point } from '@/lib/field/geometry'
 
 /** Softens the start and the end of every movement. */
@@ -7,10 +14,6 @@ export function easeInOut(t: number): number {
   const g = Math.min(Math.max(t, 0), 1)
   return g < 0.5 ? 2 * g * g : 1 - (-2 * g + 2) ** 2 / 2
 }
-
-/** How far a juke swings out sideways, in metres, and how often. */
-export const JUKE_AMPLITUDE_M = 0.5
-export const JUKE_CYCLI = 3
 
 /** The disc leaves at 30 percent of the frame and lands at 90. */
 export const WORP_START = 0.3
@@ -77,16 +80,13 @@ export function positieOpTijd(
   const arrow = bewegingVan(vorig, id)
   if (!arrow) return lerp(van, naar, eased)
 
-  const table = buildLengthTable(arrow.path.points)
+  const table = buildLengthTable(arrow.path.points, padvormVan(arrow.kind))
   if (table.total === 0) return lerp(van, naar, eased)
 
-  const { point, tangent } = pointAtDistance(table, table.total * eased)
-  if (arrow.kind !== 'juke') return point
-
-  // Damped at both ends, so the player leaves and arrives on the line itself.
-  const demping = Math.sin(Math.PI * t)
-  const afwijking = Math.sin(2 * Math.PI * JUKE_CYCLI * t) * JUKE_AMPLITUDE_M * demping
-  return { x: point.x - tangent.y * afwijking, y: point.y + tangent.x * afwijking }
+  // Arc length, not the curve parameter, so the player keeps one speed through
+  // the bends instead of hurrying in and dawdling out. A cut turns on its bend
+  // points, a curve rounds them off; both are the same walk along a line.
+  return pointAtDistance(table, table.total * eased).point
 }
 
 /** Fades an entity in or out when it is not in both frames. */

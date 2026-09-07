@@ -219,29 +219,28 @@ export function PaletteIcon({ size = 20 }: IconProps) {
 }
 
 
-/** A juke: the same line, but wavy. */
-
-/** A throw: a dashed line with an open point. */
-
 /*
  * The three arrows a player can draw. They have to be told apart at twenty
- * pixels, so each one carries the shape of the thing it means: a cut runs
- * straight, a juke wobbles, a throw flies dashed with an open head.
+ * pixels, so each one carries the shape of the thing it means: a cut turns on a
+ * corner, a curve rounds it off, a throw flies dashed with an open head.
  */
+
+/** A cut: a hard corner. */
 export function CutIcon({ size = 20 }: IconProps) {
   return (
     <svg {...base(size)}>
-      <path d="M4.5 18.5 17 6" />
-      <path d="M10.6 5.6H18v7.4" fill="none" />
+      <path d="M4.2 18.4 10.8 11.8 15.4 16.4 19 8.4" />
+      <path d="M15.6 7.5 19.4 7.9 19 11.8" fill="none" />
     </svg>
   )
 }
 
-export function JukeIcon({ size = 20 }: IconProps) {
+/** A curve: the same run, rounded off. */
+export function CurveIcon({ size = 20 }: IconProps) {
   return (
     <svg {...base(size)}>
-      <path d="M4 17.6c2.6 0 2.6-4.4 5.2-4.4s2.6 4.4 5.2 4.4c1.7 0 2.3-1.9 3.1-3.2" />
-      <path d="M15.2 11.2 18.4 13l-1.1 3.4" />
+      <path d="M4.2 18.4c4.6 0 5.2-4.2 7.4-6.6 1.9-2.1 4.4-2.9 7-3.4" />
+      <path d="M15.6 7.5 19.4 7.9 19 11.8" fill="none" />
     </svg>
   )
 }

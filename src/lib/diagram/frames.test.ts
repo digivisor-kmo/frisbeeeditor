@@ -102,11 +102,11 @@ describe('volgendFrame', () => {
     expect(content.entities.filter((e) => e.type === 'arrow')).toHaveLength(1)
   })
 
-  it('verplaatst ook via een juke', () => {
+  it('verplaatst ook via een curve', () => {
     const content = opstelling()
-    const juke = cut('p2', { x: 45, y: 22 }, { x: 55, y: 12 })
-    juke.kind = 'juke'
-    content.entities.push(juke)
+    const curve = cut('p2', { x: 45, y: 22 }, { x: 55, y: 12 })
+    curve.kind = 'curve'
+    content.entities.push(curve)
     const volgend = volgendFrame(content)
     const cutter = volgend.entities.find((e) => e.id === 'p2')
     expect(isPlayer(cutter!) && cutter.pos).toEqual({ x: 55, y: 12 })

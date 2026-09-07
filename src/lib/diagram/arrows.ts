@@ -268,12 +268,12 @@ export function verwijderBocht(arrow: Arrow, puntIndex: number): boolean {
 
 export const ARROW_LABELS: Record<ArrowKind, string> = {
   cut: 'Cut',
+  curve: 'Curve',
   throw: 'Worp',
-  juke: 'Juke',
   sight: 'Zichtlijn',
 }
 
 /** Which arrows this player can draw right now. */
 export function tekenbareArrows(heeftSchijf: boolean): ArrowKind[] {
-  return heeftSchijf ? ['cut', 'juke', 'throw'] : ['cut', 'juke']
+  return heeftSchijf ? ['cut', 'curve', 'throw'] : ['cut', 'curve']
 }

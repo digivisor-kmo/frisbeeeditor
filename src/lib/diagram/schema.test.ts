@@ -109,7 +109,7 @@ describe('frame-invarianten', () => {
   it('overleeft een rondje door JSON, want zo staat het in de database', () => {
     const entities: Entity[] = [
       entitySchema.parse(player('p1', { hasDisc: true })),
-      entitySchema.parse(arrow('a1', { kind: 'juke' })),
+      entitySchema.parse(arrow('a1', { kind: 'curve' })),
     ]
     const roundTrip = JSON.parse(JSON.stringify({ entities }))
     expect(frameContentSchema.safeParse(roundTrip).success).toBe(true)

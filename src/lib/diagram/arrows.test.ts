@@ -57,7 +57,7 @@ describe('createArrow', () => {
       id: 'a1',
       ownerId: 'p1',
       van,
-      kind: 'juke',
+      kind: 'curve',
       weergave: 'volledig',
       entities: [],
     })
@@ -227,7 +227,7 @@ describe('arrow meeverplaatsen', () => {
 
 describe('welke arrows een speler mag tekenen', () => {
   it('geeft de worp alleen aan wie de schijf heeft', () => {
-    expect(tekenbareArrows(false)).toEqual(['cut', 'juke'])
+    expect(tekenbareArrows(false)).toEqual(['cut', 'curve'])
     expect(tekenbareArrows(true)).toContain('throw')
   })
 })

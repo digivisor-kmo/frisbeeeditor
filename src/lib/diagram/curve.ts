@@ -1,3 +1,4 @@
+import type { Padvorm } from './schema'
 import type { Point } from '@/lib/field/geometry'
 
 /**
@@ -23,16 +24,36 @@ const mul = (a: Point, k: number): Point => ({ x: a.x * k, y: a.y * k })
 export const distance = (a: Point, b: Point): number => Math.hypot(a.x - b.x, a.y - b.y)
 
 /**
- * Catmull-Rom to cubic Bezier. The curve runs exactly through every input
- * point; the tangent at each point follows its two neighbours.
+ * Points to cubic Beziers, either rounded off or not.
+ *
+ * `vloeiend` is Catmull-Rom: the curve runs exactly through every input point
+ * and the tangent at each one follows its two neighbours.
+ *
+ * `hoekig` is the same thing made of straight pieces. It could have been a
+ * separate polyline path with its own length code, but a straight line IS a
+ * cubic — put the two control points at a third and two thirds of the way
+ * along and the curve is the segment, walked at a constant speed. That way the
+ * length table, the tangents, the trimming and the midpoint all keep working,
+ * unchanged and exact, for both shapes.
  */
-export function toBezier(points: readonly Point[]): Bezier[] {
+export function toBezier(points: readonly Point[], vorm: Padvorm = 'vloeiend'): Bezier[] {
   if (points.length < 2) return []
 
   const segments: Bezier[] = []
   for (let i = 0; i < points.length - 1; i++) {
     const p0 = points[i]!
     const p1 = points[i + 1]!
+
+    if (vorm === 'hoekig') {
+      segments.push({
+        p0,
+        c1: add(p0, mul(sub(p1, p0), 1 / 3)),
+        c2: add(p0, mul(sub(p1, p0), 2 / 3)),
+        p1,
+      })
+      continue
+    }
+
     // At the ends there is no neighbour, so mirror the segment itself. That
     // keeps a two-point path an exactly uniform straight line instead of one
     // that speeds up in the middle.
@@ -77,8 +98,8 @@ export function tangentAt(seg: Bezier, t: number): Point {
 }
 
 /** SVG path data for the whole curve. */
-export function toPathD(points: readonly Point[]): string {
-  const segments = toBezier(points)
+export function toPathD(points: readonly Point[], vorm: Padvorm = 'vloeiend'): string {
+  const segments = toBezier(points, vorm)
   if (segments.length === 0) return ''
   const first = segments[0]!
   const parts = [`M ${first.p0.x} ${first.p0.y}`]
@@ -109,9 +130,10 @@ export const SAMPLES_PER_SEGMENT = 100
  */
 export function buildLengthTable(
   points: readonly Point[],
+  vorm: Padvorm = 'vloeiend',
   samplesPerSegment: number = SAMPLES_PER_SEGMENT,
 ): LengthTable {
-  const segments = toBezier(points)
+  const segments = toBezier(points, vorm)
   const cumulative: number[] = [0]
   const samples: { segment: number; t: number }[] = [{ segment: 0, t: 0 }]
 
@@ -172,17 +194,21 @@ export function pointAtFraction(table: LengthTable, fractie: number) {
 }
 
 /** Midpoint of the curve measured along its length, not along t. */
-export function midpoint(points: readonly Point[]): Point {
-  return pointAtFraction(buildLengthTable(points), 0.5).point
+export function midpoint(points: readonly Point[], vorm: Padvorm = 'vloeiend'): Point {
+  return pointAtFraction(buildLengthTable(points, vorm), 0.5).point
 }
 
 /**
  * Shortens the curve at the start, so an arrow leaving a player does not come
  * out of the middle of the letter on his token.
  */
-export function trimStart(points: readonly Point[], afstand: number): Point[] {
+export function trimStart(
+  points: readonly Point[],
+  afstand: number,
+  vorm: Padvorm = 'vloeiend',
+): Point[] {
   if (points.length < 2 || afstand <= 0) return [...points]
-  const table = buildLengthTable(points)
+  const table = buildLengthTable(points, vorm)
   if (afstand >= table.total) return [...points]
 
   const nieuw = pointAtDistance(table, afstand).point
@@ -190,34 +216,6 @@ export function trimStart(points: readonly Point[], afstand: number): Point[] {
   return [nieuw, ...rest]
 }
 
-/**
- * A wavy version of the curve, for juke arrows: the same line with a sine
- * running perpendicular to it. Returns points, so the caller can draw them as a
- * polyline.
- */
-export function wavyPoints(
-  points: readonly Point[],
-  amplitude: number,
-  cycles: number,
-  samples = 80,
-): Point[] {
-  const table = buildLengthTable(points)
-  if (table.total === 0) return [...points]
-
-  const out: Point[] = []
-  for (let i = 0; i <= samples; i++) {
-    const fractie = i / samples
-    const { point, tangent } = pointAtDistance(table, table.total * fractie)
-    // Fade the wave out at both ends so the line still starts and stops cleanly.
-    const demping = Math.sin(Math.PI * fractie)
-    const afwijking = Math.sin(2 * Math.PI * cycles * fractie) * amplitude * demping
-    out.push({
-      x: point.x - tangent.y * afwijking,
-      y: point.y + tangent.x * afwijking,
-    })
-  }
-  return out
-}
 
 export function toPolylineD(points: readonly Point[]): string {
   if (points.length === 0) return ''
@@ -231,6 +229,6 @@ export function toPolylineD(points: readonly Point[]): string {
  * new bend there. With n bend points there are n + 1 segments, so there are
  * always n + 1 of these.
  */
-export function segmentMidpoints(points: readonly Point[]): Point[] {
-  return toBezier(points).map((seg) => evalBezier(seg, 0.5))
+export function segmentMidpoints(points: readonly Point[], vorm: Padvorm = 'vloeiend'): Point[] {
+  return toBezier(points, vorm).map((seg) => evalBezier(seg, 0.5))
 }

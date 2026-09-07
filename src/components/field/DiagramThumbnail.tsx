@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { toPathD, trimStart } from '@/lib/diagram/curve'
-import { isArrow, isPlayer, type FrameContent, type Weergave } from '@/lib/diagram/schema'
+import { isArrow, isPlayer, padvormVan, type FrameContent, type Weergave } from '@/lib/diagram/schema'
 import { createView, metresToUnits, toSvg } from '@/lib/field/geometry'
 
 /**
@@ -47,14 +47,16 @@ function DiagramThumbnailBasis({
       )}
 
       {content.entities.filter(isArrow).map((arrow) => {
+        const vorm = padvormVan(arrow.kind)
         const punten = trimStart(
           arrow.path.points.map((p) => toSvg(p, view)),
           straal,
+          vorm,
         )
         return (
           <path
             key={arrow.id}
-            d={toPathD(punten)}
+            d={toPathD(punten, vorm)}
             fill="none"
             stroke="var(--arrow)"
             strokeWidth={dikte}

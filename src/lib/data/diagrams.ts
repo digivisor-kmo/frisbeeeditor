@@ -2,6 +2,7 @@
 
 import { occupancy } from '@/lib/diagram/entities'
 import { frameContentSchema, SCHEMA_VERSION } from '@/lib/diagram/schema'
+import { leesFrameContent } from '@/lib/diagram/migratie'
 import type { EditorDoc } from '@/lib/editor/document'
 import { claimSlot, SlotKwijtError } from '@/lib/data/vergrendeling'
 import { createClient } from '@/lib/supabase/client'
@@ -111,7 +112,7 @@ export async function laadDiagram(id: string): Promise<EditorDoc> {
       toelichting: frame.toelichting,
       // Anything that comes back from the database goes through the schema
       // before the editor touches it.
-      content: frameContentSchema.parse(frame.content),
+      content: leesFrameContent(frame.content, frame.schema_version),
     })),
   }
 }
