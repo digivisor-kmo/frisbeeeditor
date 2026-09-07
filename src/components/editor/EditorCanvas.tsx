@@ -380,6 +380,9 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     }
 
     if (tool === 'text') {
+      // Stops the field from claiming the focus, so the little field that is
+      // about to appear can keep it.
+      event.preventDefault()
       clearSelection()
       setTekstInvoer({
         soort: 'tekst',

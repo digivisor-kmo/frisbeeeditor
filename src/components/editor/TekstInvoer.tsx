@@ -36,8 +36,20 @@ export function TekstInvoer({
   const veld = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    veld.current?.focus()
-    veld.current?.select()
+    // Twice, and the second time after the browser has finished the click that
+    // opened this. That click ends on the field, and the field takes the focus
+    // back with it — so focusing only on mount leaves you typing into nothing.
+    const pak = () => {
+      veld.current?.focus()
+      veld.current?.select()
+    }
+    pak()
+    const frame = requestAnimationFrame(pak)
+    const later = window.setTimeout(pak, 60)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.clearTimeout(later)
+    }
   }, [])
 
   return (
