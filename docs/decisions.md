@@ -828,3 +828,18 @@ versleept kan worden, zegt het niets.
 De thumbnails in de bibliotheek tonen ze bewust nog altijd niet. Op honderdvijftig
 pixels is een zone een vlek en een notitie onleesbaar; de kaart moet in één
 oogopslag zeggen wélk diagram het is, niet wat erin staat.
+
+## 2026-09-07 — De afspeelklok hoort niet in de afspeelbalk
+
+Op een telefoon deed de afspeelknop niets. De oorzaak: de lus die de tijd
+vooruitzet zat in `Afspeelbalk`, en die balk bestaat op een telefoon niet — daar
+staat de knop in de zwevende bediening. Hij zette `speelt` op waar, niemand
+verzette de klok, en het veld bleef op het eerste frame staan.
+
+De klok staat nu in `EditorScherm`, dat beide indelingen tekent. Een motor die
+in een stukje interface woont, werkt alleen zolang dat stukje interface er is,
+en dat is geen eigenschap waar je op wil bouwen.
+
+Meteen ook de knop op de telefoon gelijkgetrokken met die op de laptop: play
+begint alleen opnieuw als de speelkop aan het einde staat. Hij zette de tijd
+altijd op nul, dus pauzeren en verder spelen bestond daar niet.

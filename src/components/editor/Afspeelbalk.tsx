@@ -2,9 +2,8 @@
 
 import { useMemo } from 'react'
 import { Knop } from '@/components/ui/Knop'
-import { frameOpTijd } from '@/lib/diagram/animation'
+import { frameOpTijd, totaleDuur } from '@/lib/diagram/animation'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
-import { useAfspelen } from '@/lib/editor/useAfspelen'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { nl } from '@/lib/strings'
 import { PauzeIcon, SpeelIcon } from './icons'
@@ -12,7 +11,8 @@ import { PauzeIcon, SpeelIcon } from './icons'
 export function Afspeelbalk() {
   const frames = useDiagramStore((s) => s.doc.frames)
   const duren = useMemo(() => frames.map((f) => f.duurMs), [frames])
-  const { totaal } = useAfspelen()
+  // The clock itself runs one level up, where both layouts can reach it.
+  const totaal = totaleDuur(duren)
 
   const speelt = useUiStore((s) => s.speelt)
   const setSpeelt = useUiStore((s) => s.setSpeelt)

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Knop } from '@/components/ui/Knop'
 import { Aanvink } from '@/components/ui/Veld'
 import { DEFAULT_FRAME_DURATION_MS } from '@/lib/editor/document'
+import { totaleDuur } from '@/lib/diagram/animation'
 import { kanFrameToevoegen, MAX_FRAMES } from '@/lib/diagram/frames'
 import type { Side } from '@/lib/diagram/schema'
 import { canRedo, canUndo, useDiagramStore } from '@/lib/editor/diagramStore'
@@ -84,6 +85,7 @@ export function MobieleChrome({ kant, setKant, status, fout, diagramId }: Props)
   const activeFrame = useUiStore((s) => s.activeFrame)
   const setActiveFrame = useUiStore((s) => s.setActiveFrame)
   const speelt = useUiStore((s) => s.speelt)
+  const tijdMs = useUiStore((s) => s.tijdMs)
   const setSpeelt = useUiStore((s) => s.setSpeelt)
   const setTijd = useUiStore((s) => s.setTijd)
   const sleept = useUiStore((s) => s.sleept)
@@ -91,6 +93,7 @@ export function MobieleChrome({ kant, setKant, status, fout, diagramId }: Props)
   const huidig = frames[activeFrame]
   const magFrame = huidig ? kanFrameToevoegen(huidig.content, frames.length) : false
   const meerdereFrames = frames.length > 1
+  const totaal = totaleDuur(frames.map((f) => f.duurMs))
   const ontbreekt = watOntbreekt(doc)
 
   // Out of the way while you are actually moving something, back the moment you
@@ -188,7 +191,9 @@ export function MobieleChrome({ kant, setKant, status, fout, diagramId }: Props)
               className="btn--icoon"
               aria-label={speelt ? nl.afspelen.pauze : nl.afspelen.speel}
               onClick={() => {
-                if (!speelt) setTijd(0)
+                // Only start over when the playhead is sitting at the end;
+                // pressing play should carry on from where you paused.
+                if (!speelt && tijdMs >= totaal) setTijd(0)
                 setSpeelt(!speelt)
               }}
             >

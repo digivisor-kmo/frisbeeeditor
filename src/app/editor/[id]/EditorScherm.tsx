@@ -24,6 +24,7 @@ import { watOntbreekt } from '@/lib/editor/validatie'
 import type { Side } from '@/lib/diagram/schema'
 import { framesVan, type EditorDoc } from '@/lib/editor/document'
 import { useDiagramStore } from '@/lib/editor/diagramStore'
+import { useAfspelen } from '@/lib/editor/useAfspelen'
 import { useAutosave } from '@/lib/editor/useAutosave'
 import { useDockHoogte } from '@/lib/editor/useDockHoogte'
 import { useUiStore } from '@/lib/editor/uiStore'
@@ -53,6 +54,16 @@ export function EditorScherm({
   )
   const doc = useDiagramStore((s) => s.doc)
   const ontbreekt = useMemo(() => watOntbreekt(doc), [doc])
+
+  /**
+   * The clock that plays the diagram.
+   *
+   * It lives here rather than inside the play bar, because on a phone that bar
+   * does not exist: the play button sits in the floating chrome instead. It set
+   * `speelt` to true, nothing advanced the time, and the field froze on the
+   * first frame — press play, watch nothing happen.
+   */
+  useAfspelen()
 
   const scherm = useScherm()
   // A full field is 100 by 37 metres and wants the long side of the screen; a
