@@ -88,6 +88,9 @@
 
   --arrow: #ffffff;
   --handle: #191c20;
+  /* Behind the letters of a zone label or a note, so white text keeps its edge
+     against grass and coloured text keeps it against white. */
+  --zone-halo: rgb(24 34 27 / 0.42);
 
   /* Spacing scale */
   --ruimte-1: 0.25rem;
@@ -129,6 +132,7 @@
   --token-donker: #191c20;
   --arrow: #3a4149;
   --scrim: rgb(18 24 20 / 0.1);
+  --zone-halo: rgb(255 255 255 / 0.85);
 }
 
 * {
@@ -1297,6 +1301,35 @@ h3,
 
 .zweeftab--in {
   color: var(--accent);
+}
+
+/* Two rows of settings under an arc menu, for the things that need more than
+   a strip of colours. */
+.menu-paneel {
+  display: grid;
+  gap: var(--ruimte-2);
+  justify-items: center;
+}
+
+/* Typing a note, hanging just under the spot you tapped on the field. */
+.tekstinvoer {
+  position: absolute;
+  z-index: 12;
+  transform: translate(-50%, 12px);
+  display: grid;
+  gap: var(--ruimte-2);
+  width: min(260px, 78vw);
+  padding: var(--ruimte-3);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--schaduw-3);
+}
+
+.tekstinvoer__knoppen {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--ruimte-2);
 }
 
 /* ------------------------------------------------------------------ sheet */

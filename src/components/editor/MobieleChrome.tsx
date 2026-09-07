@@ -23,6 +23,8 @@ import {
   OpnieuwIcon,
   PauzeIcon,
   PionIcon,
+  TekstIcon,
+  ZoneIcon,
   PlusIcon,
   SchuivenIcon,
   SpeelIcon,
@@ -37,6 +39,8 @@ const TOOLS: { id: Tool; label: string; icoon: React.ReactNode }[] = [
   { id: 'select', label: nl.editor.selecteren, icoon: <CursorIcon /> },
   { id: 'player', label: nl.editor.speler, icoon: <SpelerIcon /> },
   { id: 'cone', label: nl.editor.pion, icoon: <PionIcon /> },
+  { id: 'zone', label: nl.editor.zone, icoon: <ZoneIcon /> },
+  { id: 'text', label: nl.editor.tekst, icoon: <TekstIcon /> },
 ]
 
 const DUUR_STAPPEN = [750, 1000, 1500, 2000, 3000]

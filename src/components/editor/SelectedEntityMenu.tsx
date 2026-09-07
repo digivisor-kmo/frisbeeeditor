@@ -14,8 +14,9 @@ import { giveDisc } from '@/lib/diagram/entities'
 import {
   arrowVerplaatsing,
   herberekenSchijfVanaf,
+  pasStatischAanVanaf,
   verplaatsVanaf,
-  verwijderVanaf,
+  verwijderSelectie,
   zetIdentiteit,
 } from '@/lib/diagram/propagatie'
 import {
@@ -37,11 +38,14 @@ import { EntityMenu, type MenuActie } from './EntityMenu'
 import {
   CutIcon,
   DiscIcon,
+  EllipsIcon,
   GearIcon,
   CurveIcon,
   PaletteIcon,
+  TekstIcon,
   ThrowIcon,
   TrashIcon,
+  ZoneIcon,
 } from './icons'
 import { PlayerSettings } from './PlayerSettings'
 import { ThrowSettings } from './ThrowSettings'
@@ -51,6 +55,8 @@ interface Props {
   anchor: { x: number; y: number }
   tokenRadiusPx: number
   canvas: { breedte: number; hoogte: number }
+  /** Opens the note editor over the field; only the canvas can place that. */
+  onTekstBewerken?: () => void
 }
 
 const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
@@ -62,7 +68,13 @@ const ARROW_ICONS: Record<ArrowKind, React.ReactNode> = {
 
 const negatief = (p: { x: number; y: number }) => ({ x: -p.x, y: -p.y })
 
-export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Props) {
+export function SelectedEntityMenu({
+  entity,
+  anchor,
+  tokenRadiusPx,
+  canvas,
+  onTekstBewerken,
+}: Props) {
   const change = useDiagramStore((s) => s.change)
   const weergave = useDiagramStore((s) => s.doc.meta.weergave)
   const activeFrame = useUiStore((s) => s.activeFrame)
@@ -116,7 +128,7 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
         const delta = arrowVerplaatsing(content, entity)
         if (delta) verplaatsVanaf(frames, activeFrame + 1, entity.ownerId, negatief(delta))
       }
-      verwijderVanaf(frames, activeFrame, new Set([entity.id]))
+      verwijderSelectie(frames, activeFrame, new Set([entity.id]))
       herberekenSchijfVanaf(frames, activeFrame)
     })
     clearSelection()
@@ -313,6 +325,155 @@ export function SelectedEntityMenu({ entity, anchor, tokenRadiusPx, canvas }: Pr
               style={{ background: paintFor(color, 'offense').fill }}
             />
           ))}
+        </div>
+      )
+    }
+  } else if (entity.type === 'annotation') {
+    const zone = entity
+
+    // Shape, name, colour, gone. Four buttons in the same arc as everywhere
+    // else, so a zone is worked the way a player is.
+    acties.push({
+      id: 'vorm',
+      label: zone.shape === 'ellipse' ? nl.zone.rechthoek : nl.zone.ellips,
+      icon: zone.shape === 'ellipse' ? <ZoneIcon /> : <EllipsIcon />,
+      onClick: () =>
+        wijzigFrames(nl.zone.vorm, (frames) => {
+          const vorm = zone.shape === 'ellipse' ? 'rect' : 'ellipse'
+          pasStatischAanVanaf(frames, activeFrame, zone.id, (target) => {
+            if (target.type === 'annotation') target.shape = vorm
+          })
+        }),
+    })
+
+    acties.push({
+      id: 'label',
+      label: nl.zone.label,
+      icon: <TekstIcon />,
+      onClick: () => {
+        const antwoord = window.prompt(nl.zone.labelVraag, zone.label ?? '')
+        if (antwoord === null) return
+        const schoon = antwoord.trim().slice(0, 40)
+        wijzigFrames(nl.zone.label, (frames) => {
+          pasStatischAanVanaf(frames, activeFrame, zone.id, (target) => {
+            if (target.type === 'annotation') target.label = schoon || undefined
+          })
+        })
+      },
+    })
+
+    acties.push({
+      id: 'color',
+      label: nl.menu.kleur,
+      icon: <PaletteIcon />,
+      actief: paneelOpen,
+      onClick: () => setPaneelOpen((open) => !open),
+    })
+
+    acties.push({
+      id: 'delete',
+      label: nl.menu.verwijderen,
+      icon: <TrashIcon />,
+      gevaar: true,
+      onClick: verwijder,
+    })
+
+    if (paneelOpen) {
+      paneel = (
+        <div className="kleurrij">
+          {TOKEN_COLORS.map((color: TokenColor) => (
+            <button
+              key={color}
+              type="button"
+              className="kleurstaal"
+              title={nl.kleuren[color]}
+              aria-label={nl.kleuren[color]}
+              aria-pressed={zone.style.stroke === color}
+              onClick={() =>
+                wijzigFrames(nl.menu.kleur, (frames) => {
+                  pasStatischAanVanaf(frames, activeFrame, zone.id, (target) => {
+                    if (target.type !== 'annotation') return
+                    target.style.stroke = color
+                    target.style.fill = color
+                  })
+                })
+              }
+              style={{ background: paintFor(color, 'offense').fill }}
+            />
+          ))}
+        </div>
+      )
+    }
+  } else if (entity.type === 'text') {
+    const blok = entity
+
+    acties.push({
+      id: 'bewerken',
+      label: nl.tekst.bewerken,
+      icon: <TekstIcon />,
+      onClick: () => {
+        setMenuOpen(false)
+        onTekstBewerken?.()
+      },
+    })
+
+    acties.push({
+      id: 'grootte',
+      label: nl.tekst.grootte,
+      icon: <GearIcon />,
+      actief: paneelOpen,
+      onClick: () => setPaneelOpen((open) => !open),
+    })
+
+    acties.push({
+      id: 'delete',
+      label: nl.menu.verwijderen,
+      icon: <TrashIcon />,
+      gevaar: true,
+      onClick: verwijder,
+    })
+
+    if (paneelOpen) {
+      paneel = (
+        <div className="menu-paneel">
+          <div className="btn-groep">
+            {(['sm', 'md', 'lg'] as const).map((maat) => (
+              <button
+                key={maat}
+                type="button"
+                className={`btn btn--klein${blok.size === maat ? ' is-actief' : ''}`}
+                onClick={() =>
+                  wijzigFrames(nl.tekst.grootte, (frames) => {
+                    pasStatischAanVanaf(frames, activeFrame, blok.id, (target) => {
+                      if (target.type === 'text') target.size = maat
+                    })
+                  })
+                }
+              >
+                {maat === 'sm' ? nl.tekst.klein : maat === 'md' ? nl.tekst.middel : nl.tekst.groot}
+              </button>
+            ))}
+          </div>
+          <div className="kleurrij">
+            {TOKEN_COLORS.map((color: TokenColor) => (
+              <button
+                key={color}
+                type="button"
+                className="kleurstaal"
+                title={nl.kleuren[color]}
+                aria-label={nl.kleuren[color]}
+                aria-pressed={blok.color === color}
+                onClick={() =>
+                  wijzigFrames(nl.menu.kleur, (frames) => {
+                    pasStatischAanVanaf(frames, activeFrame, blok.id, (target) => {
+                      if (target.type === 'text') target.color = color
+                    })
+                  })
+                }
+                style={{ background: paintFor(color, 'offense').fill }}
+              />
+            ))}
+          </div>
         </div>
       )
     }

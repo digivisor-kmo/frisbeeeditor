@@ -141,11 +141,17 @@ export type Arrow = z.infer<typeof arrowSchema>
 
 /* -------------------------------------------------------------- annotation */
 
+/** The two shapes you can mark a region of the pitch with. */
+export const ZONE_SHAPES = ['rect', 'ellipse'] as const
+
 export const annotationSchema = z.object({
   ...entityBase,
   type: z.literal('annotation'),
   shape: z.enum(['freehand', 'line', 'rect', 'ellipse', 'arrow']),
+  /** For a rect or an ellipse: two opposite corners, in any order. */
   points: z.array(pointSchema).min(2),
+  /** What the region is called, drawn along its top edge. */
+  label: z.string().max(40).optional(),
   style: z.object({
     stroke: colorSchema,
     /** Stroke width in metres, so it scales with the field. */
@@ -190,6 +196,27 @@ export function isPlayer(entity: Entity): entity is Player {
 
 export function isArrow(entity: Entity): entity is Arrow {
   return entity.type === 'arrow'
+}
+
+export function isZone(entity: Entity): entity is Annotation {
+  return entity.type === 'annotation'
+}
+
+export function isText(entity: Entity): entity is TextBlock {
+  return entity.type === 'text'
+}
+
+/**
+ * Marks the things on the field that do not move.
+ *
+ * A zone and a note are scenery: they say what a patch of grass means or what
+ * to watch for. They carry into the next frame like everything else, but they
+ * are never interpolated, and removing one is a decision about this frame only.
+ * That is why they need a name of their own rather than being handled by
+ * whichever piece of code happens to touch them.
+ */
+export function isStatisch(entity: Entity): entity is Annotation | TextBlock {
+  return entity.type === 'annotation' || entity.type === 'text'
 }
 
 /* ------------------------------------------------------------------- frame */

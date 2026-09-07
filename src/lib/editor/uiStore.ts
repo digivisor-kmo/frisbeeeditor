@@ -12,7 +12,7 @@ export type EditorMode =
   | 'drawingAnnotation'
   | 'editingText'
 
-export type Tool = 'select' | 'player' | 'cone' | 'draw' | 'text'
+export type Tool = 'select' | 'player' | 'cone' | 'zone' | 'text'
 
 interface UiStore {
   mode: EditorMode

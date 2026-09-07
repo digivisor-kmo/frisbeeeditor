@@ -1,8 +1,9 @@
 import { arrowEnd, verplaatsArrow } from './arrows'
-import { hasPosition } from './entities'
+import { beweeg, hasPosition } from './entities'
 import {
   isArrow,
   isPlayer,
+  isStatisch,
   MOVEMENT_KINDS,
   type Arrow,
   type Entity,
@@ -61,11 +62,8 @@ export function verplaatsVanaf(
     const entity = content.entities.find((e) => e.id === entityId)
     if (!entity) continue
 
-    if (hasPosition(entity)) {
-      entity.pos = { x: entity.pos.x + delta.x, y: entity.pos.y + delta.y }
-    } else if (isArrow(entity)) {
-      verplaatsArrow(entity, delta)
-    }
+    if (isArrow(entity)) verplaatsArrow(entity, delta)
+    else beweeg(entity, delta)
 
     // Arrows travel with their player: the shape you drew stays the shape.
     for (const other of content.entities) {
@@ -171,6 +169,19 @@ export function voegToeVanaf(frames: FrameContent[], vanafIndex: number, entity:
   return geraakt
 }
 
+/**
+ * Removes ids from this frame only.
+ *
+ * For a zone or a note that is the whole rule: they are scenery, and taking one
+ * out of frame three says nothing about frame four. A player is the opposite,
+ * which is what `verwijderVanaf` is for.
+ */
+export function verwijderHier(content: FrameContent, ids: ReadonlySet<string>): void {
+  content.entities = content.entities.filter(
+    (e) => !ids.has(e.id) && !(isArrow(e) && ids.has(e.ownerId)),
+  )
+}
+
 /** Removing somebody removes him from here on; earlier frames keep him. */
 export function verwijderVanaf(
   frames: FrameContent[],
@@ -190,6 +201,35 @@ export function verwijderVanaf(
   return geraakt
 }
 
+/**
+ * Deletes a selection the way each thing in it wants to be deleted.
+ *
+ * A player taken off the field is gone from here on; that is one decision about
+ * the rest of the play. A zone or a note is scenery, and removing it from frame
+ * three says nothing about frame four — so it goes only from the frame you are
+ * looking at. One function, because every place that deletes needs both rules
+ * and none of them should have to remember which is which.
+ */
+export function verwijderSelectie(
+  frames: FrameContent[],
+  vanafIndex: number,
+  ids: ReadonlySet<string>,
+): number {
+  const huidig = frames[vanafIndex]
+  if (!huidig) return 0
+
+  const hier = new Set<string>()
+  const vanaf = new Set<string>()
+  for (const id of ids) {
+    const entity = huidig.entities.find((e) => e.id === id)
+    if (entity && isStatisch(entity)) hier.add(id)
+    else vanaf.add(id)
+  }
+
+  if (hier.size > 0) verwijderHier(huidig, hier)
+  return vanaf.size > 0 ? verwijderVanaf(frames, vanafIndex, vanaf) : 0
+}
+
 /** Identity belongs to the player, not to a frame, so it lands in all of them. */
 export function zetIdentiteit(
   frames: FrameContent[],
@@ -206,8 +246,33 @@ export function zetIdentiteit(
       if ('label' in patch) entity.label = patch.label
     } else if (entity.type === 'cone' && patch.color !== undefined) {
       entity.color = patch.color
+    } else if (entity.type === 'text' && patch.color !== undefined) {
+      entity.color = patch.color
     }
   }
+}
+
+/**
+ * Changes one static entity — a zone or a note — from this frame onwards.
+ *
+ * Forwards rather than everywhere, because that is the rule the rest of the
+ * editor already follows: what you change applies from where you stand. Only
+ * removing one is different, and that is deliberate.
+ */
+export function pasStatischAanVanaf(
+  frames: FrameContent[],
+  vanafIndex: number,
+  entityId: string,
+  muteer: (entity: Entity) => void,
+): number {
+  let geraakt = 0
+  for (let i = vanafIndex; i < frames.length; i++) {
+    const entity = frames[i]?.entities.find((e) => e.id === entityId)
+    if (!entity) continue
+    muteer(entity)
+    if (i > vanafIndex) geraakt++
+  }
+  return geraakt
 }
 
 /**

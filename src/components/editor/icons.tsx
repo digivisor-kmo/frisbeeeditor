@@ -263,3 +263,31 @@ export function InstalleerIcon({ size = 18 }: IconProps) {
     </svg>
   )
 }
+
+/** A region: a dashed box. */
+export function ZoneIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <rect x="3.6" y="5.6" width="16.8" height="12.8" rx="1.6" strokeDasharray="3.4 2.6" />
+    </svg>
+  )
+}
+
+/** A note on the field: the printer's A. */
+export function TekstIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M5.2 19.4 12 4.6l6.8 14.8" />
+      <path d="M8 14.6h8" />
+    </svg>
+  )
+}
+
+/** An ellipse, for switching a zone over to the round shape. */
+export function EllipsIcon({ size = 18 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <ellipse cx="12" cy="12" rx="8.4" ry="6.2" strokeDasharray="3.4 2.6" />
+    </svg>
+  )
+}

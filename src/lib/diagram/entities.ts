@@ -7,6 +7,7 @@ import {
   type Player,
   type Point,
   type Side,
+  type TextBlock,
   type Tokenstijl,
 } from './schema'
 import { ROLE_ABBREV } from './roles'
@@ -80,7 +81,43 @@ export function findEntity(content: FrameContent, id: string): Entity | undefine
   return content.entities.find((e) => e.id === id)
 }
 
-/** Entities that can simply be dragged to a new position. */
-export function hasPosition(entity: Entity): entity is Player | Cone {
-  return entity.type === 'player' || entity.type === 'cone'
+/** Entities that carry a single position and can simply be dragged. */
+export function hasPosition(entity: Entity): entity is Player | Cone | TextBlock {
+  return entity.type === 'player' || entity.type === 'cone' || entity.type === 'text'
+}
+
+/**
+ * Shifts whatever this entity is by a delta.
+ *
+ * A zone has no position of its own, only two corners, and both of them have to
+ * move by the same amount or dragging it would reshape it. Keeping that in one
+ * place means every caller that moves something moves all of it.
+ */
+export function beweeg(entity: Entity, delta: Point): void {
+  if (hasPosition(entity)) {
+    entity.pos = { x: entity.pos.x + delta.x, y: entity.pos.y + delta.y }
+    return
+  }
+  if (entity.type === 'annotation') {
+    entity.points = entity.points.map((p) => ({ x: p.x + delta.x, y: p.y + delta.y }))
+    return
+  }
+  if (entity.type === 'coneLine') {
+    entity.path.points = entity.path.points.map((p) => ({ x: p.x + delta.x, y: p.y + delta.y }))
+  }
+}
+
+/**
+ * The spot a menu should hang above, and the point a drag measures from.
+ * A zone answers with its middle; there is nothing else sensible to point at.
+ */
+export function ankerVan(entity: Entity): Point | null {
+  if (hasPosition(entity)) return entity.pos
+  if (entity.type === 'annotation') {
+    const a = entity.points[0]
+    const b = entity.points[entity.points.length - 1]
+    if (!a || !b) return null
+    return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }
+  }
+  return null
 }

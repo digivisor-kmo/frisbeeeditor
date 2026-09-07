@@ -10,7 +10,7 @@ import {
   arrowVerplaatsing,
   herberekenSchijfVanaf,
   verplaatsVanaf,
-  verwijderVanaf,
+  verwijderSelectie,
 } from '@/lib/diagram/propagatie'
 import { BewaarStatusLabel } from '@/components/editor/BewaarStatus'
 import { DeelKnop } from '@/components/editor/DeelKnop'
@@ -111,7 +111,7 @@ export function EditorScherm({
               verplaatsVanaf(frames, activeFrame + 1, entity.ownerId, { x: -delta.x, y: -delta.y })
             }
           }
-          verwijderVanaf(frames, activeFrame, ids)
+          verwijderSelectie(frames, activeFrame, ids)
           herberekenSchijfVanaf(frames, activeFrame)
         })
         clearSelection()

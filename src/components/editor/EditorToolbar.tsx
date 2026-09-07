@@ -15,6 +15,8 @@ import {
   OngedaanIcon,
   OpnieuwIcon,
   PionIcon,
+  TekstIcon,
+  ZoneIcon,
   SchuivenIcon,
   SpelerIcon,
 } from './icons'
@@ -30,6 +32,8 @@ const TOOLS: { id: Tool; label: string; icoon: React.ReactNode }[] = [
   { id: 'select', label: nl.editor.selecteren, icoon: <CursorIcon /> },
   { id: 'player', label: nl.editor.speler, icoon: <SpelerIcon /> },
   { id: 'cone', label: nl.editor.pion, icoon: <PionIcon /> },
+  { id: 'zone', label: nl.editor.zone, icoon: <ZoneIcon /> },
+  { id: 'text', label: nl.editor.tekst, icoon: <TekstIcon /> },
 ]
 
 interface Props {

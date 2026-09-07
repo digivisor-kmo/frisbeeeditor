@@ -10,7 +10,7 @@ import {
   arrowVerplaatsing,
   herberekenSchijfVanaf,
   verplaatsVanaf,
-  verwijderVanaf,
+  verwijderSelectie,
   voegToeVanaf,
   zetIdentiteit,
   type Identiteit,
@@ -153,7 +153,7 @@ export function BulkPaneel({ entities }: { entities: readonly Entity[] }) {
                     })
                   }
                 }
-                verwijderVanaf(frames, activeFrame, doelIds)
+                verwijderSelectie(frames, activeFrame, doelIds)
                 herberekenSchijfVanaf(frames, activeFrame)
               })
               clearSelection()

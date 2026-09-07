@@ -68,8 +68,18 @@ export function entiteitRaaktKader(entity: Entity, k: Kader, tokenStraal: number
       return arrowRaaktKader(entity.path.points, k)
     case 'coneLine':
       return arrowRaaktKader(entity.path.points, k)
-    case 'annotation':
-      return entity.points.some((p) => puntInKader(p, k))
+    case 'annotation': {
+      // A zone is caught when the frame touches it anywhere, not only on one of
+      // its two stored corners: you drag a box over a region, not over a dot.
+      const xs = entity.points.map((p) => p.x)
+      const ys = entity.points.map((p) => p.y)
+      return (
+        Math.min(...xs) <= k.maxX &&
+        Math.max(...xs) >= k.minX &&
+        Math.min(...ys) <= k.maxY &&
+        Math.max(...ys) >= k.minY
+      )
+    }
     case 'text':
       return puntInKader(entity.pos, k)
   }

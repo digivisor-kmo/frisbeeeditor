@@ -5,6 +5,9 @@ import { AnimatieLaag } from '@/components/field/AnimatieLaag'
 import { ArrowHandles } from '@/components/field/ArrowHandles'
 import { ArrowShape } from '@/components/field/ArrowShape'
 import { FieldSurface } from '@/components/field/FieldSurface'
+import { TextShape } from '@/components/field/TextShape'
+import { ZoneHandles } from '@/components/field/ZoneHandles'
+import { ZoneShape } from '@/components/field/ZoneShape'
 import { ConeToken } from '@/components/field/tokens/ConeToken'
 import { PlayerToken } from '@/components/field/tokens/PlayerToken'
 import { frameOpTijd } from '@/lib/diagram/animation'
@@ -19,12 +22,21 @@ import {
   herberekenSchijfVanaf,
   synchroniseerArrowMetVorigFrame,
   verplaatsVanaf,
+  pasStatischAanVanaf,
   voegToeVanaf,
   volgWorpenNaar,
   worpAnkers,
 } from '@/lib/diagram/propagatie'
-import { createCone, createPlayer, hasPosition } from '@/lib/diagram/entities'
-import { isArrow, isPlayer, type Point, type Side } from '@/lib/diagram/schema'
+import { ankerVan, createCone, createPlayer } from '@/lib/diagram/entities'
+import { createText, createZone, MIN_ZONE_M, STANDAARD_ZONE_M, zoneKader } from '@/lib/diagram/zones'
+import {
+  isArrow,
+  isPlayer,
+  isText,
+  isZone,
+  type Point,
+  type Side,
+} from '@/lib/diagram/schema'
 import { framesVan } from '@/lib/editor/document'
 import {
   createView,
@@ -47,6 +59,7 @@ import { useDiagramStore } from '@/lib/editor/diagramStore'
 import { newId } from '@/lib/editor/ids'
 import { useUiStore } from '@/lib/editor/uiStore'
 import { SelectedEntityMenu } from './SelectedEntityMenu'
+import { TekstInvoer } from './TekstInvoer'
 import { useMetresPerPixel, useStaandScherm } from './useMetresPerPixel'
 
 interface KnijpState {
@@ -63,6 +76,10 @@ type DragDoel =
   | { soort: 'bend'; id: string; puntIndex: number }
   | { soort: 'hint'; id: string; segmentIndex: number; puntIndex: number | null }
   | { soort: 'kader'; startPunt: Point }
+  /** Drawing a new zone: one corner is fixed, the other follows the finger. */
+  | { soort: 'zoneTekenen'; id: string; anker: Point }
+  /** Resizing an existing zone: the corner across from the one you grabbed. */
+  | { soort: 'zoneHoek'; id: string; anker: Point }
 
 interface DragState {
   doel: DragDoel
@@ -90,6 +107,16 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   // half a metre is indistinguishable from one that caught.
   const [snapDoel, setSnapDoel] = useState<Point | null>(null)
   const [kader, setKader] = useState<Kader | null>(null)
+  /**
+   * Where a note is being typed, and which one.
+   *
+   * A text block with nothing in it is not a thing: it would be an invisible
+   * entity on the field and an empty line in the export. So the block is only
+   * created once there are words, and until then it lives here.
+   */
+  const [tekstInvoer, setTekstInvoer] = useState<
+    { id: string | null; pos: Point; waarde: string } | null
+  >(null)
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const knijp = useRef<KnijpState | null>(null)
 
@@ -265,7 +292,8 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         return
       }
 
-      if (!hasPosition(entity)) return
+      const anker = ankerVan(entity)
+      if (!anker) return
 
       // Grabbing something that is already part of a multiple selection drags
       // the whole selection, and does not throw that selection away.
@@ -274,11 +302,29 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       if (event.shiftKey) toggle(entityId)
       else if (!hoortBijSelectie) select([entityId])
 
+      // A corner of a selected zone resizes it, and the corner across from the
+      // one you grabbed stays where it is.
+      if (isZone(entity) && part?.startsWith('hoek-')) {
+        const k = zoneKader(entity)
+        const index = Number(part.split('-')[1])
+        const tegenover = [
+          { x: k.maxX, y: k.maxY },
+          { x: k.minX, y: k.maxY },
+          { x: k.minX, y: k.minY },
+          { x: k.maxX, y: k.minY },
+        ][index]
+        if (tegenover) {
+          setMenuOpen(false)
+          beginSleep({ soort: 'zoneHoek', id: entityId, anker: tegenover })
+          return
+        }
+      }
+
       setMenuOpen(!event.shiftKey && !hoortBijSelectie)
       beginSleep({
         soort: 'entiteit',
         id: entityId,
-        offset: { x: entity.pos.x - point.x, y: entity.pos.y - point.y },
+        offset: { x: anker.x - point.x, y: anker.y - point.y },
         groepIds: hoortBijSelectie ? [...selection] : [entityId],
       })
       return
@@ -299,6 +345,42 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       })
       select([id])
       setMenuOpen(true)
+      return
+    }
+
+    if (tool === 'zone') {
+      const start = maybeSnap(point, event.altKey)
+      const id = newId()
+      wijzigFrames('Zone tekenen', (frames) => {
+        const huidig = frames[activeFrame]
+        if (!huidig) return
+        // Born with no size at all: the drag gives it one, and letting go
+        // without dragging turns it into a default rectangle further down.
+        const zone = createZone({
+          id,
+          shape: 'rect',
+          van: start,
+          tot: start,
+          entities: huidig.entities,
+        })
+        voegToeVanaf(frames, activeFrame, zone)
+      })
+      select([id])
+      setMenuOpen(false)
+      drag.current = {
+        doel: { soort: 'zoneTekenen', id, anker: start },
+        pointerId: event.pointerId,
+        groupId: newId(),
+        start: { x: event.clientX, y: event.clientY },
+        moved: false,
+      }
+      svgRef.current?.setPointerCapture(event.pointerId)
+      return
+    }
+
+    if (tool === 'text') {
+      clearSelection()
+      setTekstInvoer({ id: null, pos: maybeSnap(point, event.altKey), waarde: '' })
       return
     }
 
@@ -357,6 +439,22 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
       return
     }
 
+    if (doel.soort === 'zoneTekenen' || doel.soort === 'zoneHoek') {
+      const hoek = maybeSnap(ruw, event.altKey)
+      wijzigFrames(
+        doel.soort === 'zoneTekenen' ? 'Zone tekenen' : 'Zone bijstellen',
+        (frames) => {
+          // While you are dragging a corner, only this frame changes; when you
+          // let go the finished shape is pushed forward to the frames after it.
+          const zone = frames[activeFrame]?.entities.find((e) => e.id === doel.id)
+          if (!zone || zone.type !== 'annotation') return
+          zone.points = [{ ...doel.anker }, { ...hoek }]
+        },
+        state.groupId,
+      )
+      return
+    }
+
     if (doel.soort === 'entiteit') {
       const pos = maybeSnap({ x: ruw.x + doel.offset.x, y: ruw.y + doel.offset.y }, event.altKey)
       const groep = doel.groepIds
@@ -366,12 +464,13 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           const huidig = frames[activeFrame]
           if (!huidig) return
           const primair = huidig.entities.find((e) => e.id === doel.id)
-          if (!primair || !hasPosition(primair)) return
+          const anker = primair ? ankerVan(primair) : null
+          if (!primair || !anker) return
 
           // Only the entity under the finger snaps to the grid; everything else
           // follows by exactly the same delta, so the shape of the selection
           // never distorts while you drag it.
-          const delta = { x: pos.x - primair.pos.x, y: pos.y - primair.pos.y }
+          const delta = { x: pos.x - anker.x, y: pos.y - anker.y }
           if (delta.x === 0 && delta.y === 0) return
 
           for (const id of groep) {
@@ -465,7 +564,49 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
     const state = drag.current
     if (!state || state.pointerId !== event.pointerId) return
     svgRef.current?.releasePointerCapture(event.pointerId)
+
+    const doel = state.doel
+    if (doel.soort === 'zoneTekenen' || doel.soort === 'zoneHoek') {
+      rondZoneAf(doel.id, doel.soort === 'zoneTekenen' && !state.moved, state.groupId)
+      if (doel.soort === 'zoneTekenen') setMenuOpen(true)
+    }
+
     stopSleep()
+  }
+
+  /**
+   * Gives a zone its final shape and hands that shape to the frames after this
+   * one.
+   *
+   * Two things happen here rather than during the drag. A tap that never moved
+   * gets a region you can actually see and grab, instead of a shape of nothing
+   * that leaves you hunting for a handle. And the corners are only pushed
+   * forward once, on release, so a drag of fifty moves does not rewrite four
+   * frames fifty times.
+   */
+  function rondZoneAf(id: string, wasTik: boolean, groupId: string) {
+    wijzigFrames(
+      'Zone',
+      (frames) => {
+        const zone = frames[activeFrame]?.entities.find((e) => e.id === id)
+        if (!zone || zone.type !== 'annotation') return
+
+        const k = zoneKader(zone)
+        if (wasTik || k.maxX - k.minX < MIN_ZONE_M || k.maxY - k.minY < MIN_ZONE_M) {
+          const midden = { x: (k.minX + k.maxX) / 2, y: (k.minY + k.maxY) / 2 }
+          zone.points = [
+            { x: midden.x - STANDAARD_ZONE_M.breedte / 2, y: midden.y - STANDAARD_ZONE_M.hoogte / 2 },
+            { x: midden.x + STANDAARD_ZONE_M.breedte / 2, y: midden.y + STANDAARD_ZONE_M.hoogte / 2 },
+          ]
+        }
+
+        const punten = zone.points.map((p) => ({ ...p }))
+        pasStatischAanVanaf(frames, activeFrame + 1, id, (entity) => {
+          if (entity.type === 'annotation') entity.points = punten.map((p) => ({ ...p }))
+        })
+      },
+      groupId,
+    )
   }
 
   function onWheel(event: React.WheelEvent<SVGSVGElement>) {
@@ -490,6 +631,13 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
   const cones = entities.filter((e) => e.type === 'cone')
   const arrows = entities.filter(isArrow)
   const players = entities.filter(isPlayer)
+  // Scenery. It is drawn from whichever frame is on screen, playing or not, and
+  // never interpolated: a zone that slides across the pitch during playback
+  // would look like it means something.
+  const toonFrame = animeert ? frameOpTijd(duren, tijdMs).index : activeFrame
+  const statisch = doc.frames[toonFrame]?.content.entities ?? entities
+  const zones = statisch.filter(isZone)
+  const teksten = statisch.filter(isText)
 
   const geselecteerd =
     selection.size === 1 ? entities.find((e) => selection.has(e.id)) : undefined
@@ -502,10 +650,49 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           metresPerPixel,
           camera.origin,
         )
-      : hasPosition(geselecteerd)
-        ? toScreenPx(geselecteerd.pos, view, metresPerPixel, camera.origin)
-        : null
+      : (() => {
+          // A zone has no position of its own; its menu hangs over its middle.
+          const anker = ankerVan(geselecteerd)
+          return anker ? toScreenPx(anker, view, metresPerPixel, camera.origin) : null
+        })()
     : null
+
+  /**
+   * Turns what was typed into a note, or updates the one being edited.
+   *
+   * Nothing is created for an empty field. A text block with no words in it is
+   * an invisible entity on the field and a blank line in the export, and the
+   * only way to find it again would be to drag a box over the whole pitch.
+   */
+  function bewaarTekst() {
+    const invoer = tekstInvoer
+    if (!invoer) return
+    const inhoud = invoer.waarde.trim()
+    setTekstInvoer(null)
+    if (inhoud.length === 0) return
+
+    if (invoer.id) {
+      wijzigFrames('Tekst bewerken', (frames) => {
+        pasStatischAanVanaf(frames, activeFrame, invoer.id!, (entity) => {
+          if (entity.type === 'text') entity.content = inhoud
+        })
+      })
+      return
+    }
+
+    const id = newId()
+    wijzigFrames('Tekst plaatsen', (frames) => {
+      const huidig = frames[activeFrame]
+      if (!huidig) return
+      voegToeVanaf(
+        frames,
+        activeFrame,
+        createText({ id, pos: invoer.pos, content: inhoud, entities: huidig.entities }),
+      )
+    })
+    select([id])
+    setMenuOpen(true)
+  }
 
   const opZ = <T extends { z: number }>(list: T[]) => list.slice().sort((a, b) => a.z - b.z)
 
@@ -545,6 +732,18 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
             focus={focus}
           />
         )}
+
+        <g>
+          {opZ(zones).map((zone) => (
+            <ZoneShape
+              key={zone.id}
+              zone={zone}
+              view={view}
+              hitRadiusM={hitM}
+              selected={!animeert && selection.has(zone.id)}
+            />
+          ))}
+        </g>
 
         <g style={{ display: animeert ? 'none' : undefined }}>
           {opZ(cones).map((cone) => (
@@ -600,6 +799,18 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           ))}
         </g>
 
+        <g>
+          {opZ(teksten).map((blok) => (
+            <TextShape
+              key={blok.id}
+              blok={blok}
+              view={view}
+              hitRadiusM={hitM}
+              selected={!animeert && selection.has(blok.id)}
+            />
+          ))}
+        </g>
+
         {/* While the menu is open the field steps back, so the arc reads as a
             layer above the diagram instead of as part of it. The token you
             tapped stays bright: it is what you are working on. */}
@@ -615,6 +826,12 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
             selected
           />
         )}
+        {toonScrim && geselecteerd?.type === 'annotation' && (
+          <ZoneShape zone={geselecteerd} view={view} hitRadiusM={hitM} selected />
+        )}
+        {toonScrim && geselecteerd?.type === 'text' && (
+          <TextShape blok={geselecteerd} view={view} hitRadiusM={hitM} selected />
+        )}
         {toonScrim && geselecteerd?.type === 'cone' && (
           <ConeToken
             cone={geselecteerd}
@@ -626,6 +843,21 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         )}
 
         {kader && <KaderVlak kader={kader} view={view} metresPerPixel={metresPerPixel} />}
+
+        <g>
+          {!animeert &&
+            zones
+              .filter((z) => selection.has(z.id))
+              .map((zone) => (
+                <ZoneHandles
+                  key={zone.id}
+                  zone={zone}
+                  view={view}
+                  hitRadiusM={hitM}
+                  tokenRadiusM={radiusM}
+                />
+              ))}
+        </g>
 
         <g>
           {arrows
@@ -643,6 +875,16 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
         </g>
       </svg>
 
+      {tekstInvoer && !animeert && (
+        <TekstInvoer
+          anker={toScreenPx(tekstInvoer.pos, view, metresPerPixel, camera.origin)}
+          waarde={tekstInvoer.waarde}
+          onWijzig={(waarde) => setTekstInvoer((vorig) => (vorig ? { ...vorig, waarde } : vorig))}
+          onAnnuleer={() => setTekstInvoer(null)}
+          onBewaar={() => bewaarTekst()}
+        />
+      )}
+
       {menuOpen && !animeert && geselecteerd && anchor && (
         <SelectedEntityMenu
           key={geselecteerd.id}
@@ -650,6 +892,14 @@ export function EditorCanvas({ nieuweSpelerKant }: { nieuweSpelerKant: Side }) {
           anchor={anchor}
           tokenRadiusPx={radiusM / metresPerPixel}
           canvas={{ breedte: canvasBreedte, hoogte: canvasHoogte }}
+          onTekstBewerken={() => {
+            if (geselecteerd.type !== 'text') return
+            setTekstInvoer({
+              id: geselecteerd.id,
+              pos: geselecteerd.pos,
+              waarde: geselecteerd.content,
+            })
+          }}
         />
       )}
     </div>

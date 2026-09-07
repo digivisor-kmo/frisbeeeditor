@@ -717,3 +717,42 @@ pad, zelfde eindpunt. Dat gebeurt vóór de validatie, want een onbekende soort
 zou door het schema geweigerd worden en dan opent een trainer een diagram van
 vorige maand en is het leeg. In de database stond geen enkele juke, maar het
 veld staat er sinds dag één voor precies dit moment.
+
+## 2026-09-07 — Zones en tekst op het veld
+
+Twee dingen erbij die niet bewegen: een zone om een stuk veld aan te duiden, en
+een kort woordje uitleg.
+
+**Zone.** Rechthoek of ellips, streepjesrand, doorschijnende vulling, met een
+label erboven. Opgeslagen als de bestaande `annotation` met twee tegenoverliggende
+hoeken — het datamodel voorzag dit al, er kwam alleen een `label` bij. Slepen op
+het veld tekent er een; tikken geeft een zone van veertien bij tien meter, want
+een vorm zonder afmeting laat je zoeken naar een handvat dat er niet is.
+
+**Alleen de rand is aanklikbaar, de vulling niet.** Een zone is vaak twintig
+meter breed, en eentje die elke klik binnenin opslokt maakt het onmogelijk om
+een sleepkader over de spelers erin te trekken — precies wat je met een zone op
+het veld doet.
+
+**Vier hoekhandvatten, twee opgeslagen punten.** Welke hoek je ook vastneemt, de
+hoek ertegenover blijft staan. Dat is het enige gedrag dat niet aanvoelt alsof de
+vorm tegenwerkt. Welke twee punten er daarna in de data staan is niets om over
+na te denken.
+
+**Tekst.** Een gewoon HTML-invoerveld boven het veld, niet een bewerkbare
+SVG-tekst: het brengt een cursor, selectie, autocorrectie en het
+telefoonklavier mee, en niets daarvan bestaat in een SVG. Een leeg blok wordt
+niet gemaakt — dat zou een onzichtbare entiteit op het veld zijn en een lege
+regel in de export, en je zou het alleen terugvinden door een kader over het
+hele veld te trekken.
+
+**Doorwerken naar volgende frames.** Toevoegen, verplaatsen, hervormen, label en
+kleur werken door vanaf het frame waar je staat, net als bij een speler.
+Verwijderen is de uitzondering: dat raakt alleen het frame waar je op kijkt. Een
+zone is decor, en hem uit frame drie halen zegt niets over frame vier. Dat zit
+in één functie, `verwijderSelectie`, zodat geen enkele plek die verwijdert hoeft
+te onthouden welke regel voor welk ding geldt.
+
+**Niet geanimeerd.** Ze worden getekend uit het frame dat op dat moment op het
+scherm staat, en nooit geïnterpoleerd. Een zone die tijdens het afspelen over
+het veld schuift zou eruitzien alsof ze iets betekent.
