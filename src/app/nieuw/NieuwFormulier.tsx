@@ -37,8 +37,24 @@ export function NieuwFormulier({ magBewerken }: { magBewerken: boolean }) {
    */
   function kiesWeergave(id: Weergave) {
     setWeergave(id)
+    const doel = stapTwee.current
+    if (!doel) return
+
     const zacht = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    stapTwee.current?.scrollIntoView({ behavior: zacht ? 'smooth' : 'auto', block: 'start' })
+    if (!zacht) {
+      doel.scrollIntoView({ block: 'start' })
+      return
+    }
+
+    // Smooth scrolling is quietly ignored in some contexts — I have watched it
+    // do nothing in a Chrome that scrolled instantly on the very next call. So:
+    // ask nicely, and if the page has not budged a moment later, jump. Arriving
+    // abruptly is a small ugliness; not arriving at all is the bug being fixed.
+    const vanaf = window.scrollY
+    doel.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.setTimeout(() => {
+      if (Math.abs(window.scrollY - vanaf) < 2) doel.scrollIntoView({ block: 'start' })
+    }, 300)
   }
 
   async function aanmaken() {
